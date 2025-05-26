@@ -1,0 +1,366 @@
+# Chiropractic Practice Growth Platform - Product Requirements Document
+
+## 1. Executive Summary
+
+### Product Vision
+Build a comprehensive software platform that helps chiropractors grow their practices through automated patient acquisition, education, retention, and marketing tools, centered around viral pediatric health assessments.
+
+### Business Objectives
+- **Primary Goal**: Increase patient acquisition for chiropractic practices through viral marketing
+- **Secondary Goals**: Improve patient education, enhance retention rates, establish chiropractors as community health authorities
+- **Success Metrics**: 90%+ annual practice retention, 30%+ report sharing rate, 80%+ survey completion rate
+
+### Key Value Propositions
+- **For Chiropractors**: Automated patient acquisition system requiring minimal technical expertise
+- **For Parents**: Free, valuable pediatric health assessments with actionable insights
+- **Unique Differentiator**: Transform health assessments into shareable marketing tools creating organic referral loops
+
+## 2. Market Analysis & Target Users
+
+### Primary Users: Chiropractors
+**Demographics:**
+- Solo practitioners and small chiropractic practices
+- Practitioners with limited marketing resources or technical expertise
+- Both tech-savvy and traditional practitioners
+
+**Pain Points:**
+- Difficulty acquiring new patients consistently
+- Limited marketing budget and expertise
+- Time constraints for patient education and follow-up
+- Lack of tools to demonstrate value to community
+
+**User Goals:**
+- Increase patient volume without significant time investment
+- Establish authority in pediatric chiropractic care
+- Automate patient communication and education
+- Track practice growth and patient engagement
+
+### Secondary Users: Parents/Guardians
+**Demographics:**
+- Parents of children with health concerns (headaches, posture, focus issues)
+- Health-conscious families seeking preventive care
+- Parents active in community networks
+
+**Pain Points:**
+- Difficulty finding trustworthy pediatric health information
+- Uncertainty about when to seek chiropractic care for children
+- Limited access to quick health assessments
+
+**User Goals:**
+- Understand their child's health status
+- Access professional health guidance
+- Find qualified healthcare providers
+- Share valuable health resources with other parents
+
+## 3. Product Requirements
+
+### 3.1 Core Features
+
+#### Patient Assessment System
+**3-Step Survey Process**
+- **Step 1: Lifestyle Stressors Checklist**
+  - Birth trauma history
+  - Digital device usage patterns
+  - Sports and physical activities
+  - Sleep and dietary habits
+  - Academic/social stressors
+
+- **Step 2: Symptoms Assessment**
+  - Frequency and severity of headaches
+  - Focus and attention issues
+  - Sleep quality problems
+  - Behavioral concerns
+  - Physical complaints
+
+- **Step 3: Contact Information & Consent**
+  - Parent/guardian contact details
+  - Child information
+  - Communication preferences
+  - Health information sharing consent
+
+**Dynamic Report Generation**
+- Personalized PDF reports based on survey responses
+- Visual spinal concern areas (cervical, thoracic, lumbar)
+- Organ system connection mappings
+- Brain-O-Meter™ neurological health scoring (0-100 scale)
+- Customized recommendations based on assessment results
+- Practice-specific branding integration
+
+#### Dual Distribution System
+**In-Office Tablet Experience**
+- Waiting room assessment stations
+- Offline capability for surveys
+- Integration with existing patient check-in process
+- Real-time report generation
+
+**Online Sharing Platform**
+- Shareable assessment links
+- Social media integration
+- Practice-specific landing pages
+- Viral marketing tracking
+
+#### Chiropractor Dashboard
+**Practice Management Portal**
+- Logo and color scheme customization
+- Contact information management
+- Custom video upload for landing pages
+- Email template customization
+- Assessment question customization
+
+**Analytics & Reporting**
+- Survey completion rates and trends
+- Report sharing metrics and viral coefficient
+- Lead generation and conversion tracking
+- Patient engagement insights
+- Revenue attribution from platform
+
+**Communication Management**
+- Automated email campaign oversight
+- Custom content integration
+- Response tracking and management
+- Lead nurturing workflows
+
+#### Automated Marketing System
+**Email Campaign Management**
+- Bi-weekly educational email sequences (frequency adjustable)
+- General pediatric health education content
+- Chiropractic care insights and tips
+- Practice-specific news and updates
+- Seasonal health topics and reminders
+
+**Content Library**
+- Platform-provided educational content
+- Customizable templates
+- Practice-specific content integration
+- Multi-format content support (text, images, videos)
+
+### 3.2 Technical Requirements
+
+#### **PRIORITY: Modularity and Performance**
+**Code Architecture Principles:**
+- **Maximum Modularity**: All components must be designed as small, independent, reusable modules
+- **Small File Sizes**: Strict enforcement of small file sizes across all components
+  - Individual React components: <200 lines of code
+  - Utility functions: <100 lines of code
+  - Database modules: <150 lines of code
+  - API routes: <100 lines of code
+- **Single Responsibility**: Each module/component should have one clear purpose
+- **Minimal Dependencies**: Reduce coupling between modules for easier testing and maintenance
+- **Tree-Shaking Optimization**: Enable aggressive dead code elimination
+- **Code Splitting**: Implement dynamic imports for optimal bundle sizes
+
+**Bundle Size Targets:**
+- Initial page load: <50KB gzipped JavaScript
+- Individual route chunks: <25KB gzipped
+- Shared vendor bundle: <100KB gzipped
+- Total application: <200KB gzipped
+
+#### Performance Requirements
+- Survey completion time: <5 minutes average
+- Report generation: <30 seconds
+- Mobile load time: <3 seconds
+- 99.9% uptime availability
+- Support for 1000+ concurrent users
+- **Critical Performance Metrics:**
+  - First Contentful Paint: <1.5 seconds
+  - Largest Contentful Paint: <2.5 seconds
+  - Time to Interactive: <3 seconds
+  - Cumulative Layout Shift: <0.1
+
+#### Platform Requirements
+- Responsive web application (mobile-first)
+- Cross-browser compatibility (Chrome, Safari, Firefox, Edge)
+- Tablet optimization for waiting room use
+- Progressive Web App capabilities
+- Future mobile app conversion ready
+- **Modular Component Library**: Reusable UI components across all interfaces
+
+#### Integration Requirements
+- Email service provider integration (Resend)
+- Payment processing (Stripe)
+- Social media sharing APIs
+- Analytics and tracking integration
+- Future EHR/practice management system compatibility
+- **API Design**: RESTful, modular endpoints with consistent response patterns
+
+### 3.3 Security & Compliance Requirements
+
+#### Data Protection
+- HTTPS encryption for all data transmission
+- Data encryption at rest
+- Secure user authentication (Supabase Auth)
+- Input validation and sanitization
+- Session management and timeout
+
+#### Privacy & Compliance
+- HIPAA-ready architecture (future compliance)
+- Clear privacy policies and data usage statements
+- Data retention and deletion policies
+- Audit trail capabilities
+- User consent management
+
+## 4. Technical Architecture
+
+### Technology Stack
+- **Frontend & Backend**: Next.js (with App Router for optimal code splitting)
+- **Database**: Supabase (PostgreSQL)
+- **Authentication**: Supabase Auth
+- **File Storage**: Supabase Storage
+- **Email**: Resend
+- **Hosting**: Vercel
+- **Payments**: Stripe
+
+### **Modular Architecture Requirements**
+**Component Structure:**
+- Atomic Design principles (atoms, molecules, organisms, templates, pages)
+- Shared component library with consistent props interface
+- Hooks library for reusable business logic
+- Utility functions library with pure functions
+- Service layer modules for external API interactions
+
+**Code Organization:**
+```
+/src
+  /components
+    /atoms        (buttons, inputs, labels)
+    /molecules    (form fields, cards, navigation items)
+    /organisms    (forms, headers, sidebars)
+    /templates    (page layouts)
+  /hooks          (custom React hooks)
+  /services       (API calls, business logic)
+  /utils          (pure helper functions)
+  /types          (TypeScript definitions)
+  /constants      (configuration values)
+```
+
+### Data Model Overview
+**Core Entities:**
+- **Practices**: Practice information, branding, subscription status
+- **Assessments**: Survey responses, child information, completion data
+- **Reports**: Generated report data, sharing metrics, personalization
+- **Email Campaigns**: Templates, customizations, delivery schedules
+- **Users**: Chiropractor accounts, authentication, preferences
+
+## 5. User Experience Design
+
+### Design Principles
+- **Clean & Professional**: Medical-grade credibility with approachable aesthetics
+- **Mobile-First**: Optimized for tablet and smartphone usage
+- **Accessibility**: Clear typography, adequate contrast, intuitive navigation
+- **Trust-Building**: Professional imagery, security indicators, clear disclaimers
+- **Performance-Conscious Design**: Minimal asset sizes, optimized images, efficient animations
+
+### Key User Flows
+1. **Parent Assessment Flow**: Landing page → Survey completion → Report generation → Sharing
+2. **Chiropractor Onboarding**: Registration → Practice setup → Branding customization → Go live
+3. **Practice Management**: Dashboard access → Analytics review → Content customization → Campaign management
+
+### Interface Requirements
+- Minimal friction survey completion
+- Clear progress indicators
+- Visual engagement in reports (charts, diagrams)
+- One-click sharing mechanisms
+- Intuitive dashboard navigation
+- **Component Reusability**: Consistent UI patterns across all interfaces
+
+---
+
+## Development Standards
+
+### **Modularity Enforcement**
+- **Code Review Requirements**: All PRs must demonstrate modular design
+- **File Size Monitoring**: Automated checks for file size limits
+- **Bundle Analysis**: Regular bundle size audits
+- **Component Documentation**: Each component must have clear props interface and usage examples
+- **Testing Strategy**: Unit tests for individual modules, integration tests for component interactions
+
+### **Performance Monitoring**
+- Lighthouse CI integration
+- Bundle analyzer in CI/CD pipeline
+- Real User Monitoring (RUM) implementation
+- Core Web Vitals tracking
+- Regular performance audits and optimization
+
+---
+
+## Appendix
+
+### Phase 1: Core Assessment Platform (MVP) - 8-12 weeks
+**Sprint 1-2: Foundation (2-3 weeks)**
+- **Modular project setup** with component library foundation
+- Basic user authentication modules
+- Database schema implementation with modular data access layer
+- Core survey functionality with reusable form components
+
+**Sprint 3-4: Assessment Engine (3-4 weeks)**
+- 3-step survey process with modular step components
+- Dynamic report generation with templating system
+- Basic PDF export functionality with modular report components
+- Email delivery system with service layer abstraction
+
+**Sprint 5-6: Practice Portal (3-4 weeks)**
+- Chiropractor dashboard with reusable dashboard components
+- Basic practice customization with modular settings components
+- Survey analytics with charting component library
+- MVP launch preparation
+
+**Phase 1 Success Criteria:**
+- Functional survey with report generation
+- Basic chiropractor portal
+- Email delivery working
+- 10 beta practices onboarded
+- **Performance targets met** (bundle size, load times)
+- **Modular architecture established** with clear component boundaries
+
+### Phase 2: Enhanced Features & Analytics - 6-8 weeks
+**Sprint 7-8: Advanced Analytics (3-4 weeks)**
+- Comprehensive analytics dashboard with modular chart components
+- Sharing tracking and metrics with service layer modules
+- Lead conversion reporting with reusable data visualization
+- Performance optimization and bundle size review
+
+**Sprint 9-10: Marketing Automation (3-4 weeks)**
+- Automated email campaign system with template engine modules
+- Template customization tools with drag-and-drop components
+- Video upload functionality with media handling modules
+- Social sharing optimization with sharing service modules
+
+**Phase 2 Success Criteria:**
+- Advanced analytics operational
+- Email automation launched
+- 50+ practices using platform
+- Positive user feedback and retention
+- **Maintained performance standards** despite feature additions
+
+### Phase 3: Growth & Marketing Tools - 4-6 weeks
+**Sprint 11-12: Marketing Enhancement (2-3 weeks)**
+- Advanced sharing mechanisms with viral tracking modules
+- Referral tracking system with analytics integration
+- Content library expansion with content management modules
+- Mobile app preparation with PWA optimization
+
+**Sprint 13: Optimization & Scale (2-3 weeks)**
+- Performance optimization and bundle analysis
+- API development foundations with modular endpoint design
+- Enterprise feature preparation with scalable architecture
+- Scale testing with performance monitoring
+
+**Phase 3 Success Criteria:**
+- Viral sharing metrics improving
+- 100+ active practices
+- Platform stability at scale
+- Positive ROI for practices
+- **Optimized performance** across all metrics
+
+## 6. Development Roadmap
+
+---
+
+## Appendix
+
+### Glossary
+- **Brain-O-Meter™**: Proprietary neurological health scoring system (0-100 scale)
+- **Viral Coefficient**: Number of new users generated by each existing user
+- **Lead Conversion**: Process of converting assessment completions to patient appointments
+- **Modularity**: Code architecture principle emphasizing small, independent, reusable components
+- **Bundle Size**: Total JavaScript payload delivered to users

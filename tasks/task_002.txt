@@ -1,0 +1,11 @@
+# Task ID: 2
+# Title: Implement User Authentication with Supabase Auth
+# Status: pending
+# Dependencies: 1
+# Priority: high
+# Description: Integrate secure user authentication for chiropractors and parents using Supabase Auth.
+# Details:
+Use Supabase Auth (v2+) for authentication. Set up email/password and OAuth providers. Implement session management, secure cookies, and session timeout. Ensure input validation and sanitization. Store user roles (chiropractor, parent).
+
+# Test Strategy:
+Test user registration, login, logout, and session management. Verify role-based access and session timeout.

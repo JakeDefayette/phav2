@@ -1,0 +1,11 @@
+# Task ID: 7
+# Title: Integrate Email Service (Resend)
+# Status: pending
+# Dependencies: 3, 6
+# Priority: medium
+# Description: Integrate Resend for automated email delivery and campaign management.
+# Details:
+Use Resend API (latest) for sending emails. Implement email templates, scheduling, and tracking. Support bi-weekly educational sequences and custom content.
+
+# Test Strategy:
+Test email delivery, scheduling, and template rendering.

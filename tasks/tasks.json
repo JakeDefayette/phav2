@@ -1,0 +1,209 @@
+{
+  "tasks": [
+    {
+      "id": 1,
+      "title": "Setup Project Repository and Modular Architecture",
+      "description": "Initialize the project repository with Next.js (App Router), modular folder structure, and component library foundation.",
+      "details": "Use Next.js v14+ with App Router for optimal code splitting. Set up /src/components (atoms, molecules, organisms, templates), /hooks, /services, /utils, /types, /constants. Initialize TypeScript, ESLint, Prettier, and Husky for code quality. Use Vercel for hosting. Implement Atomic Design principles for component structure.",
+      "testStrategy": "Verify folder structure, linting, and TypeScript setup. Test basic Next.js routing and component rendering.",
+      "priority": "high",
+      "dependencies": [],
+      "status": "pending",
+      "subtasks": []
+    },
+    {
+      "id": 2,
+      "title": "Implement User Authentication with Supabase Auth",
+      "description": "Integrate secure user authentication for chiropractors and parents using Supabase Auth.",
+      "details": "Use Supabase Auth (v2+) for authentication. Set up email/password and OAuth providers. Implement session management, secure cookies, and session timeout. Ensure input validation and sanitization. Store user roles (chiropractor, parent).",
+      "testStrategy": "Test user registration, login, logout, and session management. Verify role-based access and session timeout.",
+      "priority": "high",
+      "dependencies": [
+        1
+      ],
+      "status": "pending",
+      "subtasks": []
+    },
+    {
+      "id": 3,
+      "title": "Design and Implement Database Schema",
+      "description": "Define and implement the core database schema using Supabase (PostgreSQL).",
+      "details": "Create tables for Practices, Assessments, Reports, Email Campaigns, and Users. Define relationships and constraints. Use Supabase v2+ with PostgreSQL 15+. Implement modular data access layer.",
+      "testStrategy": "Test CRUD operations for each entity. Validate relationships and constraints.",
+      "priority": "high",
+      "dependencies": [
+        1
+      ],
+      "status": "pending",
+      "subtasks": []
+    },
+    {
+      "id": 4,
+      "title": "Develop Core Survey Form Components",
+      "description": "Build reusable, modular survey form components for the 3-step assessment process.",
+      "details": "Create React components for each survey step (Lifestyle Stressors, Symptoms, Contact/Consent). Use Formik v2+ and Yup for validation. Ensure mobile-first, accessible design. Implement progress indicators.",
+      "testStrategy": "Test form validation, navigation between steps, and accessibility. Verify mobile responsiveness.",
+      "priority": "medium",
+      "dependencies": [
+        1
+      ],
+      "status": "pending",
+      "subtasks": []
+    },
+    {
+      "id": 5,
+      "title": "Implement Dynamic Report Generation",
+      "description": "Develop a system to generate personalized PDF reports from survey responses.",
+      "details": "Use React-PDF (v2+) or PDFKit for dynamic PDF generation. Map survey responses to visual charts and diagrams. Integrate practice branding. Support offline and online report generation.",
+      "testStrategy": "Test report generation with various survey inputs. Verify branding and visual elements.",
+      "priority": "medium",
+      "dependencies": [
+        3,
+        4
+      ],
+      "status": "pending",
+      "subtasks": []
+    },
+    {
+      "id": 6,
+      "title": "Build Chiropractor Dashboard",
+      "description": "Develop the chiropractor dashboard for practice management and customization.",
+      "details": "Create dashboard layout with reusable components. Implement practice branding, contact management, and video upload. Use Next.js App Router for routing. Support customization of email templates and assessment questions.",
+      "testStrategy": "Test dashboard navigation, customization features, and data display.",
+      "priority": "medium",
+      "dependencies": [
+        2,
+        3
+      ],
+      "status": "pending",
+      "subtasks": []
+    },
+    {
+      "id": 7,
+      "title": "Integrate Email Service (Resend)",
+      "description": "Integrate Resend for automated email delivery and campaign management.",
+      "details": "Use Resend API (latest) for sending emails. Implement email templates, scheduling, and tracking. Support bi-weekly educational sequences and custom content.",
+      "testStrategy": "Test email delivery, scheduling, and template rendering.",
+      "priority": "medium",
+      "dependencies": [
+        3,
+        6
+      ],
+      "status": "pending",
+      "subtasks": []
+    },
+    {
+      "id": 8,
+      "title": "Develop Analytics and Reporting Module",
+      "description": "Build analytics dashboard for survey completion, sharing, and lead conversion tracking.",
+      "details": "Use Chart.js (v4+) or similar for data visualization. Track survey completion, report sharing, and viral coefficient. Implement lead generation and conversion metrics.",
+      "testStrategy": "Test data visualization, metric calculation, and dashboard updates.",
+      "priority": "medium",
+      "dependencies": [
+        3,
+        6
+      ],
+      "status": "pending",
+      "subtasks": []
+    },
+    {
+      "id": 9,
+      "title": "Implement Social Media Sharing and Viral Tracking",
+      "description": "Add social media sharing and viral marketing tracking features.",
+      "details": "Integrate social sharing APIs (Facebook, Twitter, LinkedIn). Track sharing events and viral coefficient. Use practice-specific landing pages for sharing links.",
+      "testStrategy": "Test sharing functionality and tracking of sharing events.",
+      "priority": "medium",
+      "dependencies": [
+        5,
+        6
+      ],
+      "status": "pending",
+      "subtasks": []
+    },
+    {
+      "id": 10,
+      "title": "Build Content Library and Template Engine",
+      "description": "Develop a content library and template engine for educational content and campaigns.",
+      "details": "Create a content management system for text, images, and videos. Support customizable templates and multi-format content. Use React components for content rendering.",
+      "testStrategy": "Test content upload, template customization, and rendering.",
+      "priority": "medium",
+      "dependencies": [
+        6,
+        7
+      ],
+      "status": "pending",
+      "subtasks": []
+    },
+    {
+      "id": 11,
+      "title": "Optimize for Performance and Bundle Size",
+      "description": "Optimize application for fast load times and minimal bundle size.",
+      "details": "Implement code splitting, tree-shaking, and dynamic imports. Enforce file size limits (React components <200 lines, utility functions <100 lines, etc.). Use Lighthouse CI and bundle analyzer. Target initial load <50KB, route chunks <25KB, total app <200KB gzipped.",
+      "testStrategy": "Run Lighthouse audits, bundle analysis, and performance tests.",
+      "priority": "high",
+      "dependencies": [
+        1,
+        4,
+        5
+      ],
+      "status": "pending",
+      "subtasks": []
+    },
+    {
+      "id": 12,
+      "title": "Implement Security and Compliance Features",
+      "description": "Add security and compliance features including HTTPS, data encryption, and HIPAA-ready architecture.",
+      "details": "Enforce HTTPS, data encryption at rest, secure authentication, input validation, session timeout, audit trails, and consent management. Prepare for future HIPAA compliance.",
+      "testStrategy": "Test security headers, encryption, session management, and audit trails.",
+      "priority": "high",
+      "dependencies": [
+        2,
+        3
+      ],
+      "status": "pending",
+      "subtasks": []
+    },
+    {
+      "id": 13,
+      "title": "Develop Tablet and Offline Survey Experience",
+      "description": "Build tablet-optimized, offline-capable survey experience for waiting rooms.",
+      "details": "Use Progressive Web App (PWA) capabilities for offline support. Optimize UI for tablets. Integrate with existing patient check-in processes. Store survey responses locally and sync when online.",
+      "testStrategy": "Test offline survey completion, data sync, and tablet responsiveness.",
+      "priority": "medium",
+      "dependencies": [
+        4,
+        11
+      ],
+      "status": "pending",
+      "subtasks": []
+    },
+    {
+      "id": 14,
+      "title": "Integrate Payment Processing (Stripe)",
+      "description": "Add Stripe integration for payment processing and subscription management.",
+      "details": "Use Stripe API (latest) for payments and subscriptions. Support practice billing and premium features. Implement secure checkout and subscription management.",
+      "testStrategy": "Test payment processing, subscription management, and security.",
+      "priority": "medium",
+      "dependencies": [
+        2,
+        3
+      ],
+      "status": "pending",
+      "subtasks": []
+    },
+    {
+      "id": 15,
+      "title": "Prepare for Mobile App Conversion and Scale Testing",
+      "description": "Prepare the platform for future mobile app conversion and scale testing.",
+      "details": "Optimize PWA for mobile app conversion. Implement API foundations for modular endpoints. Conduct scale testing with 1000+ concurrent users. Monitor performance and stability.",
+      "testStrategy": "Test PWA installation, API scalability, and performance under load.",
+      "priority": "medium",
+      "dependencies": [
+        11,
+        13
+      ],
+      "status": "pending",
+      "subtasks": []
+    }
+  ]
+}

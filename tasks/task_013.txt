@@ -1,0 +1,11 @@
+# Task ID: 13
+# Title: Develop Tablet and Offline Survey Experience
+# Status: pending
+# Dependencies: 4, 11
+# Priority: medium
+# Description: Build tablet-optimized, offline-capable survey experience for waiting rooms.
+# Details:
+Use Progressive Web App (PWA) capabilities for offline support. Optimize UI for tablets. Integrate with existing patient check-in processes. Store survey responses locally and sync when online.
+
+# Test Strategy:
+Test offline survey completion, data sync, and tablet responsiveness.

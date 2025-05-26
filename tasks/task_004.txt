@@ -1,0 +1,11 @@
+# Task ID: 4
+# Title: Develop Core Survey Form Components
+# Status: pending
+# Dependencies: 1
+# Priority: medium
+# Description: Build reusable, modular survey form components for the 3-step assessment process.
+# Details:
+Create React components for each survey step (Lifestyle Stressors, Symptoms, Contact/Consent). Use Formik v2+ and Yup for validation. Ensure mobile-first, accessible design. Implement progress indicators.
+
+# Test Strategy:
+Test form validation, navigation between steps, and accessibility. Verify mobile responsiveness.

@@ -55,4 +55,21 @@ env/
 venv/
 ENV/
 env.bak/
-venv.bak/ 
+venv.bak/
+.venv/
+
+# Added by Claude Task Master
+dev-debug.log
+# Dependency directories
+# Editor directories and files
+.idea
+.vscode
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+# OS specific
+# Task files
+tasks.json
+tasks/ 

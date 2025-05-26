@@ -1,0 +1,11 @@
+# Task ID: 11
+# Title: Optimize for Performance and Bundle Size
+# Status: pending
+# Dependencies: 1, 4, 5
+# Priority: high
+# Description: Optimize application for fast load times and minimal bundle size.
+# Details:
+Implement code splitting, tree-shaking, and dynamic imports. Enforce file size limits (React components <200 lines, utility functions <100 lines, etc.). Use Lighthouse CI and bundle analyzer. Target initial load <50KB, route chunks <25KB, total app <200KB gzipped.
+
+# Test Strategy:
+Run Lighthouse audits, bundle analysis, and performance tests.

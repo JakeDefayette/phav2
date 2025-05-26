@@ -1,0 +1,11 @@
+# Task ID: 3
+# Title: Design and Implement Database Schema
+# Status: pending
+# Dependencies: 1
+# Priority: high
+# Description: Define and implement the core database schema using Supabase (PostgreSQL).
+# Details:
+Create tables for Practices, Assessments, Reports, Email Campaigns, and Users. Define relationships and constraints. Use Supabase v2+ with PostgreSQL 15+. Implement modular data access layer.
+
+# Test Strategy:
+Test CRUD operations for each entity. Validate relationships and constraints.

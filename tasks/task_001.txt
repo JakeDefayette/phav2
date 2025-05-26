@@ -1,0 +1,11 @@
+# Task ID: 1
+# Title: Setup Project Repository and Modular Architecture
+# Status: pending
+# Dependencies: None
+# Priority: high
+# Description: Initialize the project repository with Next.js (App Router), modular folder structure, and component library foundation.
+# Details:
+Use Next.js v14+ with App Router for optimal code splitting. Set up /src/components (atoms, molecules, organisms, templates), /hooks, /services, /utils, /types, /constants. Initialize TypeScript, ESLint, Prettier, and Husky for code quality. Use Vercel for hosting. Implement Atomic Design principles for component structure.
+
+# Test Strategy:
+Verify folder structure, linting, and TypeScript setup. Test basic Next.js routing and component rendering.
