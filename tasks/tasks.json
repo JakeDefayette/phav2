@@ -103,8 +103,63 @@
       "dependencies": [
         1
       ],
-      "status": "pending",
-      "subtasks": []
+      "status": "in-progress",
+      "subtasks": [
+        {
+          "id": 1,
+          "title": "Set up Supabase Auth configuration",
+          "description": "Configure Supabase Auth settings including email/password authentication and OAuth providers",
+          "dependencies": [],
+          "details": "Create a Supabase project, configure authentication settings in the Supabase dashboard, enable email/password authentication, set up OAuth providers (Google, Facebook, etc.), and configure redirect URLs for authentication flow\n<info added on 2025-05-26T18:25:47.069Z>\n✅ Supabase Auth Configuration Setup Complete\n\nImplementation Details:\n- Installed @supabase/supabase-js package\n- Created modular Supabase client configurations:\n  - src/lib/supabase.ts - Client-side Supabase client with auth settings\n  - src/lib/supabase-server.ts - Server-side client for API routes\n- Defined TypeScript types in src/types/auth.ts:\n  - UserRole type (chiropractor | parent)\n  - UserProfile interface with role-based fields\n  - AuthState, LoginCredentials, RegisterCredentials interfaces\n- Created comprehensive setup documentation in docs/supabase-setup.md\n- Implemented auth callback route at src/app/auth/callback/route.ts\n\nConfiguration Features:\n- Auto-refresh tokens enabled\n- Session persistence configured\n- URL detection for OAuth flows\n- Proper error handling for auth callbacks\n- Environment variable validation\n- Modular architecture following project standards\n\nNext Steps:\n- User needs to create Supabase project and configure environment variables\n- Ready to proceed with registration/login flow implementation\n</info added on 2025-05-26T18:25:47.069Z>",
+          "status": "done",
+          "testStrategy": "Verify configuration settings in Supabase dashboard and test connection from application"
+        },
+        {
+          "id": 2,
+          "title": "Implement user registration and login flows",
+          "description": "Create registration and login interfaces with input validation for both chiropractors and parents",
+          "dependencies": [
+            1
+          ],
+          "details": "Develop registration forms with email/password fields, implement client-side and server-side input validation and sanitization, create login interfaces for both user types, handle authentication errors and user feedback",
+          "status": "pending",
+          "testStrategy": "Test registration and login with valid and invalid credentials, verify error handling and validation"
+        },
+        {
+          "id": 3,
+          "title": "Implement session management and security",
+          "description": "Set up secure session handling with cookies, timeouts, and refresh token rotation",
+          "dependencies": [
+            2
+          ],
+          "details": "Configure secure HTTP-only cookies for session storage, implement session timeout mechanisms, set up refresh token rotation for enhanced security, handle session persistence across page reloads",
+          "status": "pending",
+          "testStrategy": "Test session persistence, timeout functionality, and security of stored tokens"
+        },
+        {
+          "id": 4,
+          "title": "Create user role management system",
+          "description": "Implement storage and verification of user roles (chiropractor, parent) in Supabase",
+          "dependencies": [
+            2
+          ],
+          "details": "Create database schema for storing user roles, implement role assignment during registration, develop role verification middleware for protected routes, ensure roles are properly associated with user accounts",
+          "status": "pending",
+          "testStrategy": "Test role assignment during registration and role-based access control to protected routes"
+        },
+        {
+          "id": 5,
+          "title": "Develop protected routes and authorization",
+          "description": "Create route protection based on authentication status and user roles",
+          "dependencies": [
+            3,
+            4
+          ],
+          "details": "Implement middleware to verify authentication status before accessing protected routes, create role-based access control for different sections of the application, handle unauthorized access attempts, develop redirect logic for unauthenticated users",
+          "status": "pending",
+          "testStrategy": "Test access to protected routes with authenticated and unauthenticated users, verify role-based restrictions"
+        }
+      ]
     },
     {
       "id": 3,
