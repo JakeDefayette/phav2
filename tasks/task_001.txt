@@ -9,3 +9,86 @@ Use Next.js v14+ with App Router for optimal code splitting. Set up /src/compone
 
 # Test Strategy:
 Verify folder structure, linting, and TypeScript setup. Test basic Next.js routing and component rendering.
+
+# Subtasks:
+## 1. Initialize the Next.js Project Repository [in-progress]
+### Dependencies: None
+### Description: Create a new Next.js project repository using the latest version and initialize version control.
+### Details:
+Use the create-next-app CLI to scaffold the project, initialize a Git repository, and make the initial commit.
+<info added on 2025-05-26T17:27:42.881Z>
+**Initial Assessment:**
+- Git repository is already initialized (✅)
+- No package.json found - need to create Next.js project
+- Current directory: /Users/jakedefayette/Desktop/Organized/PersonalProjects/pha-v2
+- Existing files: .git/, .cursor/, .env, .gitignore, .taskmasterconfig, .venv/, README.md, scripts/, tasks/
+
+**Plan:**
+1. Create Next.js project using create-next-app:
+   ```
+   npx create-next-app@latest .
+   ```
+   - Choose "Yes" for TypeScript
+   - Choose "Yes" for using App Router
+   - Select other options as needed (e.g., ESLint, Tailwind CSS)
+
+2. After project creation, review and adjust the generated files:
+   - Ensure `app/` directory is present (indicating App Router usage)
+   - Check `tsconfig.json` for TypeScript configuration
+   - Verify `package.json` for correct dependencies and scripts
+
+3. Make initial commit with the new Next.js setup:
+   ```
+   git add .
+   git commit -m "Initial Next.js setup with App Router and TypeScript"
+   ```
+
+4. Test the setup by running the development server:
+   ```
+   npm run dev
+   ```
+   Verify that the app starts without errors and the default Next.js page loads in the browser.
+</info added on 2025-05-26T17:27:42.881Z>
+
+## 2. Configure Next.js with App Router [pending]
+### Dependencies: 1.1
+### Description: Set up Next.js to use the App Router for routing and ensure the app directory is present.
+### Details:
+During project setup, select 'Yes' for App Router to generate the /app directory and enable the latest routing conventions.
+
+## 3. Set Up TypeScript Support [pending]
+### Dependencies: 1.2
+### Description: Configure TypeScript in the Next.js project for type safety and scalability.
+### Details:
+Install TypeScript and required type definitions, then allow Next.js to generate tsconfig.json and convert starter files to .tsx/.ts as needed.
+
+## 4. Establish Modular Folder Structure [pending]
+### Dependencies: 1.3
+### Description: Create a modular folder structure including components, hooks, services, utils, types, and constants directories.
+### Details:
+Organize the src directory (or root) with clearly separated folders for each module to promote maintainability and scalability.
+
+## 5. Implement Atomic Design Principles in Component Library [pending]
+### Dependencies: 1.4
+### Description: Structure the components directory according to Atomic Design (atoms, molecules, organisms, templates, pages).
+### Details:
+Within the components folder, create subfolders for each Atomic Design level and provide example components for each.
+
+## 6. Set Up ESLint and Prettier for Code Quality [pending]
+### Dependencies: 1.3
+### Description: Install and configure ESLint and Prettier for linting and code formatting.
+### Details:
+Add ESLint and Prettier dependencies, create configuration files, and ensure they work with TypeScript and Next.js.
+
+## 7. Configure Husky for Git Hooks [pending]
+### Dependencies: None
+### Description: Set up Husky to enforce code quality checks (linting, formatting) before commits and pushes.
+### Details:
+Install Husky, add pre-commit and pre-push hooks to run ESLint and Prettier, and verify integration with the repository.
+
+## 8. Configure Vercel Deployment [pending]
+### Dependencies: 1.1, 1.3, 1.4, 1.5, 1.6, 1.7
+### Description: Set up deployment to Vercel for continuous integration and delivery.
+### Details:
+Connect the repository to Vercel, configure project settings, and verify successful deployment of the modular Next.js app.
+

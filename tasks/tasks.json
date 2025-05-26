@@ -9,7 +9,89 @@
       "priority": "high",
       "dependencies": [],
       "status": "pending",
-      "subtasks": []
+      "subtasks": [
+        {
+          "id": 1,
+          "title": "Initialize the Next.js Project Repository",
+          "description": "Create a new Next.js project repository using the latest version and initialize version control.",
+          "dependencies": [],
+          "details": "Use the create-next-app CLI to scaffold the project, initialize a Git repository, and make the initial commit.\n<info added on 2025-05-26T17:27:42.881Z>\n**Initial Assessment:**\n- Git repository is already initialized (✅)\n- No package.json found - need to create Next.js project\n- Current directory: /Users/jakedefayette/Desktop/Organized/PersonalProjects/pha-v2\n- Existing files: .git/, .cursor/, .env, .gitignore, .taskmasterconfig, .venv/, README.md, scripts/, tasks/\n\n**Plan:**\n1. Create Next.js project using create-next-app:\n   ```\n   npx create-next-app@latest .\n   ```\n   - Choose \"Yes\" for TypeScript\n   - Choose \"Yes\" for using App Router\n   - Select other options as needed (e.g., ESLint, Tailwind CSS)\n\n2. After project creation, review and adjust the generated files:\n   - Ensure `app/` directory is present (indicating App Router usage)\n   - Check `tsconfig.json` for TypeScript configuration\n   - Verify `package.json` for correct dependencies and scripts\n\n3. Make initial commit with the new Next.js setup:\n   ```\n   git add .\n   git commit -m \"Initial Next.js setup with App Router and TypeScript\"\n   ```\n\n4. Test the setup by running the development server:\n   ```\n   npm run dev\n   ```\n   Verify that the app starts without errors and the default Next.js page loads in the browser.\n</info added on 2025-05-26T17:27:42.881Z>",
+          "status": "in-progress"
+        },
+        {
+          "id": 2,
+          "title": "Configure Next.js with App Router",
+          "description": "Set up Next.js to use the App Router for routing and ensure the app directory is present.",
+          "dependencies": [
+            1
+          ],
+          "details": "During project setup, select 'Yes' for App Router to generate the /app directory and enable the latest routing conventions.",
+          "status": "pending"
+        },
+        {
+          "id": 3,
+          "title": "Set Up TypeScript Support",
+          "description": "Configure TypeScript in the Next.js project for type safety and scalability.",
+          "dependencies": [
+            2
+          ],
+          "details": "Install TypeScript and required type definitions, then allow Next.js to generate tsconfig.json and convert starter files to .tsx/.ts as needed.",
+          "status": "pending"
+        },
+        {
+          "id": 4,
+          "title": "Establish Modular Folder Structure",
+          "description": "Create a modular folder structure including components, hooks, services, utils, types, and constants directories.",
+          "dependencies": [
+            3
+          ],
+          "details": "Organize the src directory (or root) with clearly separated folders for each module to promote maintainability and scalability.",
+          "status": "pending"
+        },
+        {
+          "id": 5,
+          "title": "Implement Atomic Design Principles in Component Library",
+          "description": "Structure the components directory according to Atomic Design (atoms, molecules, organisms, templates, pages).",
+          "dependencies": [
+            4
+          ],
+          "details": "Within the components folder, create subfolders for each Atomic Design level and provide example components for each.",
+          "status": "pending"
+        },
+        {
+          "id": 6,
+          "title": "Set Up ESLint and Prettier for Code Quality",
+          "description": "Install and configure ESLint and Prettier for linting and code formatting.",
+          "dependencies": [
+            3
+          ],
+          "details": "Add ESLint and Prettier dependencies, create configuration files, and ensure they work with TypeScript and Next.js.",
+          "status": "pending"
+        },
+        {
+          "id": 7,
+          "title": "Configure Husky for Git Hooks",
+          "description": "Set up Husky to enforce code quality checks (linting, formatting) before commits and pushes.",
+          "dependencies": [],
+          "details": "Install Husky, add pre-commit and pre-push hooks to run ESLint and Prettier, and verify integration with the repository.",
+          "status": "pending"
+        },
+        {
+          "id": 8,
+          "title": "Configure Vercel Deployment",
+          "description": "Set up deployment to Vercel for continuous integration and delivery.",
+          "dependencies": [
+            1,
+            3,
+            4,
+            5,
+            6,
+            7
+          ],
+          "details": "Connect the repository to Vercel, configure project settings, and verify successful deployment of the modular Next.js app.",
+          "status": "pending"
+        }
+      ]
     },
     {
       "id": 2,
