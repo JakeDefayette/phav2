@@ -21,7 +21,7 @@ export default function RegisterPage() {
         'lastName' in credentials &&
         'role' in credentials
       ) {
-        await register(credentials);
+        await register(credentials as RegisterCredentials);
         router.push('/dashboard');
       } else {
         throw new Error('Invalid registration data');

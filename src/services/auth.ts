@@ -1,4 +1,11 @@
 import { supabase } from '@/lib/supabase';
+import {
+  validateSession,
+  clearSession,
+  initializeSessionTracking,
+  refreshSession as refreshSessionUtil,
+  getSessionInfo,
+} from '@/lib/session';
 import type {
   LoginCredentials,
   RegisterCredentials,
@@ -45,6 +52,9 @@ export async function registerUser(
     if (!authData.user) {
       throw new AuthError('Registration failed - no user data returned');
     }
+
+    // Initialize session tracking for new session
+    initializeSessionTracking();
 
     // The profile will be created automatically by the database trigger
     // Wait a moment for the trigger to complete
@@ -118,6 +128,9 @@ export async function loginUser(
       throw new AuthError('Login failed - no user data returned');
     }
 
+    // Initialize session tracking for new session
+    initializeSessionTracking();
+
     // Fetch user profile
     const { data: profileData, error: profileError } = await supabase
       .from('user_profiles')
@@ -162,19 +175,17 @@ export async function loginUser(
 }
 
 /**
- * Sign out the current user
+ * Sign out the current user with enhanced session cleanup
  */
 export async function logoutUser(): Promise<void> {
   try {
-    const { error } = await supabase.auth.signOut();
-    if (error) {
-      throw new AuthError(error.message);
-    }
+    await supabase.auth.signOut();
+    await clearSession(); // Clear client-side session tracking
   } catch (error) {
-    if (error instanceof AuthError) {
-      throw error;
-    }
-    throw new AuthError('Logout failed. Please try again.');
+    // console.error('Error during logout:', error);
+    // Even if Supabase signout fails, try to clear local session
+    await clearSession();
+    throw new AuthError('Logout failed');
   }
 }
 
@@ -235,16 +246,38 @@ export async function getCurrentUser(): Promise<UserProfile | null> {
 }
 
 /**
- * Check if user is authenticated
+ * Check if user is authenticated with enhanced validation
  */
 export async function isAuthenticated(): Promise<boolean> {
   try {
-    const {
-      data: { session },
-    } = await supabase.auth.getSession();
-    return !!session?.user;
+    const validation = await validateSession();
+    return validation.isValid;
   } catch (error) {
-    // Error checking authentication, return false
     return false;
+  }
+}
+
+/**
+ * Refresh the current session with enhanced security
+ */
+export async function refreshUserSession(): Promise<boolean> {
+  try {
+    const refreshResult = await refreshSessionUtil();
+    return refreshResult.success;
+  } catch (error) {
+    // console.error('Session refresh failed:', error);
+    return false;
+  }
+}
+
+/**
+ * Get comprehensive session information
+ */
+export async function getUserSessionInfo() {
+  try {
+    return await getSessionInfo();
+  } catch (error) {
+    // console.error('Failed to get session info:', error);
+    return null;
   }
 }

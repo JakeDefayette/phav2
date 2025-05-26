@@ -58,12 +58,12 @@ export function AuthProvider({ children }: AuthProviderProps) {
         }
       } catch (error) {
         if (mounted) {
-          setState({
+          setState(prev => ({
             user: null,
             loading: false,
             error:
               error instanceof Error ? error.message : 'Authentication error',
-          });
+          }));
         }
       }
     };
