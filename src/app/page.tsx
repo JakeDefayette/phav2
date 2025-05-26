@@ -1,14 +1,68 @@
+'use client';
+
+import Link from 'next/link';
+import { useAuth } from '@/hooks/useAuth';
+import { Button } from '@/components/atoms/Button';
+
 export default function Home() {
+  const { user, loading } = useAuth();
+
   return (
     <main className='flex min-h-screen flex-col items-center justify-between p-24'>
       <div className='z-10 max-w-5xl w-full items-center justify-between font-mono text-sm lg:flex'>
         <p className='fixed left-0 top-0 flex w-full justify-center border-b border-gray-300 bg-gradient-to-b from-zinc-200 pb-6 pt-8 backdrop-blur-2xl dark:border-neutral-800 dark:bg-zinc-800/30 dark:from-inherit lg:static lg:w-auto lg:rounded-xl lg:border lg:bg-gray-200 lg:p-4 lg:dark:bg-zinc-800/30'>
-          Personal Health Assistant v2
+          Chiropractic Practice Growth Platform
         </p>
+
+        {!loading && (
+          <div className='fixed right-4 top-4 lg:static lg:ml-auto'>
+            {user ? (
+              <Link href='/dashboard'>
+                <Button variant='primary' size='sm'>
+                  Go to Dashboard
+                </Button>
+              </Link>
+            ) : (
+              <div className='flex gap-2'>
+                <Link href='/auth/login'>
+                  <Button variant='outline' size='sm'>
+                    Sign In
+                  </Button>
+                </Link>
+                <Link href='/auth/register'>
+                  <Button variant='primary' size='sm'>
+                    Sign Up
+                  </Button>
+                </Link>
+              </div>
+            )}
+          </div>
+        )}
       </div>
 
-      <div className="relative flex place-items-center before:absolute before:h-[300px] before:w-[480px] before:-translate-x-1/2 before:rounded-full before:bg-gradient-radial before:from-white before:to-transparent before:blur-2xl before:content-[''] after:absolute after:-z-20 after:h-[180px] after:w-[240px] after:translate-x-1/3 after:bg-gradient-conic after:from-sky-200 after:via-blue-200 after:blur-2xl after:content-[''] before:dark:bg-gradient-to-br before:dark:from-transparent before:dark:to-blue-700 before:dark:opacity-10 after:dark:from-sky-900 after:dark:via-[#0141ff] after:dark:opacity-40 before:lg:h-[360px] z-[-1]">
-        <h1 className='text-4xl font-bold text-center'>Welcome to PHA v2</h1>
+      <div className="relative flex flex-col place-items-center before:absolute before:h-[300px] before:w-[480px] before:-translate-x-1/2 before:rounded-full before:bg-gradient-radial before:from-white before:to-transparent before:blur-2xl before:content-[''] after:absolute after:-z-20 after:h-[180px] after:w-[240px] after:translate-x-1/3 after:bg-gradient-conic after:from-sky-200 after:via-blue-200 after:blur-2xl after:content-[''] before:dark:bg-gradient-to-br before:dark:from-transparent before:dark:to-blue-700 before:dark:opacity-10 after:dark:from-sky-900 after:dark:via-[#0141ff] after:dark:opacity-40 before:lg:h-[360px] z-[-1]">
+        <h1 className='text-4xl font-bold text-center mb-6'>
+          Chiropractic Practice Growth Platform
+        </h1>
+        <p className='text-lg text-gray-600 text-center max-w-2xl mb-8'>
+          Streamline your chiropractic practice with comprehensive patient
+          management, growth analytics, and family-centered care coordination.
+        </p>
+
+        {!loading && !user && (
+          <div className='flex gap-4'>
+            <Link href='/auth/register'>
+              <Button variant='primary' size='lg'>
+                Get Started
+              </Button>
+            </Link>
+            <Link href='/auth/login'>
+              <Button variant='outline' size='lg'>
+                Sign In
+              </Button>
+            </Link>
+          </div>
+        )}
       </div>
 
       <div className='mb-32 grid text-center lg:max-w-5xl lg:w-full lg:mb-0 lg:grid-cols-4 lg:text-left'>
