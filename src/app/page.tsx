@@ -51,8 +51,13 @@ export default function Home() {
 
         {!loading && !user && (
           <div className='flex gap-4'>
-            <Link href='/auth/register'>
+            <Link href='/survey'>
               <Button variant='primary' size='lg'>
+                Take Assessment
+              </Button>
+            </Link>
+            <Link href='/auth/register'>
+              <Button variant='outline' size='lg'>
                 Get Started
               </Button>
             </Link>

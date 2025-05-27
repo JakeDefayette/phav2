@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { Formik, Form, FormikHelpers } from 'formik';
-import { Button } from '@/components/atoms';
+import { Formik, Form, FormikHelpers, Field } from 'formik';
+import { Button, Checkbox } from '@/components/atoms';
 import {
   StepIndicator,
   CheckboxGroup,
@@ -222,30 +222,60 @@ export const MultiStepSurveyForm: React.FC<MultiStepSurveyFormProps> = ({
               <h3 className='text-lg font-semibold text-gray-900'>
                 Required Consent
               </h3>
-              <CheckboxGroup
-                name='privacyPolicyAcknowledged'
-                options={[
-                  {
-                    value: 'true',
-                    label: 'I acknowledge the privacy policy',
-                    description:
-                      'Your information is protected and will only be used for health assessment purposes.',
-                  },
-                ]}
-                required
-              />
-              <CheckboxGroup
-                name='medicalDisclaimerAcknowledged'
-                options={[
-                  {
-                    value: 'true',
-                    label: 'I understand this is not a medical diagnosis',
-                    description:
-                      'This assessment is for educational purposes only and does not replace professional medical advice.',
-                  },
-                ]}
-                required
-              />
+              <div className='space-y-4'>
+                <div>
+                  <Field name='privacyPolicyAcknowledged'>
+                    {({ field, meta }: any) => (
+                      <div>
+                        <Checkbox
+                          id='privacyPolicyAcknowledged'
+                          label='I acknowledge the privacy policy'
+                          checked={field.value}
+                          onChange={field.onChange}
+                          variant={
+                            meta.touched && meta.error ? 'error' : 'default'
+                          }
+                        />
+                        <p className='ml-7 text-xs text-gray-500 mt-1'>
+                          Your information is protected and will only be used
+                          for health assessment purposes.
+                        </p>
+                        {meta.touched && meta.error && (
+                          <p className='ml-7 text-sm text-red-600 mt-1'>
+                            {meta.error}
+                          </p>
+                        )}
+                      </div>
+                    )}
+                  </Field>
+                </div>
+                <div>
+                  <Field name='medicalDisclaimerAcknowledged'>
+                    {({ field, meta }: any) => (
+                      <div>
+                        <Checkbox
+                          id='medicalDisclaimerAcknowledged'
+                          label='I understand this is not a medical diagnosis'
+                          checked={field.value}
+                          onChange={field.onChange}
+                          variant={
+                            meta.touched && meta.error ? 'error' : 'default'
+                          }
+                        />
+                        <p className='ml-7 text-xs text-gray-500 mt-1'>
+                          This assessment is for educational purposes only and
+                          does not replace professional medical advice.
+                        </p>
+                        {meta.touched && meta.error && (
+                          <p className='ml-7 text-sm text-red-600 mt-1'>
+                            {meta.error}
+                          </p>
+                        )}
+                      </div>
+                    )}
+                  </Field>
+                </div>
+              </div>
             </div>
           </div>
         );

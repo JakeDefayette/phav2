@@ -34,7 +34,7 @@ export const CheckboxGroup: React.FC<CheckboxGroupProps> = ({
   const [field, meta, helpers] = useField<string[]>(name);
 
   const handleChange = (optionValue: string, checked: boolean) => {
-    const currentValues = field.value || [];
+    const currentValues = Array.isArray(field.value) ? field.value : [];
     if (checked) {
       helpers.setValue([...currentValues, optionValue]);
     } else {
@@ -64,7 +64,11 @@ export const CheckboxGroup: React.FC<CheckboxGroupProps> = ({
             <Checkbox
               id={`${name}-${option.value}`}
               label={option.label}
-              checked={field.value?.includes(option.value) || false}
+              checked={
+                Array.isArray(field.value)
+                  ? field.value.includes(option.value)
+                  : false
+              }
               onChange={e => handleChange(option.value, e.target.checked)}
               variant={displayError ? 'error' : 'default'}
             />
