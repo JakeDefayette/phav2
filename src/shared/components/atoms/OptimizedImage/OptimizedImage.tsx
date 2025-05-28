@@ -12,7 +12,8 @@ import { cn } from '@/shared/utils/cn';
 /**
  * Props for the OptimizedImage component
  */
-export interface OptimizedImageProps extends Omit<ImageProps, 'src'> {
+export interface OptimizedImageProps
+  extends Omit<ImageProps, 'src' | 'placeholder'> {
   /** Image source URL or static import */
   src: string | StaticImageData;
   /** Alt text for accessibility (required) */
@@ -242,7 +243,6 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
         className={imageClasses}
         onLoad={handleLoad}
         onError={handleError}
-        {...props}
       />
     </div>
   );

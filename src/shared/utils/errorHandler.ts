@@ -71,7 +71,7 @@ export function handleDatabaseError(
   error: unknown,
   operation: string,
   context?: Record<string, any>
-): DatabaseError {
+): AppError {
   if (error instanceof Error) {
     // Check for specific database error patterns
     if (error.message.includes('unique constraint')) {

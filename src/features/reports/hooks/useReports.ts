@@ -263,11 +263,18 @@ export function useGenerateReport() {
       options,
     }: {
       assessmentId: string;
-      options?: Record<string, any>;
+      options?: {
+        reportType?: 'standard' | 'detailed' | 'summary';
+        practiceId?: string;
+      };
     }) =>
       withErrorHandling('generateReport', async () => {
         const service = new ReportsService();
-        return await service.generateFromAssessment(assessmentId, options);
+        return await service.generateReport(
+          assessmentId,
+          options?.reportType || 'standard',
+          options?.practiceId
+        );
       }),
     onSuccess: newReport => {
       // Add to cache
@@ -288,13 +295,20 @@ export function useGenerateReport() {
 /**
  * Hook to get report analytics/statistics
  */
-export function useReportStats(filters: Record<string, any> = {}) {
+export function useReportStats(
+  practiceId: string,
+  filters: { dateFrom?: string; dateTo?: string } = {}
+) {
   return useQuery({
-    queryKey: [...QueryKeys.reports.all, 'stats', filters],
+    queryKey: [...QueryKeys.reports.all, 'stats', practiceId, filters],
     queryFn: () =>
       withErrorHandling('fetchReportStats', async () => {
         const service = new ReportsService();
-        return await service.getStatistics(filters);
+        return await service.getViralMetrics(
+          practiceId,
+          filters.dateFrom,
+          filters.dateTo
+        );
       }),
     staleTime: 15 * 60 * 1000, // 15 minutes for stats
   });

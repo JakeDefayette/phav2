@@ -63,19 +63,6 @@ const queryConfig: DefaultOptions = {
 export function createQueryClient(): QueryClient {
   return new QueryClient({
     defaultOptions: queryConfig,
-    logger: {
-      log: (...args) => {
-        if (config.app.environment === 'development') {
-          console.log('[React Query]', ...args);
-        }
-      },
-      warn: (...args) => {
-        console.warn('[React Query]', ...args);
-      },
-      error: (...args) => {
-        console.error('[React Query]', ...args);
-      },
-    },
   });
 }
 

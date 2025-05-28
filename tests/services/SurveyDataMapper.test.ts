@@ -1,9 +1,8 @@
 import {
   SurveyDataMapper,
-  MappedResponse,
-  ReportDataStructure,
-} from '@/services/SurveyDataMapper';
-import { SurveyResponseWithQuestion } from '@/services/surveyResponses';
+  type ReportDataStructure,
+} from '@/features/assessment/services/SurveyDataMapper';
+import { SurveyResponseWithQuestion } from '@/features/assessment/services/surveyResponses';
 import { Database } from '../../src/types/database';
 
 type QuestionType = Database['public']['Enums']['question_type_enum'];

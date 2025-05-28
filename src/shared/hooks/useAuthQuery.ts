@@ -30,7 +30,7 @@ export function useCurrentUser() {
     staleTime: 5 * 60 * 1000, // 5 minutes
     retry: (failureCount, error) => {
       // Don't retry on authentication errors
-      if (error?.statusCode === 401) {
+      if (error && 'statusCode' in error && error.statusCode === 401) {
         return false;
       }
       return failureCount < 2;
@@ -47,7 +47,7 @@ export function useSession() {
     queryFn: () =>
       withErrorHandling('getSession', async () => {
         const authService = new AuthService();
-        return await authService.getSession();
+        return await authService.getSessionInfo();
       }),
     staleTime: 5 * 60 * 1000,
     retry: false, // Don't retry session checks
@@ -64,18 +64,11 @@ export function useLogin() {
     mutationFn: (credentials: LoginCredentials) =>
       withErrorHandling('login', async () => {
         const authService = new AuthService();
-        return await authService.signIn(credentials);
+        return await authService.login(credentials);
       }),
-    onSuccess: result => {
+    onSuccess: user => {
       // Update user cache
-      if (result.user) {
-        queryClient.setQueryData(QueryKeys.auth.user(), result.user);
-      }
-
-      // Update session cache
-      if (result.session) {
-        queryClient.setQueryData(QueryKeys.auth.session(), result.session);
-      }
+      queryClient.setQueryData(QueryKeys.auth.user(), user);
 
       // Invalidate other auth-related queries
       queryClient.invalidateQueries({ queryKey: QueryKeys.auth.all });
@@ -99,17 +92,11 @@ export function useRegister() {
     mutationFn: (credentials: RegisterCredentials) =>
       withErrorHandling('register', async () => {
         const authService = new AuthService();
-        return await authService.signUp(credentials);
+        return await authService.register(credentials);
       }),
-    onSuccess: result => {
+    onSuccess: user => {
       // Update user cache if registration includes auto-login
-      if (result.user) {
-        queryClient.setQueryData(QueryKeys.auth.user(), result.user);
-      }
-
-      if (result.session) {
-        queryClient.setQueryData(QueryKeys.auth.session(), result.session);
-      }
+      queryClient.setQueryData(QueryKeys.auth.user(), user);
     },
     onError: error => {
       console.error('Registration failed:', error);
@@ -127,7 +114,7 @@ export function useLogout() {
     mutationFn: () =>
       withErrorHandling('logout', async () => {
         const authService = new AuthService();
-        await authService.signOut();
+        await authService.logout();
       }),
     onSuccess: () => {
       // Clear all cached data on logout
@@ -151,12 +138,12 @@ export function useUpdateProfile() {
   return useMutation({
     mutationFn: (updates: Partial<UserProfile>) =>
       withErrorHandling('updateProfile', async () => {
-        const authService = new AuthService();
-        return await authService.updateProfile(updates);
+        // TODO: Implement updateProfile method in AuthService
+        throw new Error('updateProfile method not implemented in AuthService');
       }),
     onSuccess: updatedUser => {
-      // Update user cache
       queryClient.setQueryData(QueryKeys.auth.user(), updatedUser);
+      queryClient.invalidateQueries({ queryKey: QueryKeys.auth.all });
     },
     onError: error => {
       console.error('Profile update failed:', error);
@@ -171,8 +158,8 @@ export function useResetPassword() {
   return useMutation({
     mutationFn: (email: string) =>
       withErrorHandling('resetPassword', async () => {
-        const authService = new AuthService();
-        return await authService.resetPassword(email);
+        // TODO: Implement resetPassword method in AuthService
+        throw new Error('resetPassword method not implemented in AuthService');
       }),
     onError: error => {
       console.error('Password reset failed:', error);
@@ -193,8 +180,8 @@ export function useUpdatePassword() {
       newPassword: string;
     }) =>
       withErrorHandling('updatePassword', async () => {
-        const authService = new AuthService();
-        return await authService.updatePassword(currentPassword, newPassword);
+        // TODO: Implement updatePassword method in AuthService
+        throw new Error('updatePassword method not implemented in AuthService');
       }),
     onError: error => {
       console.error('Password update failed:', error);

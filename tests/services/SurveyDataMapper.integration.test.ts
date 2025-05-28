@@ -1,5 +1,5 @@
-import { SurveyDataMapper } from '@/services/SurveyDataMapper';
-import { SurveyResponseWithQuestion } from '@/services/surveyResponses';
+import { SurveyDataMapper } from '@/features/assessment/services/SurveyDataMapper';
+import { SurveyResponseWithQuestion } from '@/features/assessment/services/surveyResponses';
 
 describe('SurveyDataMapper Integration Tests', () => {
   let mapper: SurveyDataMapper;

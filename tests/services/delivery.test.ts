@@ -79,7 +79,7 @@ jest.mock('@/services/pdf', () => ({
 }));
 
 // Now import the service after all mocks are set up
-import { DeliveryService } from '@/services/delivery';
+import { DeliveryService } from '@/features/reports/services';
 
 describe('DeliveryService', () => {
   let deliveryService: DeliveryService;

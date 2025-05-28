@@ -49,9 +49,7 @@ export function initializeServices(): void {
 
   // Shared services
   registerService('authService', () => new AuthService());
-  registerService('brandingService', () =>
-    BrandingService.getInstance(supabase)
-  );
+  registerService('brandingService', () => BrandingService.getInstance());
   registerService('emailService', () => new EmailService());
 
   // Assessment feature services

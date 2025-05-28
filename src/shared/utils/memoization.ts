@@ -12,13 +12,13 @@ import React from 'react';
 export function smartMemo<T extends React.ComponentType<any>>(
   Component: T,
   compare?: (
-    prevProps: React.ComponentProps<T>,
-    nextProps: React.ComponentProps<T>
+    prevProps: Readonly<React.ComponentProps<T>>,
+    nextProps: Readonly<React.ComponentProps<T>>
   ) => boolean
 ): T {
   const defaultCompare = (
-    prevProps: React.ComponentProps<T>,
-    nextProps: React.ComponentProps<T>
+    prevProps: Readonly<React.ComponentProps<T>>,
+    nextProps: Readonly<React.ComponentProps<T>>
   ): boolean => {
     const prevKeys = Object.keys(prevProps);
     const nextKeys = Object.keys(nextProps);
@@ -86,7 +86,12 @@ export function smartMemo<T extends React.ComponentType<any>>(
     return true;
   };
 
-  return React.memo(Component, compare || defaultCompare) as T;
+  // Use proper typing for React.memo
+  const compareFunction = compare || defaultCompare;
+  return React.memo(
+    Component as React.FunctionComponent<React.ComponentProps<T>>,
+    compareFunction
+  ) as unknown as T;
 }
 
 /**
