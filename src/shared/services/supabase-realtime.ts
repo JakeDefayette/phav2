@@ -179,7 +179,7 @@ export class RealtimeSubscriptionManager {
       const channel = supabase.channel(config.channel);
 
       // Configure the subscription based on config
-      let subscription = channel.on(
+      const subscription = channel.on(
         'postgres_changes',
         {
           event: config.event || '*',
