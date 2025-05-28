@@ -3,8 +3,8 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { AuthForm } from '@/components/organisms/AuthForm';
-import { useAuth } from '@/hooks';
+import { AuthForm } from '@/shared/components/organisms/AuthForm';
+import { useAuth } from '@/shared/hooks';
 import type { LoginCredentials } from '@/shared/types/auth';
 
 export default function LoginPage() {

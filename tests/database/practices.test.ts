@@ -3,7 +3,7 @@ import {
   expectSupabaseError,
   generateTestPractice,
 } from '../utils/database';
-import { Database } from '../../src/types/database';
+import { Database } from '../../src/shared/types/database';
 import { randomUUID } from 'crypto';
 
 describe('Practices CRUD Operations', () => {

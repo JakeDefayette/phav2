@@ -3,9 +3,9 @@
 # Status: pending
 # Dependencies: 9, 10
 # Priority: medium
-# Description: Develop a content library and template engine for educational content and campaigns.
+# Description: Develop a content library and template engine for educational content and campaigns within the new feature-based architecture.
 # Details:
-Create a content management system for text, images, and videos. Support customizable templates and multi-format content. Use React components for content rendering.
+Create a content management system for text, images, and videos in src/features/dashboard/services/contentManagement.ts. Support customizable templates and multi-format content. Use React components for content rendering in src/features/dashboard/components/organisms/ContentRenderer.tsx.
 
 # Test Strategy:
-Test content upload, template customization, and rendering.
+Test content upload, template customization, and rendering in src/features/dashboard/__tests__/contentLibrary.test.ts.

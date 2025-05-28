@@ -1,24 +1,97 @@
-export { AuthService } from './auth';
-export { BaseService } from './base';
-export { BrandingService } from './brandingService';
-export { EmailService } from './email';
+// Services barrel export
+// This file will be used to export all service modules
 
-// Re-export services from features
-export { PDFService } from '@/features/reports/services/pdf';
-export { ReportsService } from '@/features/reports/services/reports';
-export { ChartService } from '@/features/reports/services/chartService';
+// Example exports (to be added as services are created):
+// export { authService } from './auth';
+// export { apiService } from './api';
+// export { storageService } from './storage';
+
+// Re-export services from their new locations after refactoring
+
+// Shared services
+export {
+  BaseService,
+  withRetry,
+  type RetryOptions,
+} from '@/shared/services/base';
+
+export {
+  AuthService,
+  authService,
+  type LoginCredentials,
+  type RegisterData,
+  type AuthUser,
+} from '@/shared/services/auth';
+
+export {
+  BrandingService,
+  brandingService,
+  type BrandingConfig,
+} from '@/shared/services/brandingService';
+
+export {
+  EmailService,
+  emailService,
+  type ReportDeliveryEmailOptions,
+  type ReportReadyNotificationOptions,
+  type EmailResult,
+} from '@/shared/services/email';
+
+// Feature services - Reports
+export {
+  ReportsService,
+  PDFService,
+  DeliveryService,
+  ChartService,
+} from '@/features/reports/services';
+
+export type {
+  Report,
+  ReportInsert,
+  ReportUpdate,
+  ReportWithShares,
+  ReportShare,
+  ReportShareInsert,
+  ViralMetrics,
+} from '@/features/reports/types';
+
+export {
+  SurveyDataMapper,
+  type ReportDataStructure,
+} from '@/features/assessment/services/SurveyDataMapper';
+
 export { ReportCacheService } from '@/features/reports/services/reportCache';
 
-// Dependency injection
+// Feature services - Dashboard
 export {
-  ServiceContainer,
-  container,
-  inject,
-  registerService,
-  getService,
-  type ServiceFactory,
-  type ServiceInstance,
-  type ServiceDefinition,
-} from './ServiceContainer';
+  PracticeService,
+  practiceService,
+} from '@/features/dashboard/services/practices';
 
-export { initializeServices, ServiceKeys, type ServiceKey } from './registry';
+export {
+  ChildrenService,
+  childrenService,
+} from '@/features/dashboard/services/children';
+
+// Feature services - Assessment
+export {
+  AssessmentsService,
+  assessmentsService,
+} from '@/features/assessment/services/assessments';
+
+export {
+  SurveyResponsesService,
+  surveyResponsesService,
+} from '@/features/assessment/services/surveyResponses';
+
+// Service instances for backward compatibility
+import { authService } from '@/shared/services/auth';
+import { brandingService } from '@/shared/services/brandingService';
+import { emailService } from '@/shared/services/email';
+
+// Export service instances
+export {
+  authService as auth,
+  brandingService as branding,
+  emailService as email,
+};

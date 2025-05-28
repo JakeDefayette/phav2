@@ -1,6 +1,9 @@
 'use client';
 
-import { MultiStepSurveyForm, SurveyFormData } from '@/components/organisms';
+import {
+  MultiStepSurveyForm,
+  SurveyFormData,
+} from '@/shared/components/organisms';
 
 export default function SurveyPage() {
   const handleSubmit = async (values: SurveyFormData) => {

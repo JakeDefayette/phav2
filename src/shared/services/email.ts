@@ -1,4 +1,4 @@
-import { supabase as supabaseClient } from '@/lib/supabase';
+import { supabase as supabaseClient } from '@/shared/services/supabase';
 import { config } from '@/shared/config';
 
 // TODO: Replace with actual Resend implementation in later task

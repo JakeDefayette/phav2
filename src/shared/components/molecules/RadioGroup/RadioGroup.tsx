@@ -1,8 +1,8 @@
 import React from 'react';
 import { useField } from 'formik';
-import { RadioButton } from '@/components/atoms/RadioButton';
-import { Label } from '@/components/atoms/Label';
-import { cn } from '@/utils/cn';
+import { RadioButton } from '@/shared/components/atoms/RadioButton';
+import { Label } from '@/shared/components/atoms/Label';
+import { cn } from '@/shared/utils/cn';
 
 export interface RadioOption {
   value: string;

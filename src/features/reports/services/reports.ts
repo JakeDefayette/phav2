@@ -1,95 +1,29 @@
 import { BaseService, ServiceError } from '@/shared/services/base';
-import { supabase } from '@/lib/supabase';
+import { supabase } from '@/shared/services/supabase';
 import {
   SurveyDataMapper,
   ReportDataStructure,
 } from '@/features/assessment/services/SurveyDataMapper';
 import { SurveyResponsesService } from '@/features/assessment/services/surveyResponses';
 import { ChartService } from './chartService';
-import { TransformedChartData } from '@/components/molecules/Charts/types';
+import { TransformedChartData } from '@/shared/components/molecules/Charts/types';
 import { ReportCacheService } from './reportCache';
-import { PerformanceMonitor, timed, timeOperation } from '@/utils/performance';
-
-// Types for the new schema
-export interface Report {
-  id: string;
-  assessment_id: string;
-  practice_id?: string;
-  report_type: 'standard' | 'detailed' | 'summary';
-  content: Record<string, any>;
-  generated_at: string;
-  created_at: string;
-  updated_at: string;
-}
-
-export interface ReportInsert {
-  assessment_id: string;
-  practice_id?: string;
-  report_type?: 'standard' | 'detailed' | 'summary';
-  content: Record<string, any>;
-  generated_at?: string;
-}
-
-export interface ReportUpdate {
-  report_type?: 'standard' | 'detailed' | 'summary';
-  content?: Record<string, any>;
-  generated_at?: string;
-}
-
-export interface ReportShare {
-  id: string;
-  report_id: string;
-  share_token: string;
-  shared_by_user_id?: string;
-  recipient_email?: string;
-  recipient_name?: string;
-  share_method: 'email' | 'link' | 'qr_code';
-  expires_at?: string;
-  viewed_at?: string;
-  conversion_assessment_id?: string;
-  created_at: string;
-  updated_at: string;
-}
-
-export interface ReportShareInsert {
-  report_id: string;
-  shared_by_user_id?: string;
-  recipient_email?: string;
-  recipient_name?: string;
-  share_method: 'email' | 'link' | 'qr_code';
-  expires_at?: string;
-}
-
-export interface ReportWithShares extends Report {
-  report_shares?: ReportShare[];
-  assessment?: {
-    id: string;
-    child_id: string;
-    brain_o_meter_score?: number;
-    started_at: string;
-    completed_at?: string;
-  };
-  children?: {
-    id: string;
-    first_name: string;
-    last_name?: string;
-    date_of_birth: string;
-  };
-}
-
-export interface ViralMetrics {
-  total_shares: number;
-  shares_by_method: Record<string, number>;
-  total_views: number;
-  conversion_rate: number;
-  conversions: number;
-  most_shared_reports: Array<{
-    report_id: string;
-    child_name: string;
-    share_count: number;
-    view_count: number;
-  }>;
-}
+import {
+  PerformanceMonitor,
+  timed,
+  timeOperation,
+} from '@/shared/utils/performance';
+import type {
+  Report,
+  ReportInsert,
+  ReportUpdate,
+  ReportShare,
+  ReportShareInsert,
+  ReportWithShares,
+  ViralMetrics,
+  GeneratedReport,
+  GeneratedReportContent,
+} from '../types';
 
 /**
  * Service for managing report operations and viral tracking
@@ -121,7 +55,7 @@ export class ReportsService extends BaseService<
     assessmentId: string,
     reportType: 'standard' | 'detailed' | 'summary' = 'standard',
     practiceId?: string
-  ): Promise<Report> {
+  ): Promise<GeneratedReport> {
     return timeOperation(
       'generateReport',
       async () => {
@@ -235,12 +169,10 @@ export class ReportsService extends BaseService<
           );
           const content = contentResult.result;
 
+          // Create database report record (only fields that exist in DB)
           const reportData: ReportInsert = {
             assessment_id: assessmentId,
             practice_id: practiceId,
-            report_type: reportType,
-            content,
-            generated_at: new Date().toISOString(),
           };
 
           const reportResult = await timeOperation('createReport', async () => {
@@ -248,8 +180,21 @@ export class ReportsService extends BaseService<
           });
           const report = reportResult.result;
 
-          // Cache the generated report
-          await this.reportCacheService.cacheReport(cacheKey, report);
+          // Store the generated content separately (could be in a cache, file system, or separate table)
+          // For now, we'll create a GeneratedReport object that combines both
+          const generatedReport: GeneratedReport = {
+            id: report.id,
+            assessment_id: report.assessment_id,
+            practice_id: report.practice_id || undefined,
+            report_type: reportType,
+            content,
+            generated_at: new Date().toISOString(),
+            created_at: report.created_at || undefined,
+            updated_at: report.updated_at || undefined,
+          };
+
+          // Cache the generated report content
+          await this.reportCacheService.cacheReport(cacheKey, generatedReport);
 
           this.performanceMonitor.endOperation('generateReport');
           this.performanceMonitor.recordMetric('generateReport', 'cache_miss', {
@@ -257,7 +202,7 @@ export class ReportsService extends BaseService<
             reportType,
           });
 
-          return report;
+          return generatedReport;
         } catch (error) {
           this.performanceMonitor.endOperation(
             'generateReport',
@@ -280,7 +225,7 @@ export class ReportsService extends BaseService<
     assessmentData: any,
     mappedData: ReportDataStructure,
     reportType: string
-  ): Promise<Record<string, any>> {
+  ): Promise<GeneratedReportContent> {
     const child = assessmentData.children;
 
     const baseContent = {
@@ -320,6 +265,7 @@ export class ReportsService extends BaseService<
         return {
           child: baseContent.child,
           assessment: {
+            id: baseContent.assessment.id,
             brain_o_meter_score: baseContent.assessment.brain_o_meter_score,
             completed_at: baseContent.assessment.completed_at,
           },

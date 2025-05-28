@@ -7,7 +7,7 @@ import React, {
   useState,
   ReactNode,
 } from 'react';
-import { supabase } from '@/lib/supabase';
+import { supabase } from '@/shared/services/supabase';
 import {
   getCurrentUser,
   loginUser,

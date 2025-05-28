@@ -3,9 +3,9 @@
 # Status: pending
 # Dependencies: 5, 9
 # Priority: medium
-# Description: Add social media sharing and viral marketing tracking features.
+# Description: Add social media sharing and viral marketing tracking features within the new feature-based architecture.
 # Details:
-Integrate social sharing APIs (Facebook, Twitter, LinkedIn). Track sharing events and viral coefficient. Use practice-specific landing pages for sharing links.
+Integrate social sharing APIs (Facebook, Twitter, LinkedIn) in src/features/reports/services/socialSharing.ts. Track sharing events and viral coefficient in src/features/reports/services/viralTracking.ts. Use practice-specific landing pages for sharing links in src/app/[practiceId]/share/[reportId]/page.tsx.
 
 # Test Strategy:
-Test sharing functionality and tracking of sharing events.
+Test sharing functionality and tracking of sharing events in src/features/reports/__tests__/socialSharing.test.ts.

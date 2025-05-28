@@ -1,8 +1,8 @@
 import React from 'react';
 import { useField } from 'formik';
-import { Checkbox } from '@/components/atoms/Checkbox';
-import { Label } from '@/components/atoms/Label';
-import { cn } from '@/utils/cn';
+import { Checkbox } from '@/shared/components/atoms/Checkbox';
+import { Label } from '@/shared/components/atoms/Label';
+import { cn } from '@/shared/utils/cn';
 
 export interface CheckboxOption {
   value: string;

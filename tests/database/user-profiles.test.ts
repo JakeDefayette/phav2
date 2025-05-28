@@ -4,7 +4,7 @@ import {
   expectSupabaseError,
   generateTestUserProfile,
 } from '../utils/database';
-import { Database } from '../../src/types/database';
+import { Database } from '../../src/shared/types/database';
 import { randomUUID } from 'crypto';
 
 describe('User Profiles CRUD Operations', () => {

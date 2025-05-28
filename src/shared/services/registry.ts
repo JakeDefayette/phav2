@@ -35,8 +35,8 @@ import {
 } from '@/features/dashboard/services';
 
 // Supabase clients
-import { supabase } from '@/lib/supabase';
-import { supabaseServer } from '@/lib/supabase-server';
+import { supabase } from '@/shared/services/supabase';
+import { supabaseServer } from '@/shared/services/supabase-server';
 
 /**
  * Initialize and register all application services
@@ -59,7 +59,7 @@ export function initializeServices(): void {
 
   // Reports feature services
   registerService('reportsService', () => new ReportsService());
-  registerService('pdfService', () => new PDFService());
+  registerService('pdfService', () => PDFService.getInstance());
   registerService('deliveryService', () => new DeliveryService());
   registerService('chartService', () => ChartService.getInstance());
   registerService('reportCacheService', () => ReportCacheService.getInstance());

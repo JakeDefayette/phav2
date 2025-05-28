@@ -10,10 +10,14 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { QueryKeys } from '@/shared/config/queryClient';
 import { ReportsService, PDFService, DeliveryService } from '../services';
 import { withErrorHandling } from '@/shared/utils/errorHandler';
-import type { DeliveryOptions as DeliveryRequest } from '@/shared/types';
-import type { DeliveryOptions } from '../services/delivery';
-import type { Report, ReportUpdate } from '@/shared/types/database';
-import { supabase } from '@/lib/supabase';
+import type {
+  DeliveryOptions,
+  Report,
+  ReportUpdate,
+  GeneratedReport,
+} from '../types';
+import type { ReportsAPI } from '@/shared/types/api';
+import { supabase } from '@/shared/services/supabase';
 
 /**
  * Hook to fetch all reports with optional filtering
@@ -90,7 +94,7 @@ export function useReportPDF(reportId: string, enabled: boolean = true) {
     queryKey: QueryKeys.reports.pdf(reportId),
     queryFn: () =>
       withErrorHandling('generateReportPDF', async () => {
-        const pdfService = new PDFService();
+        const pdfService = PDFService.getInstance();
         const reportsService = new ReportsService();
 
         // Get the report data
@@ -99,13 +103,99 @@ export function useReportPDF(reportId: string, enabled: boolean = true) {
           throw new Error(`Report with ID ${reportId} not found`);
         }
 
+        // Convert database Report to GeneratedReport format
+        const generatedReport = await convertToGeneratedReport(report);
+
         // Generate PDF buffer
-        return await pdfService.generatePDFBuffer(report);
+        return await pdfService.generatePDFBuffer(generatedReport);
       }),
     enabled: enabled && !!reportId,
     staleTime: 30 * 60 * 1000, // 30 minutes for PDFs (expensive to generate)
     gcTime: 60 * 60 * 1000, // Keep in cache for 1 hour
   });
+}
+
+/**
+ * Helper function to convert database Report to GeneratedReport format
+ */
+async function convertToGeneratedReport(
+  report: Report
+): Promise<GeneratedReport> {
+  try {
+    // Get assessment and child data for the report
+    const { data: assessmentData, error: assessmentError } = await supabase
+      .from('assessments')
+      .select(
+        `
+        id,
+        child_id,
+        brain_o_meter_score,
+        started_at,
+        completed_at,
+        status,
+        children (
+          id,
+          first_name,
+          last_name,
+          date_of_birth,
+          gender
+        )
+      `
+      )
+      .eq('id', report.assessment_id)
+      .single();
+
+    if (assessmentError || !assessmentData) {
+      throw new Error(`Assessment not found for report ${report.id}`);
+    }
+
+    const child = assessmentData.children as any;
+
+    // Calculate child's age
+    const calculateAge = (dateOfBirth: string): number => {
+      const today = new Date();
+      const birthDate = new Date(dateOfBirth);
+      let age = today.getFullYear() - birthDate.getFullYear();
+      const monthDiff = today.getMonth() - birthDate.getMonth();
+      if (
+        monthDiff < 0 ||
+        (monthDiff === 0 && today.getDate() < birthDate.getDate())
+      ) {
+        age--;
+      }
+      return age;
+    };
+
+    // Create a properly structured GeneratedReport
+    const generatedReport: GeneratedReport = {
+      id: report.id,
+      assessment_id: report.assessment_id,
+      practice_id: report.practice_id || undefined,
+      report_type: 'standard', // Default type since this field doesn't exist in the DB
+      content: {
+        child: {
+          name: `${child.first_name} ${child.last_name || ''}`.trim(),
+          age: calculateAge(child.date_of_birth),
+          gender: child.gender,
+        },
+        assessment: {
+          id: assessmentData.id,
+          brain_o_meter_score: assessmentData.brain_o_meter_score,
+          completed_at: assessmentData.completed_at,
+          status: assessmentData.status,
+        },
+        // Content is generated dynamically, not stored in database
+      },
+      generated_at: new Date().toISOString(), // Use current time since this field doesn't exist in DB
+      created_at: report.created_at || undefined,
+      updated_at: report.updated_at || undefined,
+    };
+
+    return generatedReport;
+  } catch (error) {
+    console.error('Error converting report to GeneratedReport:', error);
+    throw new Error(`Failed to convert report ${report.id} for PDF generation`);
+  }
 }
 
 /**
@@ -223,7 +313,7 @@ export function useDeliverReport() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (request: DeliveryRequest) =>
+    mutationFn: (request: ReportsAPI.DeliveryRequest) =>
       withErrorHandling('deliverReport', async () => {
         // Convert snake_case API request to camelCase service options
         const options: DeliveryOptions = {

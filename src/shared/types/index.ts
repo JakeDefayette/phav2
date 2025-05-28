@@ -1,60 +1,51 @@
 // Type definitions barrel export
-export * from './auth';
-export * from './branding';
-export * from './common';
+// This file will be used to export all type definitions
+
+// Example exports (to be added as types are created):
+// export type { User } from './user';
+// export type { ApiResponse } from './api';
+// export type { ComponentProps } from './components';
+
+// Assessment types
+export type {
+  Assessment,
+  AssessmentInsert,
+  AssessmentUpdate,
+  AssessmentWithResponses,
+  AssessmentStats,
+  CreateAssessmentData,
+  UpdateAssessmentData,
+} from '@/features/assessment/types';
+
+// Auth types
+export type {
+  UserRole,
+  UserProfile,
+  AuthState,
+  LoginCredentials,
+  RegisterCredentials,
+} from './auth';
+
+// API types
+export * from './api';
+
+// Error types
 export * from './errors';
 
-// Export database types explicitly to avoid conflicts with API imports
-export type {
-  Database,
-  Tables,
-  TablesInsert,
-  TablesUpdate,
-  Enums,
-} from './database';
+// Database types
+export type * from './database';
 
-// Export specific database entity types
+// Re-export feature types
 export type {
-  Practice,
-  Assessment,
-  Report,
   Child,
-  SurveyResponse,
-  UserProfile,
-} from './database';
-
-// Export specific database insert types
-export type {
-  PracticeInsert,
-  AssessmentInsert,
-  ReportInsert,
   ChildInsert,
-  SurveyResponseInsert,
-  UserProfileInsert,
-} from './database';
-
-// Export specific database update types
-export type {
-  PracticeUpdate,
-  AssessmentUpdate,
-  ReportUpdate,
   ChildUpdate,
-  SurveyResponseUpdate,
-  UserProfileUpdate,
-} from './database';
-
-// Export API response types (not the namespaces to avoid conflicts)
-export type { ApiResponse, ApiErrorResponse, PaginatedResponse } from './api';
-
-// Export API data types for hooks
-export type CreateAssessmentData = import('./api').AssessmentAPI.CreateRequest;
-export type UpdateAssessmentData = import('./api').AssessmentAPI.UpdateRequest;
-export type CreateChildData = import('./api').ChildrenAPI.CreateRequest;
-export type UpdateChildData = import('./api').ChildrenAPI.UpdateRequest;
-export type CreatePracticeData = import('./api').PracticesAPI.CreateRequest;
-export type UpdatePracticeData = import('./api').PracticesAPI.UpdateRequest;
-export type CreateReportData = import('./api').ReportsAPI.CreateRequest;
-export type DeliveryOptions = import('./api').ReportsAPI.DeliveryRequest;
-
-// Note: API namespaces (AssessmentAPI, ReportsAPI, etc.) should be imported directly
-// from './api' where needed to avoid conflicts with database types
+  ChildWithAssessments,
+  CreateChildData,
+  UpdateChildData,
+  Practice,
+  PracticeInsert,
+  PracticeUpdate,
+  CreatePracticeData,
+  UpdatePracticeData,
+} from '@/features/dashboard';

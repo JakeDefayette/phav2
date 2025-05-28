@@ -1,6 +1,6 @@
 import { ServiceError } from '@/shared/services/base';
 import { SurveyResponseWithQuestion, ResponseSummary } from './surveyResponses';
-import { Database } from '@/types/database';
+import { Database } from '@/shared/types/database';
 
 // Type definitions for the data mapper
 export type QuestionType = Database['public']['Enums']['question_type_enum'];

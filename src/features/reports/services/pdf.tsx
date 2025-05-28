@@ -10,13 +10,13 @@ import {
   Image,
 } from '@react-pdf/renderer';
 import type { Assessment, Practice, Child } from '@/shared/types';
-import type { Report, ReportWithShares } from './reports';
-import type { BrandingData } from '@/types/branding';
-import { formatDate } from '@/utils/dateUtils';
-import { calculateAge } from '@/utils/ageUtils';
-import { getPostureRecommendations } from '@/utils/postureUtils';
-import { getPostureAnalysis } from '@/utils/postureAnalysis';
-import { ChartImageData } from '@/hooks';
+import type { Report, ReportWithShares, GeneratedReport } from '../types';
+import type { BrandingData } from '@/shared/types/branding';
+import { formatDate } from '@/shared/utils/dateUtils';
+import { calculateAge } from '@/shared/utils/ageUtils';
+import { getPostureRecommendations } from '@/shared/utils/postureUtils';
+import { getPostureAnalysis } from '@/shared/utils/postureAnalysis';
+import { ChartImageData } from '@/shared/hooks';
 
 // PDF Styles
 const styles = StyleSheet.create({
@@ -139,7 +139,7 @@ const styles = StyleSheet.create({
 
 // PDF Document Component
 interface PDFReportProps {
-  report: Report | ReportWithShares;
+  report: GeneratedReport;
   practiceInfo?: {
     name: string;
     logo?: string;
@@ -313,7 +313,7 @@ export class PDFService {
    * Generate PDF blob from report data
    */
   async generatePDFBlob(
-    report: Report | ReportWithShares,
+    report: GeneratedReport,
     practiceInfo?: {
       name: string;
       logo?: string;
@@ -342,7 +342,7 @@ export class PDFService {
    * Generate PDF buffer for server-side operations
    */
   async generatePDFBuffer(
-    report: Report | ReportWithShares,
+    report: GeneratedReport,
     practiceInfo?: {
       name: string;
       logo?: string;
@@ -372,7 +372,7 @@ export class PDFService {
    * Create a download link component for client-side PDF generation
    */
   createDownloadLink(
-    report: Report | ReportWithShares,
+    report: GeneratedReport,
     practiceInfo?: {
       name: string;
       logo?: string;
@@ -406,14 +406,13 @@ export class PDFService {
   /**
    * Validate that a report has the required data for PDF generation
    */
-  validateReportData(report: Report | ReportWithShares): boolean {
+  validateReportData(report: GeneratedReport): boolean {
     if (!report || !report.content) {
       return false;
     }
 
     const content = report.content;
 
-    // Check for minimum required data
     if (!content.child || !content.child.name) {
       return false;
     }
@@ -422,10 +421,10 @@ export class PDFService {
   }
 
   /**
-   * Get estimated PDF file size (in bytes)
+   * Estimate PDF file size based on content
    * This is a rough estimation based on content
    */
-  estimatePDFSize(report: Report | ReportWithShares): number {
+  estimatePDFSize(report: GeneratedReport): number {
     const content = report.content;
     let estimatedSize = 50000; // Base size ~50KB
 
@@ -448,37 +447,27 @@ export class PDFService {
    */
   async testPDFGeneration(): Promise<boolean> {
     try {
-      const sampleReport: Report = {
-        id: 'test-report-id',
-        assessment_id: 'test-assessment-id',
-        practice_id: 'test-practice-id',
+      // Create a test report with minimal data
+      const testReport: GeneratedReport = {
+        id: 'test-report-1',
+        assessment_id: 'test-assessment-1',
+        practice_id: 'test-practice-1',
         report_type: 'standard',
         content: {
           child: {
             name: 'Test Child',
             age: 8,
-            gender: 'Other',
           },
           assessment: {
-            id: 'test-assessment-id',
+            id: 'test-assessment-1',
             brain_o_meter_score: 75,
             completed_at: new Date().toISOString(),
-            status: 'completed',
-          },
-          categories: {
-            lifestyle: [
-              {
-                survey_question_definitions: {
-                  question_text: 'How many hours of sleep do you get?',
-                },
-                response_text: '8 hours',
-              },
-            ],
           },
           summary: {
-            overview: 'This is a test report to validate PDF generation.',
-            key_findings: ['Test finding 1', 'Test finding 2'],
+            overview: 'Test summary overview',
+            key_findings: ['Finding 1', 'Finding 2'],
           },
+          insights: ['Test insight 1', 'Test insight 2'],
           recommendations: ['Test recommendation 1', 'Test recommendation 2'],
         },
         generated_at: new Date().toISOString(),
@@ -486,7 +475,7 @@ export class PDFService {
         updated_at: new Date().toISOString(),
       };
 
-      const blob = await this.generatePDFBlob(sampleReport);
+      const blob = await this.generatePDFBlob(testReport);
       return blob.size > 0;
     } catch (error) {
       return false;

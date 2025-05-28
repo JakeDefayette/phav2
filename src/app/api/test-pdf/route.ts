@@ -1,25 +1,38 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { PDFService, Report } from '@/services';
+import { PDFService } from '@/features/reports/services/pdf';
+import { GeneratedReport } from '@/features/reports/types';
 
 export async function GET(request: NextRequest) {
   try {
     // Create a mock report for testing
-    const mockReport: Report = {
+    const mockReport: GeneratedReport = {
       id: 'test-report-1',
       assessment_id: 'test-assessment-1',
       practice_id: 'test-practice-1',
       report_type: 'standard',
       content: {
-        summary: 'Test report summary',
+        child: {
+          name: 'Test Child',
+          age: 8,
+        },
+        assessment: {
+          id: 'test-assessment-1',
+          brain_o_meter_score: 75,
+          completed_at: new Date().toISOString(),
+        },
+        summary: {
+          overview: 'Test report summary',
+          key_findings: ['Test finding 1', 'Test finding 2'],
+        },
+        insights: ['Test insight 1', 'Test insight 2'],
         recommendations: ['Test recommendation 1', 'Test recommendation 2'],
-        charts: [],
       },
       generated_at: new Date().toISOString(),
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString(),
     };
 
-    const pdfService = new PDFService();
+    const pdfService = PDFService.getInstance();
     const pdfBuffer = await pdfService.generatePDFBuffer(mockReport);
 
     return new NextResponse(pdfBuffer, {
@@ -43,7 +56,7 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const { reportData, practiceInfo } = body;
 
-    const pdfService = new PDFService();
+    const pdfService = PDFService.getInstance();
 
     // Validate report data
     if (!pdfService.validateReportData(reportData)) {

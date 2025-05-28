@@ -3,9 +3,9 @@
 # Status: pending
 # Dependencies: 3, 9
 # Priority: medium
-# Description: Integrate Resend for automated email delivery and campaign management.
+# Description: Integrate Resend for automated email delivery and campaign management within the new feature-based architecture.
 # Details:
-Use Resend API (latest) for sending emails. Implement email templates, scheduling, and tracking. Support bi-weekly educational sequences and custom content.
+Use Resend API (latest) for sending emails. Implement email templates in src/features/dashboard/components/molecules/EmailTemplates.tsx, scheduling in src/features/dashboard/services/emailScheduler.ts, and tracking in src/features/dashboard/services/emailTracking.ts. Support bi-weekly educational sequences and custom content.
 
 # Test Strategy:
-Test email delivery, scheduling, and template rendering.
+Test email delivery, scheduling, and template rendering in src/features/dashboard/__tests__/email.test.ts.

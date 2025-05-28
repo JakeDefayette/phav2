@@ -1,5 +1,5 @@
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
-import { Database } from '../../src/types/database';
+import { Database } from '../../src/shared/types/database';
 import { randomUUID } from 'crypto';
 
 // Create a test client with service role key for full access

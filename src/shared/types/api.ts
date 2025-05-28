@@ -4,14 +4,15 @@
  * Strict type definitions for all API responses and requests
  */
 
-import type {
-  Assessment,
-  Report,
-  Child,
-  Practice,
-  SurveyResponse,
-  UserProfile,
-} from './database';
+import type { Assessment } from '@/features/assessment/types';
+import type { Tables } from './database';
+
+// Extract entity types from database types
+type Report = Tables<'reports'>;
+type Child = Tables<'children'>;
+type Practice = Tables<'practices'>;
+type SurveyResponse = Tables<'survey_responses'>;
+type UserProfile = Tables<'user_profiles'>;
 
 /**
  * Generic API response wrapper

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { supabaseServer } from '@/lib/supabase-server';
-import { PDFService } from '@/services';
+import { supabaseServer } from '@/shared/services/supabase-server';
+import { PDFService } from '@/features/reports/services/pdf';
+import { GeneratedReport } from '@/features/reports/types';
 
 export async function GET(
   request: NextRequest,
@@ -24,16 +25,14 @@ export async function GET(
           id,
           assessment_id,
           practice_id,
-          report_type,
-          content,
-          generated_at,
           created_at,
           updated_at,
           assessments!inner (
             id,
             child_id,
-            started_at,
+            brain_o_meter_score,
             completed_at,
+            created_at,
             children!inner (
               id,
               first_name,
@@ -70,30 +69,61 @@ export async function GET(
     const assessment = reportData.assessments as any;
     const child = assessment.children as any;
 
-    // Create a properly typed report object
-    const formattedReportData = {
+    // Calculate child's age from date of birth
+    const calculateAge = (dateOfBirth: string): number => {
+      const today = new Date();
+      const birthDate = new Date(dateOfBirth);
+      let age = today.getFullYear() - birthDate.getFullYear();
+      const monthDiff = today.getMonth() - birthDate.getMonth();
+      if (
+        monthDiff < 0 ||
+        (monthDiff === 0 && today.getDate() < birthDate.getDate())
+      ) {
+        age--;
+      }
+      return age;
+    };
+
+    // Create a properly typed GeneratedReport object
+    const generatedReport: GeneratedReport = {
       id: reportData.id,
       assessment_id: reportData.assessment_id,
       practice_id: reportData.practice_id,
-      report_type: reportData.report_type,
-      content: reportData.content,
-      generated_at: reportData.generated_at,
+      report_type: 'standard', // Default type, could be stored in content if needed
+      content: {
+        child: {
+          name: `${child.first_name} ${child.last_name || ''}`.trim(),
+          age: calculateAge(child.date_of_birth),
+        },
+        assessment: {
+          id: assessment.id,
+          brain_o_meter_score: assessment.brain_o_meter_score,
+          completed_at: assessment.completed_at,
+        },
+        // Add any additional content fields that might be needed for PDF generation
+        summary: {
+          key_findings: [],
+          overview: `Health assessment completed for ${
+            child.first_name
+          } ${child.last_name || ''}`.trim(),
+        },
+        recommendations: [],
+        categories: {},
+      },
+      generated_at: new Date().toISOString(), // Use current time since this field doesn't exist in DB
       created_at: reportData.created_at,
       updated_at: reportData.updated_at,
-      // Additional data for PDF generation
-      child_name: `${child.first_name} ${child.last_name || ''}`.trim(),
-      assessment_date: assessment.started_at,
     };
 
     // Log access attempt
     await logDownloadAccess(supabase, reportData.id, token, request);
 
     // Generate PDF using the correct method
-    const pdfBuffer = await pdfService.generatePDFBuffer(formattedReportData);
+    const pdfBuffer = await pdfService.generatePDFBuffer(generatedReport);
 
-    // Create filename
+    // Create filename - use assessment.created_at since started_at doesn't exist
     const filename =
-      `pediatric-assessment-${formattedReportData.child_name}-${new Date(formattedReportData.assessment_date).toISOString().split('T')[0]}.pdf`.replace(
+      `pediatric-assessment-${generatedReport.content.child.name}-${new Date(assessment.created_at).toISOString().split('T')[0]}.pdf`.replace(
         /[^a-zA-Z0-9.-]/g,
         '_'
       );

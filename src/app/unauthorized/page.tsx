@@ -2,9 +2,9 @@
 
 import React from 'react';
 import Link from 'next/link';
-import { useAuth } from '@/hooks';
-import { Button } from '@/components/atoms/Button';
-import { Card } from '@/components/molecules/Card';
+import { useAuth } from '@/shared/hooks';
+import { Button } from '@/shared/components/atoms/Button';
+import { Card } from '@/shared/components/molecules/Card';
 
 export default function UnauthorizedPage() {
   const { user, logout } = useAuth();

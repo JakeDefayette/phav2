@@ -1,9 +1,9 @@
 'use client';
 
 import React from 'react';
-import { useAuth, useRole } from '@/hooks';
-import { Button } from '@/components/atoms/Button';
-import { RoleGuard } from '@/components/atoms/RoleGuard';
+import { useAuth, useRole } from '@/shared/hooks';
+import { Button } from '@/shared/components/atoms/Button';
+import { RoleGuard } from '@/shared/components/atoms/RoleGuard';
 
 export default function DashboardPage() {
   const { user, logout, loading } = useAuth();

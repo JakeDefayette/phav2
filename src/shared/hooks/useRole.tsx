@@ -11,7 +11,7 @@ import {
   getRolePermissions,
   hasPermission,
   type RolePermissions,
-} from '@/utils/roleUtils';
+} from '@/shared/utils/roleUtils';
 import type { UserRole } from '@/shared/types/auth';
 
 /**

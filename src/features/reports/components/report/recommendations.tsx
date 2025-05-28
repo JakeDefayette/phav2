@@ -1,5 +1,5 @@
 import React from 'react';
-import { cn } from '@/utils/cn';
+import { cn } from '@/shared/utils/cn';
 import { CheckCircle, AlertCircle, Clock } from 'lucide-react';
 
 interface Recommendation {

@@ -1,8 +1,5 @@
-export { default as ChartDisplay } from './ChartDisplay';
-export { default as ChartsGrid } from './ChartsGrid';
-
-// Report visualizations
-export { default as BrainOMeter } from './report/brain-o-meter';
-export { default as OrganConnections } from './report/organ-connections';
-export { default as Recommendations } from './report/recommendations';
-export { default as SpineDiagram } from './report/spine-diagram';
+// Backwards compatibility - re-export from new location
+export { SpineDiagram } from '@/features/reports/components/report/spine-diagram';
+export { BrainOMeter } from '@/features/reports/components/report/brain-o-meter';
+export { OrganConnections } from '@/features/reports/components/report/organ-connections';
+export { Recommendations } from '@/features/reports/components/report/recommendations';

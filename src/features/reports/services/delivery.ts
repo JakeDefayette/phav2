@@ -1,41 +1,21 @@
-import { supabaseServer } from '@/lib/supabase-server';
+import { supabaseServer } from '@/shared/services/supabase-server';
 import { PDFService } from './pdf';
 import { EmailService } from '@/shared/services/email';
 import { v4 as uuidv4 } from 'uuid';
 import { put } from '@vercel/blob';
 import { ReportsService } from './reports';
 import { config } from '@/shared/config';
-
-export interface DeliveryOptions {
-  reportId: string;
-  userId: string;
-  deliveryMethods: DeliveryMethod[];
-  recipientEmail?: string;
-  recipientPhone?: string;
-  expirationHours?: number;
-  notifyUser?: boolean;
-}
-
-export interface DeliveryMethod {
-  type: 'email' | 'download' | 'cloud_storage' | 'sms';
-  enabled: boolean;
-  config?: Record<string, any>;
-}
-
-export interface DeliveryResult {
-  success: boolean;
-  deliveryId: string;
-  downloadUrl?: string;
-  shareToken?: string;
-  emailSent?: boolean;
-  cloudStorageUrl?: string;
-  expiresAt?: Date;
-  error?: string;
-}
+import type {
+  DeliveryOptions,
+  DeliveryMethod,
+  DeliveryResult,
+  Report,
+  GeneratedReport,
+} from '../types';
 
 export class DeliveryService {
   private supabase = supabaseServer;
-  private pdfService = new PDFService();
+  private pdfService = PDFService.getInstance();
   private emailService = new EmailService();
   private reportsService = new ReportsService();
 
@@ -47,15 +27,19 @@ export class DeliveryService {
       // Generate unique delivery ID
       const deliveryId = uuidv4();
 
-      // Fetch the full report data required for PDF generation
+      // Get the report from database
       const report = await this.reportsService.findById(options.reportId);
 
       if (!report) {
         throw new Error(`Report not found: ${options.reportId}`);
       }
 
+      // Convert database Report to GeneratedReport format for PDF generation
+      const generatedReport = await this.convertToGeneratedReport(report);
+
       // Generate PDF buffer
-      const pdfBuffer = await this.pdfService.generatePDFBuffer(report);
+      const pdfBuffer =
+        await this.pdfService.generatePDFBuffer(generatedReport);
 
       // Create share token for secure access
       const shareToken = await this.createShareToken(
@@ -402,6 +386,92 @@ export class DeliveryService {
 
     if (error) {
       throw new Error(`Failed to revoke access: ${error.message}`);
+    }
+  }
+
+  /**
+   * Convert database Report to GeneratedReport format for PDF generation
+   */
+  private async convertToGeneratedReport(
+    report: Report
+  ): Promise<GeneratedReport> {
+    try {
+      // Get assessment and child data for the report
+      const { data: assessmentData, error: assessmentError } =
+        await this.supabase
+          .from('assessments')
+          .select(
+            `
+          id,
+          child_id,
+          brain_o_meter_score,
+          started_at,
+          completed_at,
+          status,
+          children (
+            id,
+            first_name,
+            last_name,
+            date_of_birth,
+            gender
+          )
+        `
+          )
+          .eq('id', report.assessment_id)
+          .single();
+
+      if (assessmentError || !assessmentData) {
+        throw new Error(`Assessment not found for report ${report.id}`);
+      }
+
+      const child = assessmentData.children as any;
+
+      // Calculate child's age
+      const calculateAge = (dateOfBirth: string): number => {
+        const today = new Date();
+        const birthDate = new Date(dateOfBirth);
+        let age = today.getFullYear() - birthDate.getFullYear();
+        const monthDiff = today.getMonth() - birthDate.getMonth();
+        if (
+          monthDiff < 0 ||
+          (monthDiff === 0 && today.getDate() < birthDate.getDate())
+        ) {
+          age--;
+        }
+        return age;
+      };
+
+      // Create a properly structured GeneratedReport
+      const generatedReport: GeneratedReport = {
+        id: report.id,
+        assessment_id: report.assessment_id,
+        practice_id: report.practice_id || undefined,
+        report_type: 'standard', // Default type since this field doesn't exist in the DB
+        content: {
+          child: {
+            name: `${child.first_name} ${child.last_name || ''}`.trim(),
+            age: calculateAge(child.date_of_birth),
+            gender: child.gender,
+          },
+          assessment: {
+            id: assessmentData.id,
+            brain_o_meter_score: assessmentData.brain_o_meter_score,
+            completed_at: assessmentData.completed_at,
+            status: assessmentData.status,
+          },
+          // Content is generated dynamically, not stored in database
+        },
+        generated_at: new Date().toISOString(), // Use current time since this field doesn't exist in DB
+        created_at: report.created_at || undefined,
+        updated_at: report.updated_at || undefined,
+      };
+
+      return generatedReport;
+    } catch (error) {
+      console.error('Error converting report to GeneratedReport:', error);
+      throw new Error(
+        `Failed to convert report ${report.id} for PDF generation`
+      );
     }
   }
 }

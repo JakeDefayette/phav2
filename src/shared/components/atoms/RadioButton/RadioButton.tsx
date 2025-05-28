@@ -1,5 +1,5 @@
 import React from 'react';
-import { cn } from '@/utils/cn';
+import { cn } from '@/shared/utils/cn';
 
 export interface RadioButtonProps
   extends Omit<React.InputHTMLAttributes<HTMLInputElement>, 'type'> {

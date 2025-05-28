@@ -2,7 +2,7 @@
 
 import { useCallback, useRef } from 'react';
 import { ChartService } from '../services/chartService';
-import { TransformedChartData } from '@/components/molecules/Charts/types';
+import { TransformedChartData } from '@/shared/components/molecules/Charts/types';
 
 export interface ChartImageData {
   title: string;

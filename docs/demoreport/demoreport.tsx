@@ -1,16 +1,17 @@
 'use client';
 
-import { Button } from '@/components/atoms/Button';
+import React from 'react';
+import { Button } from '@/shared/components/atoms/Button';
 import {
   SpineDiagram,
   BrainOMeter,
   OrganConnections,
   Recommendations,
-} from '@/components/report';
+} from '@/features/reports/components';
 import {
   BrandingProvider,
   useBrandingContext,
-} from '@/components/providers/BrandingProvider';
+} from '@/shared/components/BrandingProvider';
 import {
   Facebook,
   Mail,
@@ -22,14 +23,14 @@ import {
 } from 'lucide-react';
 import {
   dummyContactInfo,
-  dummyRecommendations,
-  dummyBrainScore,
   dummyAffectedRegions,
   dummySymptomsByRegion,
+  dummyBrainScore,
+  dummyRecommendations,
   dummyOfficeInfo,
   symptomLabels,
   type SpinalRegion,
-} from '@/lib/dummy-report-data';
+} from '@/shared/services/dummy-report-data';
 
 function DemoReportContent() {
   const { branding, loading, tailwindClasses } = useBrandingContext();

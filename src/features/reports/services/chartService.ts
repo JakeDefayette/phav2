@@ -4,9 +4,13 @@ import {
   ChartOptions as CustomChartOptions,
   SurveyChartData,
   TransformedChartData,
-} from '@/components/molecules/Charts/types';
+} from '@/shared/components/molecules/Charts/types';
 import { ChartOptions as ChartJSOptions } from 'chart.js';
-import { PerformanceMonitor, timed, timeOperation } from '@/utils/performance';
+import {
+  PerformanceMonitor,
+  timed,
+  timeOperation,
+} from '@/shared/utils/performance';
 
 /**
  * Service for transforming survey data into chart-ready formats

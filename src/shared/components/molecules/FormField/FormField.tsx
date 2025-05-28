@@ -1,7 +1,7 @@
 import React from 'react';
-import { Input, InputProps } from '@/components/atoms/Input';
-import { Label } from '@/components/atoms/Label';
-import { cn } from '@/utils/cn';
+import { Input, InputProps } from '@/shared/components/atoms/Input';
+import { Label } from '@/shared/components/atoms/Label';
+import { cn } from '@/shared/utils/cn';
 
 export interface FormFieldProps extends Omit<InputProps, 'label'> {
   label: string;

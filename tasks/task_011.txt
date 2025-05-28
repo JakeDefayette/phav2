@@ -3,9 +3,9 @@
 # Status: pending
 # Dependencies: 3, 9
 # Priority: medium
-# Description: Build analytics dashboard for survey completion, sharing, and lead conversion tracking.
+# Description: Build analytics dashboard for survey completion, sharing, and lead conversion tracking within the new feature-based architecture.
 # Details:
-Use Chart.js (v4+) or similar for data visualization. Track survey completion, report sharing, and viral coefficient. Implement lead generation and conversion metrics.
+Use Chart.js (v4+) or similar for data visualization in src/features/dashboard/components/organisms/AnalyticsDashboard.tsx. Track survey completion, report sharing, and viral coefficient. Implement lead generation and conversion metrics in src/features/dashboard/services/analyticsService.ts.
 
 # Test Strategy:
-Test data visualization, metric calculation, and dashboard updates.
+Test data visualization, metric calculation, and dashboard updates in src/features/dashboard/__tests__/analytics.test.ts.

@@ -3,21 +3,21 @@
 # Status: pending
 # Dependencies: 6, 7
 # Priority: medium
-# Description: Integrate client-side PDF export, dynamic report viewing, and user experience improvements into the survey report system, focusing on performance and sharing capabilities.
+# Description: Integrate client-side PDF export, dynamic report viewing, and user experience improvements into the survey report system, focusing on performance and sharing capabilities within the new feature-based architecture.
 # Details:
-1. Integrate a client-side PDF generation library, prioritizing React-PDF or @react-pdf/renderer for seamless React compatibility and modular PDF creation using React components. If advanced customization or editing is required, consider alternatives like jsPDF or pdf-lib, but ensure the solution supports dynamic, data-driven PDF generation and efficient rendering in the browser.[2][3][4]
-2. Build a dynamic report view at /dashboard/reports/[reportId] using the modular component architecture established in previous tasks. Ensure components are reusable, data-driven, and optimized for real-time updates via Supabase integration.
-3. Enhance user experience by adding a prominent PDF download button, completion confirmations (e.g., toast notifications), and smooth UI transitions (e.g., loading spinners, fade-ins) for report generation and sharing workflows.
+1. Integrate a client-side PDF generation library in src/features/reports/services/pdfGenerator.ts, prioritizing React-PDF or @react-pdf/renderer for seamless React compatibility and modular PDF creation using React components. If advanced customization or editing is required, consider alternatives like jsPDF or pdf-lib, but ensure the solution supports dynamic, data-driven PDF generation and efficient rendering in the browser.[2][3][4]
+2. Build a dynamic report view at src/app/dashboard/reports/[reportId]/page.tsx using the modular component architecture established in previous tasks. Ensure components are reusable, data-driven, and optimized for real-time updates via Supabase integration.
+3. Enhance user experience by adding a prominent PDF download button (src/features/reports/components/molecules/DownloadButton.tsx), completion confirmations (e.g., toast notifications), and smooth UI transitions (e.g., loading spinners, fade-ins) for report generation and sharing workflows.
 4. Optimize PDF generation and report rendering for minimal memory usage and fast load times by leveraging code-splitting, memoization, and efficient data fetching. Profile performance and address bottlenecks, especially for large or complex reports.
-5. Implement sharing features, such as generating shareable links or enabling direct sharing via email, ensuring secure access controls.
-6. Document the implementation and provide clear usage instructions for both end-users and developers.
+5. Implement sharing features in src/features/reports/services/sharing.ts, such as generating shareable links or enabling direct sharing via email, ensuring secure access controls.
+6. Document the implementation in src/features/reports/README.md and provide clear usage instructions for both end-users and developers.
 
 # Test Strategy:
-- Verify that PDF export produces accurate, branded, and complete reports for a variety of survey data scenarios, including edge cases (e.g., large datasets, missing fields).
-- Test the dynamic report view at /dashboard/reports/[reportId] for correct data loading, real-time updates, and UI responsiveness across devices and browsers.
+- Verify that PDF export produces accurate, branded, and complete reports for a variety of survey data scenarios, including edge cases (e.g., large datasets, missing fields) in src/features/reports/__tests__/pdfGeneration.test.ts.
+- Test the dynamic report view at src/app/dashboard/reports/[reportId]/page.tsx for correct data loading, real-time updates, and UI responsiveness across devices and browsers.
 - Confirm that the PDF download button, completion confirmations, and UI transitions function smoothly and enhance the user experience.
 - Profile and benchmark PDF generation and report rendering for performance, ensuring minimal render time and memory usage.
-- Test sharing features for correct link generation, access control, and usability.
+- Test sharing features for correct link generation, access control, and usability in src/features/reports/__tests__/sharing.test.ts.
 - Conduct comprehensive manual and automated tests covering PDF output, dynamic content, UI/UX, and sharing workflows.
 
 # Subtasks:

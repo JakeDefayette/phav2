@@ -3,9 +3,9 @@
 # Status: in-progress
 # Dependencies: 2, 3
 # Priority: high
-# Description: Add security and compliance features including HTTPS, data encryption, and HIPAA-ready architecture.
+# Description: Add security and compliance features including HTTPS, data encryption, and HIPAA-ready architecture within the new feature-based structure.
 # Details:
-Enforce HTTPS, data encryption at rest, secure authentication, input validation, session timeout, audit trails, and consent management. Prepare for future HIPAA compliance.
+Enforce HTTPS, data encryption at rest, secure authentication in src/shared/services/auth.ts, input validation in src/shared/utils/validation.ts, session timeout, audit trails in src/shared/services/auditLog.ts, and consent management in src/features/assessment/services/consentManagement.ts. Prepare for future HIPAA compliance.
 
 # Test Strategy:
-Test security headers, encryption, session management, and audit trails.
+Test security headers, encryption, session management, and audit trails in src/shared/__tests__/security/.

@@ -3,17 +3,17 @@
 # Status: pending
 # Dependencies: 3, 4, 5, 6
 # Priority: medium
-# Description: Integrate Supabase to enable real-time survey data retrieval, optimized report generation, and seamless data flow throughout the application.
+# Description: Integrate Supabase to enable real-time survey data retrieval, optimized report generation, and seamless data flow throughout the application, adhering to the new feature-based architecture.
 # Details:
-1. Set up Supabase Realtime subscriptions using the client library to listen for INSERT, UPDATE, and DELETE events on survey response tables, leveraging both Postgres Changes and Broadcast from Database as appropriate for scalability and selective data delivery[1][4].
-2. Design and implement efficient SQL queries and Supabase API calls for aggregating and retrieving report data, optimizing for minimal latency and bandwidth.
-3. Develop secure Server Actions (e.g., Next.js API routes or server functions) to handle form submissions, perform input validation (using Yup or Zod), and execute transactional writes to Supabase, ensuring atomicity and error handling.
-4. Implement comprehensive validation and error handling at both client (Formik/Yup) and server levels, providing clear user feedback and robust logging.
-5. Establish an end-to-end workflow: from survey submission, through secure data write, to real-time updates that trigger report regeneration and UI refreshes, ensuring seamless user experience and data consistency[2][3].
-6. Document integration patterns and provide code samples for subscribing to real-time updates, handling optimistic UI updates, and managing subscription lifecycles.
+1. Set up Supabase Realtime subscriptions in src/shared/services/supabase.ts, using the client library to listen for INSERT, UPDATE, and DELETE events on survey response tables, leveraging both Postgres Changes and Broadcast from Database as appropriate for scalability and selective data delivery[1][4].
+2. Design and implement efficient SQL queries and Supabase API calls in src/features/reports/services/reportData.ts for aggregating and retrieving report data, optimizing for minimal latency and bandwidth.
+3. Develop secure Server Actions (e.g., Next.js API routes or server functions) in src/app/api/ to handle form submissions, perform input validation (using Yup or Zod), and execute transactional writes to Supabase, ensuring atomicity and error handling.
+4. Implement comprehensive validation and error handling at both client (Formik/Yup) and server levels, providing clear user feedback and robust logging. Place client-side validation in src/features/assessment/utils/validation.ts.
+5. Establish an end-to-end workflow: from survey submission (src/features/assessment/), through secure data write, to real-time updates that trigger report regeneration (src/features/reports/) and UI refreshes, ensuring seamless user experience and data consistency[2][3].
+6. Document integration patterns in src/shared/docs/ and provide code samples for subscribing to real-time updates, handling optimistic UI updates, and managing subscription lifecycles.
 
 # Test Strategy:
-- Write integration tests to verify real-time updates are received and reflected in the UI upon database changes (insert, update, delete) to survey response tables.
+- Write integration tests in src/features/reports/__tests__/ to verify real-time updates are received and reflected in the UI upon database changes (insert, update, delete) to survey response tables.
 - Simulate concurrent survey submissions and validate that reports update in real time without data loss or race conditions.
 - Test Server Actions for secure, validated, and transactional writes, including error scenarios (invalid data, network failures).
 - Perform end-to-end tests: submit a survey, confirm data is written to Supabase, and verify that the report UI updates in real time.

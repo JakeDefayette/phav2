@@ -3,7 +3,7 @@ import {
   type ReportDataStructure,
 } from '@/features/assessment/services/SurveyDataMapper';
 import { SurveyResponseWithQuestion } from '@/features/assessment/services/surveyResponses';
-import { Database } from '../../src/types/database';
+import { Database } from '../../src/shared/types/database';
 
 type QuestionType = Database['public']['Enums']['question_type_enum'];
 

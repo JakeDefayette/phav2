@@ -1,11 +1,11 @@
-import { supabase } from '@/lib/supabase';
+import { supabase } from '@/shared/services/supabase';
 import {
   validateSession,
   clearSession,
   initializeSessionTracking,
   refreshSession as refreshSessionUtil,
   getSessionInfo,
-} from '@/lib/session';
+} from '@/shared/services/session';
 import type {
   UserProfile,
   LoginCredentials,

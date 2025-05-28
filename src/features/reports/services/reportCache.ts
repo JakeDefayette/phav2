@@ -1,6 +1,6 @@
 import { ReportDataStructure } from '@/features/assessment/services/SurveyDataMapper';
-import { TransformedChartData } from '@/components/molecules/Charts/types';
-import { PerformanceMonitor } from '@/utils/performance';
+import { TransformedChartData } from '@/shared/components/molecules/Charts/types';
+import { PerformanceMonitor } from '@/shared/utils/performance';
 
 /**
  * Cache entry with TTL (Time To Live)

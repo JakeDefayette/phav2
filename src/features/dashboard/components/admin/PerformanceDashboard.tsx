@@ -10,7 +10,7 @@ import {
   PerformanceMonitor,
   type PerformanceMetrics,
   type PerformanceReport,
-} from '@/utils/performance';
+} from '@/shared/utils/performance';
 import {
   reportCache,
   type ReportCacheMetrics,
@@ -26,9 +26,9 @@ import {
   CheckCircle,
   Activity,
 } from 'lucide-react';
-import { Card } from '@/components/molecules/Card';
-import { Button } from '@/components/atoms/Button';
-import { Loading } from '@/components/atoms/Loading';
+import { Card } from '@/shared/components/molecules/Card';
+import { Button } from '@/shared/components/atoms/Button';
+import { Loading } from '@/shared/components/atoms/Loading';
 import {
   BarChart,
   Bar,

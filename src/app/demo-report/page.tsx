@@ -1,16 +1,16 @@
 'use client';
 import React from 'react';
-import { Button } from '@/components/atoms/Button';
+import { Button } from '@/shared/components/atoms/Button';
 import {
   SpineDiagram,
   BrainOMeter,
   OrganConnections,
   Recommendations,
-} from '@/components/report';
+} from '@/features/reports/components';
 import {
   useBrandingContext,
   BrandingProvider,
-} from '@/components/providers/BrandingProvider';
+} from '@/shared/components/BrandingProvider';
 import {
   ArrowLeft,
   Printer,
@@ -28,7 +28,7 @@ import {
   dummyBrainScore,
   dummyRecommendations,
   type SpinalRegion,
-} from '@/lib/dummy-report-data';
+} from '@/shared/services/dummy-report-data';
 
 function DemoReportContent() {
   const { branding, loading, error } = useBrandingContext();

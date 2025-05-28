@@ -3,9 +3,9 @@
 # Status: pending
 # Dependencies: 2, 3
 # Priority: medium
-# Description: Develop the chiropractor dashboard for practice management and customization.
+# Description: Develop the chiropractor dashboard for practice management and customization within the new feature-based architecture.
 # Details:
-Create dashboard layout with reusable components. Implement practice branding, contact management, and video upload. Use Next.js App Router for routing. Support customization of email templates and assessment questions.
+Create dashboard layout with reusable components in src/features/dashboard/components/. Implement practice branding, contact management, and video upload. Use Next.js App Router for routing in src/app/dashboard/. Support customization of email templates and assessment questions. Place shared components in src/shared/components/ following atomic design principles.
 
 # Test Strategy:
-Test dashboard navigation, customization features, and data display.
+Test dashboard navigation, customization features, and data display in src/features/dashboard/__tests__/.

@@ -1,9 +1,9 @@
 'use client';
 
 import React from 'react';
-import { useRole } from '@/hooks';
-import { Button } from '@/components/atoms/Button';
-import { RoleGuard } from '@/components/atoms/RoleGuard';
+import { useRole } from '@/shared/hooks';
+import { Button } from '@/shared/components/atoms/Button';
+import { RoleGuard } from '@/shared/components/atoms/RoleGuard';
 
 export default function ChildrenPage() {
   const { roleInfo, permissions } = useRole();

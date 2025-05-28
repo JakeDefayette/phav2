@@ -1,5 +1,5 @@
 import { BaseService, ServiceError } from '@/shared/services/base';
-import { supabase } from '@/lib/supabase';
+import { supabase } from '@/shared/services/supabase';
 import type { Practice, PracticeInsert, PracticeUpdate } from '@/shared/types';
 import type { PracticesAPI } from '@/shared/types/api';
 

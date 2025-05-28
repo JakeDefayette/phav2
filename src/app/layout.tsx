@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
-import { AuthProvider } from '@/hooks';
-import { AuthErrorBoundary } from '@/components/organisms/AuthErrorBoundary';
+import { AuthProvider } from '@/shared/hooks';
+import { AuthErrorBoundary } from '@/shared/components/organisms/AuthErrorBoundary';
 import './globals.css';
 
 const inter = Inter({ subsets: ['latin'] });

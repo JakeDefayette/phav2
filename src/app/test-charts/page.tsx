@@ -1,8 +1,8 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { ChartsGrid, ChartDisplay } from '@/components/organisms';
-import { TransformedChartData } from '@/components/molecules/Charts/types';
+import { ChartsGrid, ChartDisplay } from '@/shared/components/organisms';
+import { TransformedChartData } from '@/shared/components/molecules/Charts/types';
 import { ChartService } from '@/features/reports/services/chartService';
 import { ReportsService } from '@/features/reports/services';
 

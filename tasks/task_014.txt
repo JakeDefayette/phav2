@@ -3,9 +3,9 @@
 # Status: pending
 # Dependencies: 1, 4, 5
 # Priority: high
-# Description: Optimize application for fast load times and minimal bundle size.
+# Description: Optimize application for fast load times and minimal bundle size within the new feature-based architecture.
 # Details:
-Implement code splitting, tree-shaking, and dynamic imports. Enforce file size limits (React components <200 lines, utility functions <100 lines, etc.). Use Lighthouse CI and bundle analyzer. Target initial load <50KB, route chunks <25KB, total app <200KB gzipped.
+Implement code splitting, tree-shaking, and dynamic imports across all feature modules. Enforce file size limits (React components <200 lines, utility functions <100 lines, etc.). Use Lighthouse CI and bundle analyzer. Target initial load <50KB, route chunks <25KB, total app <200KB gzipped. Optimize imports to leverage the new directory structure.
 
 # Test Strategy:
-Run Lighthouse audits, bundle analysis, and performance tests.
+Run Lighthouse audits, bundle analysis, and performance tests in src/shared/__tests__/performance/.

@@ -1,8 +1,8 @@
 'use client';
 
 import Link from 'next/link';
-import { useAuth } from '@/hooks';
-import { Button } from '@/components/atoms/Button';
+import { useAuth } from '@/shared/hooks';
+import { Button } from '@/shared/components/atoms/Button';
 
 export default function Home() {
   const { user, loading } = useAuth();

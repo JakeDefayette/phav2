@@ -1,7 +1,7 @@
 import { createServerClient } from '@supabase/ssr';
 import { cookies } from 'next/headers';
 import { NextRequest, NextResponse } from 'next/server';
-import { supabase } from '@/lib/supabase';
+import { supabase } from '@/shared/services/supabase';
 import type { Database } from '@/shared/types/database';
 
 export async function GET(request: NextRequest) {

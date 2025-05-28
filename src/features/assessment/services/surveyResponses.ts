@@ -1,5 +1,5 @@
 import { BaseService, ServiceError } from '@/shared/services/base';
-import { supabase } from '@/lib/supabase';
+import { supabase } from '@/shared/services/supabase';
 
 // Types for the new schema
 export interface SurveyResponse {

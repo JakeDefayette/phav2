@@ -2,8 +2,8 @@
 
 import React from 'react';
 import { ChartDisplay } from '../ChartDisplay';
-import { TransformedChartData } from '@/components/molecules/Charts/types';
-import { cn } from '@/utils/cn';
+import { TransformedChartData } from '@/shared/components/molecules/Charts/types';
+import { cn } from '@/shared/utils/cn';
 
 export interface ChartsGridProps {
   charts: TransformedChartData[];

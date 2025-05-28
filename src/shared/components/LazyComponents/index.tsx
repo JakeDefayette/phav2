@@ -114,12 +114,12 @@ export const LazyRadarChart = withLazyLoading(
 
 // Form components
 export const LazyForm = withLazyLoading(
-  () => import('@/components/organisms/Form'),
+  () => import('@/shared/components/organisms/Form'),
   'Form'
 );
 
 export const LazyAuthForm = withLazyLoading(
-  () => import('@/components/organisms/AuthForm'),
+  () => import('@/shared/components/organisms/AuthForm'),
   'AuthForm'
 );
 

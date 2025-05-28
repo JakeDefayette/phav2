@@ -1122,24 +1122,3 @@ export const Constants = {
 
 // Convenience type exports
 export type Practice = Tables<'practices'>;
-export type Assessment = Tables<'assessments'>;
-export type Report = Tables<'reports'>;
-export type Child = Tables<'children'>;
-export type SurveyResponse = Tables<'survey_responses'>;
-export type UserProfile = Tables<'user_profiles'>;
-
-// Insert types
-export type PracticeInsert = TablesInsert<'practices'>;
-export type AssessmentInsert = TablesInsert<'assessments'>;
-export type ReportInsert = TablesInsert<'reports'>;
-export type ChildInsert = TablesInsert<'children'>;
-export type SurveyResponseInsert = TablesInsert<'survey_responses'>;
-export type UserProfileInsert = TablesInsert<'user_profiles'>;
-
-// Update types
-export type PracticeUpdate = TablesUpdate<'practices'>;
-export type AssessmentUpdate = TablesUpdate<'assessments'>;
-export type ReportUpdate = TablesUpdate<'reports'>;
-export type ChildUpdate = TablesUpdate<'children'>;
-export type SurveyResponseUpdate = TablesUpdate<'survey_responses'>;
-export type UserProfileUpdate = TablesUpdate<'user_profiles'>;

@@ -1,13 +1,13 @@
 import React, { useState } from 'react';
 import { Formik, Form, FormikHelpers, Field } from 'formik';
-import { Button, Checkbox } from '@/components/atoms';
+import { Button, Checkbox } from '@/shared/components/atoms';
 import {
   StepIndicator,
   CheckboxGroup,
   RadioGroup,
   FormField,
-} from '@/components/molecules';
-import { cn } from '@/utils/cn';
+} from '@/shared/components/molecules';
+import { cn } from '@/shared/utils/cn';
 
 // Import types and data
 import { SurveyFormData, INITIAL_VALUES, FORM_STEPS } from './types';

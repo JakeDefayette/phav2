@@ -1,9 +1,9 @@
 'use client';
 
 import React from 'react';
-import { useRole } from '@/hooks';
+import { useRole } from '@/shared/hooks';
 import type { UserRole } from '@/shared/types/auth';
-import type { RolePermissions } from '@/utils/roleUtils';
+import type { RolePermissions } from '@/shared/utils/roleUtils';
 
 export interface RoleGuardProps {
   children: React.ReactNode;

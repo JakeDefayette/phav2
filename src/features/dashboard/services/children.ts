@@ -1,45 +1,13 @@
 import { BaseService, ServiceError } from '@/shared/services/base';
-import { supabase } from '@/lib/supabase';
-
-// Types for the new schema
-export interface Child {
-  id: string;
-  parent_id: string;
-  first_name: string;
-  last_name?: string;
-  date_of_birth: string;
-  gender?: 'male' | 'female' | 'other' | 'prefer_not_to_say';
-  notes?: string;
-  created_at: string;
-  updated_at: string;
-}
-
-export interface ChildInsert {
-  parent_id: string;
-  first_name: string;
-  last_name?: string;
-  date_of_birth: string;
-  gender?: 'male' | 'female' | 'other' | 'prefer_not_to_say';
-  notes?: string;
-}
-
-export interface ChildUpdate {
-  first_name?: string;
-  last_name?: string;
-  date_of_birth?: string;
-  gender?: 'male' | 'female' | 'other' | 'prefer_not_to_say';
-  notes?: string;
-}
-
-export interface ChildWithAssessments extends Child {
-  assessments?: Array<{
-    id: string;
-    status: string;
-    brain_o_meter_score?: number;
-    started_at: string;
-    completed_at?: string;
-  }>;
-}
+import { supabase } from '@/shared/services/supabase';
+import type {
+  Child,
+  ChildInsert,
+  ChildUpdate,
+  ChildWithAssessments,
+  CreateChildData,
+  UpdateChildData,
+} from '../types';
 
 /**
  * Service for managing child operations

@@ -6,9 +6,9 @@ import {
   BarChart,
   LineChart,
   RadarChart,
-} from '@/components/molecules/Charts';
-import { TransformedChartData } from '@/components/molecules/Charts/types';
-import { cn } from '@/utils/cn';
+} from '@/shared/components/molecules/Charts';
+import { TransformedChartData } from '@/shared/components/molecules/Charts/types';
+import { cn } from '@/shared/utils/cn';
 
 export interface ChartDisplayProps {
   chartData: TransformedChartData;

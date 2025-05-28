@@ -1,4 +1,4 @@
-import { CheckboxOption, RadioOption } from '@/components/molecules';
+import { CheckboxOption, RadioOption } from '@/shared/components/molecules';
 
 // Step 1: Lifestyle Stressors options
 export const LIFESTYLE_STRESSOR_OPTIONS: CheckboxOption[] = [
