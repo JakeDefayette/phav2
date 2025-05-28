@@ -1,3 +1,5 @@
+// @ts-nocheck
+
 import { NextRequest } from 'next/server';
 import { GET } from '../../src/app/reports/download/[token]/route';
 

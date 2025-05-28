@@ -75,6 +75,9 @@ export interface ReportDataStructure {
     dataQuality: 'excellent' | 'good' | 'fair' | 'poor';
     validationErrors: string[];
     processingNotes: string[];
+    reportType?: string;
+    assessmentId?: string;
+    totalResponses?: number;
   };
   rawResponses: MappedResponse[];
 }
@@ -148,6 +151,9 @@ export class SurveyDataMapper {
           dataQuality,
           validationErrors: this.validationErrors,
           processingNotes: this.processingNotes,
+          reportType: 'survey',
+          assessmentId,
+          totalResponses: mappedResponses.length,
         },
         rawResponses: mappedResponses,
       };

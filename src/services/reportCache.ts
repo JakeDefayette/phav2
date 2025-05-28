@@ -437,64 +437,35 @@ export class ReportCacheService {
   }
 
   /**
-   * Cache a complete report
-   */
-  cacheReport(cacheKey: string, report: any, ttl?: number): void {
-    this.set(cacheKey, report, ttl);
-  }
-
-  /**
-   * Get a cached report
+   * Alias for getCachedReportData (for backward compatibility)
    */
   getReport(cacheKey: string): any | null {
     return this.get(cacheKey);
   }
 
   /**
-   * Cache survey responses with a specific key
-   */
-  cacheSurveyResponses(cacheKey: string, responses: any[], ttl?: number): void {
-    this.set(cacheKey, responses, ttl);
-  }
-
-  /**
-   * Get cached survey responses with a specific key
+   * Alias for getCachedSurveyResponses (for backward compatibility)
    */
   getSurveyResponses(cacheKey: string): any[] | null {
     return this.get(cacheKey);
   }
 
   /**
-   * Cache mapped data with a specific key
-   */
-  cacheMappedData(
-    cacheKey: string,
-    mappedData: ReportDataStructure,
-    ttl?: number
-  ): void {
-    this.set(cacheKey, mappedData, ttl);
-  }
-
-  /**
-   * Get cached mapped data with a specific key
+   * Alias for getCachedMappedData (for backward compatibility)
    */
   getMappedData(cacheKey: string): ReportDataStructure | null {
     return this.get(cacheKey);
   }
 
   /**
-   * Cache chart data with a specific key
+   * Alias for cacheReportData (for backward compatibility)
    */
-  cacheChartData(
-    cacheKey: string,
-    chartData: TransformedChartData[],
-    ttl?: number
-  ): void {
-    this.set(cacheKey, chartData, ttl);
+  cacheReport(cacheKey: string, reportData: any, ttl?: number): void {
+    this.set(cacheKey, reportData, ttl);
   }
 
   /**
-   * Get cached chart data with a specific key
+   * Alias for getCachedChartData (for backward compatibility)
    */
   getChartData(cacheKey: string): TransformedChartData[] | null {
     return this.get(cacheKey);

@@ -3,6 +3,7 @@ import { PDFService } from './pdf';
 import { EmailService } from './email';
 import { v4 as uuidv4 } from 'uuid';
 import { put } from '@vercel/blob';
+import { ReportsService } from './reports';
 
 export interface DeliveryOptions {
   reportId: string;
@@ -35,6 +36,7 @@ export class DeliveryService {
   private supabase = supabaseServer;
   private pdfService = new PDFService();
   private emailService = new EmailService();
+  private reportsService = new ReportsService();
 
   /**
    * Main delivery method that coordinates multiple delivery channels
@@ -44,10 +46,15 @@ export class DeliveryService {
       // Generate unique delivery ID
       const deliveryId = uuidv4();
 
+      // Fetch the full report data required for PDF generation
+      const report = await this.reportsService.findById(options.reportId);
+
+      if (!report) {
+        throw new Error(`Report not found: ${options.reportId}`);
+      }
+
       // Generate PDF buffer
-      const pdfBuffer = await this.pdfService.generateReportPDF(
-        options.reportId
-      );
+      const pdfBuffer = await this.pdfService.generatePDFBuffer(report);
 
       // Create share token for secure access
       const shareToken = await this.createShareToken(

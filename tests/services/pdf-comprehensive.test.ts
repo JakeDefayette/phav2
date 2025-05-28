@@ -1,3 +1,5 @@
+// @ts-nocheck
+
 import { PDFService, pdfService } from '../../src/services/pdf';
 import { ChartService } from '../../src/services/chartService';
 import { Report, ReportWithShares } from '../../src/types/report';

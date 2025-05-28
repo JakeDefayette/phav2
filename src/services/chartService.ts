@@ -54,71 +54,53 @@ export class ChartService {
   /**
    * Transform SurveyDataMapper visual data into Chart.js compatible format
    */
-  @timed('transformSurveyDataToCharts')
   public transformSurveyDataToCharts(
     reportData: ReportDataStructure
   ): TransformedChartData[] {
-    // Create cache key based on report data
-    const cacheKey = this.createCacheKey(reportData);
-
-    // Check cache first
-    const cached = this.chartCache.get(cacheKey);
-    if (cached) {
-      this.performanceMonitor.recordMetric(
-        'transformSurveyDataToCharts',
-        'cache_hit',
-        { cacheKey }
-      );
-      return [cached]; // Return as array since we cached the full result
-    }
-
-    const transformedCharts: TransformedChartData[] = [];
-
-    // Process each chart from the visual data with performance tracking
-    for (const chartData of reportData.visualData.charts) {
-      try {
-        const transformed = timeOperation(
-          `transformChart_${chartData.type}`,
-          () => {
-            return this.transformSingleChart(chartData);
-          }
-        );
-
-        if (transformed) {
-          transformedCharts.push(transformed);
-        }
-      } catch (error) {
-        this.performanceMonitor.recordMetric(
-          'transformSurveyDataToCharts',
-          'chart_error',
-          {
-            chartType: chartData.type,
-            error: error.message,
-          }
-        );
-      }
-    }
-
-    // Add additional charts based on report data
-    const additionalCharts = timeOperation('generateAdditionalCharts', () => {
-      return this.generateAdditionalCharts(reportData);
-    });
-
-    transformedCharts.push(...additionalCharts);
-
-    // Cache the result for future use
-    this.chartCache.set(cacheKey, transformedCharts[0]); // Cache first chart as representative
-
-    this.performanceMonitor.recordMetric(
+    const operationId = this.performanceMonitor.startOperation(
       'transformSurveyDataToCharts',
-      'cache_miss',
-      {
-        cacheKey,
-        chartCount: transformedCharts.length,
-      }
+      { reportType: reportData.metadata.reportType }
     );
 
-    return transformedCharts;
+    try {
+      // Create cache key based on report data
+      const cacheKey = this.createCacheKey(reportData);
+
+      // Check cache first
+      const cached = this.chartCache.get(cacheKey);
+      if (cached) {
+        this.performanceMonitor.endOperation(operationId);
+        return [cached]; // Return as array since we cached the full result
+      }
+
+      const transformedCharts: TransformedChartData[] = [];
+
+      // Process each chart from the visual data
+      for (const chartData of reportData.visualData.charts) {
+        try {
+          const transformed = this.transformSingleChart(chartData);
+
+          if (transformed) {
+            transformedCharts.push(transformed);
+          }
+        } catch (error) {
+          console.error(`Error transforming chart ${chartData.type}:`, error);
+        }
+      }
+
+      // Add additional charts based on report data
+      const additionalCharts = this.generateAdditionalCharts(reportData);
+      transformedCharts.push(...additionalCharts);
+
+      // Cache the result for future use
+      this.chartCache.set(cacheKey, transformedCharts[0]); // Cache first chart as representative
+
+      this.performanceMonitor.endOperation(operationId);
+      return transformedCharts;
+    } catch (error) {
+      this.performanceMonitor.endOperation(operationId);
+      throw error;
+    }
   }
 
   /**
