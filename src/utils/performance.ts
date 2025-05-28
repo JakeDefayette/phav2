@@ -69,34 +69,37 @@ export class PerformanceMonitor {
   }
 
   /**
-   * End timing an operation
+   * End an operation and calculate metrics
    */
-  endOperation(operationId: string): PerformanceMetrics | null {
+  endOperation(operationId: string, error?: Error): PerformanceMetrics | null {
     const metrics = this.metrics.get(operationId);
     if (!metrics) {
-      console.warn(`Performance monitor: Operation ${operationId} not found`);
       return null;
     }
 
-    metrics.endTime = performance.now();
-    metrics.duration = metrics.endTime - metrics.startTime;
+    const endTime = Date.now();
+    const duration = endTime - metrics.startTime;
+    const memoryUsage = getMemoryUsage();
 
-    // Update memory usage
-    if (typeof process !== 'undefined' && process.memoryUsage) {
-      const memUsage = process.memoryUsage();
-      if (metrics.memoryUsage) {
-        metrics.memoryUsage = {
-          heapUsed: Math.max(metrics.memoryUsage.heapUsed, memUsage.heapUsed),
-          heapTotal: Math.max(
-            metrics.memoryUsage.heapTotal,
-            memUsage.heapTotal
-          ),
-          external: Math.max(metrics.memoryUsage.external, memUsage.external),
-        };
-      }
+    // Fix memory usage type mapping
+    metrics.endTime = endTime;
+    metrics.duration = duration;
+    metrics.memoryUsage = memoryUsage
+      ? {
+          heapUsed: memoryUsage.used,
+          heapTotal: memoryUsage.total,
+          external: 0, // Default value since getMemoryUsage doesn't provide this
+        }
+      : undefined;
+
+    if (error) {
+      metrics.metadata = {
+        ...metrics.metadata,
+        error: error.message,
+        errorType: error.constructor.name,
+      };
     }
 
-    this.metrics.set(operationId, metrics);
     return metrics;
   }
 
@@ -188,17 +191,52 @@ export class PerformanceMonitor {
       });
     }
   }
+
+  /**
+   * Record a discrete metric event (e.g., cache hit, error, etc.)
+   * This is useful for logging events that don't need timing
+   */
+  recordMetric(
+    operationName: string,
+    eventType: string,
+    metadata?: Record<string, any>
+  ): void {
+    const timestamp = Date.now();
+    const logData = {
+      operationName,
+      eventType,
+      timestamp,
+      metadata,
+    };
+
+    // Log to console in development
+    if (process.env.NODE_ENV === 'development') {
+      console.log(`[Performance] ${operationName} - ${eventType}:`, metadata);
+    }
+
+    // Store as a completed metric for reporting purposes
+    const operationId = `${operationName}_${eventType}_${timestamp}_${Math.random().toString(36).substr(2, 9)}`;
+    const metrics: PerformanceMetrics = {
+      startTime: timestamp,
+      endTime: timestamp,
+      duration: 0, // Instant event
+      operationName: `${operationName}_${eventType}`,
+      metadata: { ...metadata, eventType },
+    };
+
+    this.metrics.set(operationId, metrics);
+  }
 }
 
 /**
  * Decorator for automatically timing method execution
  */
-export function timed(operationName?: string) {
+export function timed(operationName?: string): any {
   return function (
     target: any,
     propertyKey: string,
     descriptor: PropertyDescriptor
-  ) {
+  ): any {
     const originalMethod = descriptor.value;
     const monitor = PerformanceMonitor.getInstance();
 
@@ -206,17 +244,28 @@ export function timed(operationName?: string) {
       const opName =
         operationName || `${target.constructor.name}.${propertyKey}`;
       const operationId = monitor.startOperation(opName, { args: args.length });
+      let errorToReport: Error | undefined = undefined;
 
       try {
         const result = await originalMethod.apply(this, args);
         monitor.endOperation(operationId);
         return result;
       } catch (error) {
-        monitor.endOperation(operationId);
-        throw error;
+        if (error instanceof Error) {
+          errorToReport = error;
+        } else if (typeof error === 'string') {
+          errorToReport = new Error(error);
+        } else if (error && typeof error === 'object' && 'message' in error) {
+          errorToReport = new Error(String(error.message));
+          Object.assign(errorToReport, error); // Preserve other properties
+        } else {
+          errorToReport = new Error('An unknown error occurred');
+        }
+        monitor.endOperation(operationId, errorToReport);
+        throw errorToReport; // Re-throw the (potentially wrapped) error
       }
     };
-
+    // Ensure the descriptor is returned by the decorator factory
     return descriptor;
   };
 }
@@ -237,7 +286,9 @@ export async function timeOperation<T>(
     const metrics = monitor.endOperation(operationId);
     return { result, metrics: metrics! };
   } catch (error) {
-    monitor.endOperation(operationId);
+    // Handle unknown error types
+    const errorObj = error instanceof Error ? error : new Error(String(error));
+    monitor.endOperation(operationId, errorObj);
     throw error;
   }
 }

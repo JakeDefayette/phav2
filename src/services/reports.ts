@@ -139,7 +139,7 @@ export class ReportsService extends BaseService<
       });
 
       // Get assessment data with performance tracking
-      const assessmentData = await timeOperation(
+      const assessmentDataResult = await timeOperation(
         'getAssessmentData',
         async () => {
           const { data, error } = await supabase
@@ -170,46 +170,59 @@ export class ReportsService extends BaseService<
           return data;
         }
       );
+      const assessmentData = assessmentDataResult.result;
 
       // Get survey responses with caching
-      const responses = await timeOperation('getSurveyResponses', async () => {
-        const cacheKey = `responses:${assessmentId}`;
-        const cached =
-          await this.reportCacheService.getSurveyResponses(cacheKey);
-        if (cached) {
-          return cached;
-        }
+      const responsesResult = await timeOperation(
+        'getSurveyResponses',
+        async () => {
+          const cacheKey = `responses:${assessmentId}`;
+          const cached =
+            await this.reportCacheService.getSurveyResponses(cacheKey);
+          if (cached) {
+            return cached;
+          }
 
-        const responses =
-          await this.surveyResponsesService.findByAssessmentId(assessmentId);
-        await this.reportCacheService.cacheSurveyResponses(cacheKey, responses);
-        return responses;
-      });
+          const responsesData =
+            await this.surveyResponsesService.findByAssessmentId(assessmentId);
+          await this.reportCacheService.cacheSurveyResponses(
+            cacheKey,
+            responsesData
+          );
+          return responsesData;
+        }
+      );
+      const responses = responsesResult.result;
 
       // Use the new data mapper to transform responses with caching
-      const mappedData = await timeOperation('mapSurveyData', async () => {
-        const cacheKey = `mapped:${assessmentId}`;
-        const cached = await this.reportCacheService.getMappedData(cacheKey);
-        if (cached) {
-          return cached;
-        }
+      const mappedDataResult = await timeOperation(
+        'mapSurveyData',
+        async () => {
+          const cacheKey = `mapped:${assessmentId}`;
+          const cached = await this.reportCacheService.getMappedData(cacheKey);
+          if (cached) {
+            return cached;
+          }
 
-        const mapped = await this.surveyDataMapper.mapSurveyData(
-          responses,
-          assessmentId
-        );
-        await this.reportCacheService.cacheMappedData(cacheKey, mapped);
-        return mapped;
-      });
+          const mapped = await this.surveyDataMapper.mapSurveyData(
+            responses,
+            assessmentId
+          );
+          await this.reportCacheService.cacheMappedData(cacheKey, mapped);
+          return mapped;
+        }
+      );
+      const mappedData = mappedDataResult.result;
 
       // Generate report content
-      const content = await timeOperation('generateContent', async () => {
+      const contentResult = await timeOperation('generateContent', async () => {
         return this.generateReportContentFromMappedData(
           assessmentData,
           mappedData,
           reportType
         );
       });
+      const content = contentResult.result;
 
       const reportData: ReportInsert = {
         assessment_id: assessmentId,
@@ -219,9 +232,10 @@ export class ReportsService extends BaseService<
         generated_at: new Date().toISOString(),
       };
 
-      const report = await timeOperation('createReport', async () => {
+      const reportResult = await timeOperation('createReport', async () => {
         return await this.create(reportData);
       });
+      const report = reportResult.result;
 
       // Cache the generated report
       await this.reportCacheService.cacheReport(cacheKey, report);
@@ -321,12 +335,13 @@ export class ReportsService extends BaseService<
       }
 
       // Generate charts with performance tracking
-      const charts = await timeOperation(
+      const chartsResult = await timeOperation(
         'transformSurveyDataToCharts',
         async () => {
           return this.chartService.transformSurveyDataToCharts(mappedData);
         }
       );
+      const charts = chartsResult.result;
 
       // Cache the generated charts
       await this.reportCacheService.cacheChartData(cacheKey, charts);
@@ -334,7 +349,7 @@ export class ReportsService extends BaseService<
       return charts;
     } catch (error) {
       this.performanceMonitor.recordMetric('generateChartsForReport', 'error', {
-        error: error.message,
+        error: error instanceof Error ? error.message : String(error),
       });
       return [];
     }
@@ -357,39 +372,47 @@ export class ReportsService extends BaseService<
       }
 
       // Get survey responses with caching
-      const responses = await timeOperation('getSurveyResponses', async () => {
-        const responsesCacheKey = `responses:${assessmentId}`;
-        const cached =
-          await this.reportCacheService.getSurveyResponses(responsesCacheKey);
-        if (cached) {
-          return cached;
-        }
+      const responsesResult = await timeOperation(
+        'getSurveyResponses',
+        async () => {
+          const responsesCacheKey = `responses:${assessmentId}`;
+          const cached =
+            await this.reportCacheService.getSurveyResponses(responsesCacheKey);
+          if (cached) {
+            return cached;
+          }
 
-        const responses =
-          await this.surveyResponsesService.findByAssessmentId(assessmentId);
-        await this.reportCacheService.cacheSurveyResponses(
-          responsesCacheKey,
-          responses
-        );
-        return responses;
-      });
+          const responsesData =
+            await this.surveyResponsesService.findByAssessmentId(assessmentId);
+          await this.reportCacheService.cacheSurveyResponses(
+            responsesCacheKey,
+            responsesData
+          );
+          return responsesData;
+        }
+      );
+      const responses = responsesResult.result;
 
       // Map the data with caching
-      const mappedData = await timeOperation('mapSurveyData', async () => {
-        const mappedCacheKey = `mapped:${assessmentId}`;
-        const cached =
-          await this.reportCacheService.getMappedData(mappedCacheKey);
-        if (cached) {
-          return cached;
-        }
+      const mappedDataResult = await timeOperation(
+        'mapSurveyData',
+        async () => {
+          const mappedCacheKey = `mapped:${assessmentId}`;
+          const cached =
+            await this.reportCacheService.getMappedData(mappedCacheKey);
+          if (cached) {
+            return cached;
+          }
 
-        const mapped = await this.surveyDataMapper.mapSurveyData(
-          responses,
-          assessmentId
-        );
-        await this.reportCacheService.cacheMappedData(mappedCacheKey, mapped);
-        return mapped;
-      });
+          const mapped = await this.surveyDataMapper.mapSurveyData(
+            responses,
+            assessmentId
+          );
+          await this.reportCacheService.cacheMappedData(mappedCacheKey, mapped);
+          return mapped;
+        }
+      );
+      const mappedData = mappedDataResult.result;
 
       // Generate charts
       const charts = await this.generateChartsForReport(mappedData);
@@ -401,7 +424,7 @@ export class ReportsService extends BaseService<
     } catch (error) {
       this.performanceMonitor.recordMetric('getChartsForAssessment', 'error', {
         assessmentId,
-        error: error.message,
+        error: error instanceof Error ? error.message : String(error),
       });
       return [];
     }
