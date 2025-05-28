@@ -1,11 +1,11 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { AuthForm } from '@/components/organisms/AuthForm';
-import { useAuth } from '@/hooks/useAuth';
-import type { LoginCredentials } from '@/types/auth';
+import { useAuth } from '@/hooks';
+import type { LoginCredentials } from '@/shared/types/auth';
 
 export default function LoginPage() {
   const router = useRouter();

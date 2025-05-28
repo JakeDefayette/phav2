@@ -3,8 +3,8 @@
 import React, { useState, useEffect } from 'react';
 import { ChartsGrid, ChartDisplay } from '@/components/organisms';
 import { TransformedChartData } from '@/components/molecules/Charts/types';
-import { ChartService } from '@/services/chartService';
-import { ReportsService } from '@/services/reports';
+import { ChartService } from '@/features/reports/services/chartService';
+import { ReportsService } from '@/features/reports/services';
 
 // Sample data for testing
 const sampleChartData: TransformedChartData[] = [

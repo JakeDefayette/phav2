@@ -6,119 +6,105 @@
 // export { apiService } from './api';
 // export { storageService } from './storage';
 
-// Base service and error handling
-export { BaseService, ServiceError } from './base';
+// Re-export services from their new locations after refactoring
 
-// Auth service (functions)
+// Shared services
 export {
-  registerUser,
-  loginUser,
-  logoutUser,
-  getCurrentUser,
-  isAuthenticated,
-  refreshUserSession,
-  getUserSessionInfo,
+  BaseService,
+  ServiceError,
+  ValidationError,
+  DatabaseError,
   AuthError,
-} from './auth';
+  NetworkError,
+  ConfigurationError,
+  withRetry,
+  type RetryOptions,
+} from '@/shared/services/base';
 
-// Core entity services
 export {
-  practiceService as practicesService,
-  type Practice,
-  type PracticeInsert,
-  type PracticeUpdate,
-} from './practices';
+  AuthService,
+  authService,
+  type LoginCredentials,
+  type RegisterData,
+  type AuthUser,
+} from '@/shared/services/auth';
+
 export {
+  BrandingService,
+  brandingService,
+  type BrandingConfig,
+} from '@/shared/services/brandingService';
+
+export {
+  EmailService,
+  emailService,
+  type ReportDeliveryEmailOptions,
+  type ReportReadyNotificationOptions,
+  type EmailResult,
+} from '@/shared/services/email';
+
+// Feature services - Reports
+export {
+  ReportsService,
+  PDFService,
+  DeliveryService,
+  ChartService,
+  type Report,
+  type ReportInsert,
+  type ReportUpdate,
+  type ReportWithShares,
+  type ReportShare,
+  type ReportShareInsert,
+  type ViralMetrics,
+} from '@/features/reports/services';
+
+export {
+  SurveyDataMapper,
+  type ReportDataStructure,
+} from '@/features/assessment/services/SurveyDataMapper';
+
+export { ReportCacheService } from '@/features/reports/services/reportCache';
+
+// Feature services - Dashboard
+export {
+  PracticeService,
+  practiceService,
+} from '@/features/dashboard/services/practices';
+
+export {
+  ChildrenService,
   childrenService,
   type Child,
   type ChildInsert,
   type ChildUpdate,
-  type ChildWithAssessments,
-} from './children';
+} from '@/features/dashboard/services/children';
+
+// Feature services - Assessment
 export {
+  AssessmentsService,
   assessmentsService,
   type Assessment,
   type AssessmentInsert,
   type AssessmentUpdate,
-  type AssessmentWithResponses,
-  type AssessmentStats,
-} from './assessments';
+} from '@/features/assessment/services/assessments';
+
 export {
+  SurveyResponsesService,
   surveyResponsesService,
   type SurveyResponse,
   type SurveyResponseInsert,
   type SurveyResponseUpdate,
   type SurveyResponseWithQuestion,
-  type ResponseSummary,
-} from './surveyResponses';
+} from '@/features/assessment/services/surveyResponses';
+
+// Service instances for backward compatibility
+import { authService } from '@/shared/services/auth';
+import { brandingService } from '@/shared/services/brandingService';
+import { emailService } from '@/shared/services/email';
+
+// Export service instances
 export {
-  reportsService,
-  type Report,
-  type ReportInsert,
-  type ReportUpdate,
-  type ReportShare,
-  type ReportShareInsert,
-  type ReportWithShares,
-  type ViralMetrics,
-} from './reports';
-export { pdfService, PDFService, type PDFReportProps, PDFReport } from './pdf';
-
-// Additional services
-export {
-  brandingService,
-  BrandingService,
-  type BrandingConfig,
-} from './brandingService';
-export { ChartService } from './chartService';
-export { SurveyDataMapper, type ReportDataStructure } from './SurveyDataMapper';
-export {
-  EmailService,
-  type EmailResult,
-  type ReportDeliveryEmailOptions,
-} from './email';
-export { ReportCacheService } from './reportCache';
-
-// Import service instances
-import { practiceService } from './practices';
-import { childrenService } from './children';
-import { assessmentsService } from './assessments';
-import { surveyResponsesService } from './surveyResponses';
-import { reportsService } from './reports';
-import { pdfService } from './pdf';
-import { brandingService } from './brandingService';
-import { ChartService } from './chartService';
-import { ReportCacheService } from './reportCache';
-import {
-  registerUser,
-  loginUser,
-  logoutUser,
-  getCurrentUser,
-  isAuthenticated,
-  refreshUserSession,
-  getUserSessionInfo,
-} from './auth';
-
-// Create auth service object
-export const authService = {
-  registerUser,
-  loginUser,
-  logoutUser,
-  getCurrentUser,
-  isAuthenticated,
-  refreshUserSession,
-  getUserSessionInfo,
-} as const;
-
-// Service instances for easy access
-export const services = {
-  auth: authService,
-  practices: practiceService,
-  children: childrenService,
-  assessments: assessmentsService,
-  surveyResponses: surveyResponsesService,
-  reports: reportsService,
-  pdf: pdfService,
-  branding: brandingService,
-  charts: ChartService.getInstance(),
-  reportCache: ReportCacheService.getInstance(),
-} as const;
+  authService as auth,
+  brandingService as branding,
+  emailService as email,
+};

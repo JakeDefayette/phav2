@@ -1,11 +1,14 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { AuthForm } from '@/components/organisms/AuthForm';
-import { useAuth } from '@/hooks/useAuth';
-import type { LoginCredentials, RegisterCredentials } from '@/types/auth';
+import { useAuth } from '@/hooks';
+import type {
+  RegisterCredentials,
+  LoginCredentials,
+} from '@/shared/types/auth';
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -24,7 +27,7 @@ export default function RegisterPage() {
         await register(credentials as RegisterCredentials);
         router.push('/dashboard');
       } else {
-        throw new Error('Invalid registration data');
+        throw new Error('Invalid credentials for registration');
       }
     } catch (err) {
       // Error is handled by the auth context

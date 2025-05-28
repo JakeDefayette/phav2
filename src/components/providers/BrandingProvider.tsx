@@ -2,7 +2,7 @@
 
 import React, { createContext, useContext, useEffect } from 'react';
 import { BrandingData } from '@/types/branding';
-import { useBranding } from '@/hooks/useBranding';
+import { useBranding } from '@/hooks';
 
 interface BrandingContextType {
   branding: BrandingData | null;

@@ -1,10 +1,12 @@
 'use client';
 
 import { Button } from '@/components/atoms/Button';
-import { SpineDiagram } from '@/components/report/spine-diagram';
-import { BrainOMeter } from '@/components/report/brain-o-meter';
-import { OrganConnections } from '@/components/report/organ-connections';
-import { Recommendations } from '@/components/report/recommendations';
+import {
+  SpineDiagram,
+  BrainOMeter,
+  OrganConnections,
+  Recommendations,
+} from '@/components/report';
 import {
   BrandingProvider,
   useBrandingContext,

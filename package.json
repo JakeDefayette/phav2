@@ -20,6 +20,9 @@
     "test:services": "jest --testPathPattern=tests/services",
     "test:survey-mapper": "npx tsx scripts/test-survey-mapper.ts",
     "prepare": "husky",
+    "analyze": "ANALYZE=true npm run build",
+    "analyze:server": "BUNDLE_ANALYZE=server npm run build",
+    "analyze:browser": "BUNDLE_ANALYZE=browser npm run build",
     "deploy": "vercel --prod",
     "deploy:preview": "vercel"
   },
@@ -36,6 +39,7 @@
     "@supabase/auth-helpers-nextjs": "^0.10.0",
     "@supabase/ssr": "^0.6.1",
     "@supabase/supabase-js": "^2.49.8",
+    "@tanstack/react-query": "^5.77.2",
     "@vercel/blob": "^1.1.1",
     "chart.js": "^4.4.9",
     "clsx": "^2.1.1",
@@ -45,12 +49,16 @@
     "react": "^19.0.0",
     "react-chartjs-2": "^5.3.0",
     "react-dom": "^19.0.0",
+    "recharts": "^2.15.3",
     "tailwind-merge": "^3.3.0",
     "uuid": "^11.1.0",
-    "yup": "^1.6.1"
+    "yup": "^1.6.1",
+    "zod": "^3.25.32"
   },
   "devDependencies": {
+    "@next/bundle-analyzer": "^15.3.2",
     "@tailwindcss/postcss": "^4.1.7",
+    "@tanstack/react-query-devtools": "^5.77.2",
     "@testing-library/jest-dom": "^6.6.3",
     "@testing-library/react": "^16.3.0",
     "@testing-library/user-event": "^14.6.1",

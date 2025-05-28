@@ -1,92 +1,36 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { pdfService } from '@/services/pdf';
-import { Report } from '@/services/reports';
+import { PDFService, Report } from '@/services';
 
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
-    // Create sample report data
-    const sampleReport: Report = {
-      id: 'test-report-123',
-      assessment_id: 'test-assessment-456',
+    // Create a mock report for testing
+    const mockReport: Report = {
+      id: 'test-report-1',
+      assessment_id: 'test-assessment-1',
+      practice_id: 'test-practice-1',
       report_type: 'standard',
       content: {
-        child: {
-          name: 'Test Child',
-          age: 8,
-          gender: 'Other',
-        },
-        assessment: {
-          id: 'test-assessment-456',
-          brain_o_meter_score: 75,
-          completed_at: new Date().toISOString(),
-          status: 'completed',
-        },
-        categories: {
-          lifestyle: [
-            {
-              survey_question_definitions: {
-                question_text: 'How many hours of sleep does your child get?',
-              },
-              response_text: '8-9 hours',
-            },
-            {
-              survey_question_definitions: {
-                question_text: 'How often does your child exercise?',
-              },
-              response_text: 'Daily',
-            },
-          ],
-          nutrition: [
-            {
-              survey_question_definitions: {
-                question_text: 'How many servings of vegetables per day?',
-              },
-              response_text: '3-4 servings',
-            },
-          ],
-        },
-        summary: {
-          overview:
-            'This is a test report to validate PDF generation functionality.',
-          key_findings: [
-            'Good sleep habits established',
-            'Regular exercise routine',
-            'Adequate vegetable intake',
-          ],
-        },
-        recommendations: [
-          'Continue current sleep schedule',
-          'Maintain daily exercise routine',
-          'Consider adding more variety to vegetable choices',
-        ],
+        summary: 'Test report summary',
+        recommendations: ['Test recommendation 1', 'Test recommendation 2'],
+        charts: [],
       },
       generated_at: new Date().toISOString(),
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString(),
     };
 
-    const practiceInfo = {
-      name: 'Test Pediatric Practice',
-      address: '123 Health St, Wellness City, WC 12345',
-      phone: '(555) 123-4567',
-      email: 'info@testpractice.com',
-    };
+    const pdfService = new PDFService();
+    const pdfBuffer = await pdfService.generatePDFBuffer(mockReport);
 
-    // Generate PDF
-    const pdfBuffer = await pdfService.generatePDFBuffer(
-      sampleReport,
-      practiceInfo
-    );
-
-    // Return PDF as response
-    return new Response(pdfBuffer, {
+    return new NextResponse(pdfBuffer, {
+      status: 200,
       headers: {
         'Content-Type': 'application/pdf',
-        'Content-Disposition': 'inline; filename="test-report.pdf"',
-        'Cache-Control': 'no-cache',
+        'Content-Disposition': 'attachment; filename="test-report.pdf"',
       },
     });
   } catch (error) {
+    console.error('PDF generation error:', error);
     return NextResponse.json(
       { error: 'Failed to generate PDF' },
       { status: 500 }
@@ -98,6 +42,8 @@ export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
     const { reportData, practiceInfo } = body;
+
+    const pdfService = new PDFService();
 
     // Validate report data
     if (!pdfService.validateReportData(reportData)) {

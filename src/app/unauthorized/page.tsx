@@ -2,7 +2,7 @@
 
 import React from 'react';
 import Link from 'next/link';
-import { useAuth } from '@/hooks/useAuth';
+import { useAuth } from '@/hooks';
 import { Button } from '@/components/atoms/Button';
 import { Card } from '@/components/molecules/Card';
 

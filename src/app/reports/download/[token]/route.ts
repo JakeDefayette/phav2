@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabaseServer } from '@/lib/supabase-server';
-import { PDFService } from '@/services/pdf';
+import { PDFService } from '@/services';
 
 export async function GET(
   request: NextRequest,

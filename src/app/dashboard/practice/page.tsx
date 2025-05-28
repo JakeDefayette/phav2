@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { useRole } from '@/hooks/useRole';
+import { useRole } from '@/hooks';
 import { Button } from '@/components/atoms/Button';
 import { RoleGuard } from '@/components/atoms/RoleGuard';
 

@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
-import { AuthProvider } from '@/hooks/useAuth';
+import { AuthProvider } from '@/hooks';
 import { AuthErrorBoundary } from '@/components/organisms/AuthErrorBoundary';
 import './globals.css';
 
