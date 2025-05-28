@@ -1,11 +1,11 @@
 # Task ID: 10
-# Title: Implement Social Media Sharing and Viral Tracking
+# Title: Integrate Email Service (Resend)
 # Status: pending
-# Dependencies: 5, 7
+# Dependencies: 3, 9
 # Priority: medium
-# Description: Add social media sharing and viral marketing tracking features.
+# Description: Integrate Resend for automated email delivery and campaign management.
 # Details:
-Integrate social sharing APIs (Facebook, Twitter, LinkedIn). Track sharing events and viral coefficient. Use practice-specific landing pages for sharing links.
+Use Resend API (latest) for sending emails. Implement email templates, scheduling, and tracking. Support bi-weekly educational sequences and custom content.
 
 # Test Strategy:
-Test sharing functionality and tracking of sharing events.
+Test email delivery, scheduling, and template rendering.

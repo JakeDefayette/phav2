@@ -1,11 +1,11 @@
 # Task ID: 12
-# Title: Optimize for Performance and Bundle Size
+# Title: Implement Social Media Sharing and Viral Tracking
 # Status: pending
-# Dependencies: 1, 4, 5
-# Priority: high
-# Description: Optimize application for fast load times and minimal bundle size.
+# Dependencies: 5, 9
+# Priority: medium
+# Description: Add social media sharing and viral marketing tracking features.
 # Details:
-Implement code splitting, tree-shaking, and dynamic imports. Enforce file size limits (React components <200 lines, utility functions <100 lines, etc.). Use Lighthouse CI and bundle analyzer. Target initial load <50KB, route chunks <25KB, total app <200KB gzipped.
+Integrate social sharing APIs (Facebook, Twitter, LinkedIn). Track sharing events and viral coefficient. Use practice-specific landing pages for sharing links.
 
 # Test Strategy:
-Run Lighthouse audits, bundle analysis, and performance tests.
+Test sharing functionality and tracking of sharing events.

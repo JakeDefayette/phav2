@@ -1,11 +1,11 @@
 # Task ID: 15
-# Title: Integrate Payment Processing (Stripe)
-# Status: pending
+# Title: Implement Security and Compliance Features
+# Status: in-progress
 # Dependencies: 2, 3
-# Priority: medium
-# Description: Add Stripe integration for payment processing and subscription management.
+# Priority: high
+# Description: Add security and compliance features including HTTPS, data encryption, and HIPAA-ready architecture.
 # Details:
-Use Stripe API (latest) for payments and subscriptions. Support practice billing and premium features. Implement secure checkout and subscription management.
+Enforce HTTPS, data encryption at rest, secure authentication, input validation, session timeout, audit trails, and consent management. Prepare for future HIPAA compliance.
 
 # Test Strategy:
-Test payment processing, subscription management, and security.
+Test security headers, encryption, session management, and audit trails.

@@ -1,6 +1,6 @@
 # Task ID: 5
 # Title: Implement Dynamic Report Generation
-# Status: pending
+# Status: done
 # Dependencies: 3, 4
 # Priority: medium
 # Description: Develop a system to generate personalized PDF reports from survey responses for online use.

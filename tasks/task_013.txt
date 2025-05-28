@@ -1,11 +1,11 @@
 # Task ID: 13
-# Title: Implement Security and Compliance Features
-# Status: in-progress
-# Dependencies: 2, 3
-# Priority: high
-# Description: Add security and compliance features including HTTPS, data encryption, and HIPAA-ready architecture.
+# Title: Build Content Library and Template Engine
+# Status: pending
+# Dependencies: 9, 10
+# Priority: medium
+# Description: Develop a content library and template engine for educational content and campaigns.
 # Details:
-Enforce HTTPS, data encryption at rest, secure authentication, input validation, session timeout, audit trails, and consent management. Prepare for future HIPAA compliance.
+Create a content management system for text, images, and videos. Support customizable templates and multi-format content. Use React components for content rendering.
 
 # Test Strategy:
-Test security headers, encryption, session management, and audit trails.
+Test content upload, template customization, and rendering.

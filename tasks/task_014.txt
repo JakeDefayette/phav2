@@ -1,11 +1,11 @@
 # Task ID: 14
-# Title: Develop Tablet and Offline Survey Experience
+# Title: Optimize for Performance and Bundle Size
 # Status: pending
-# Dependencies: 4, 12
-# Priority: medium
-# Description: Build tablet-optimized, offline-capable survey experience for waiting rooms.
+# Dependencies: 1, 4, 5
+# Priority: high
+# Description: Optimize application for fast load times and minimal bundle size.
 # Details:
-Use Progressive Web App (PWA) capabilities for offline support. Optimize UI for tablets. Integrate with existing patient check-in processes. Store survey responses locally and sync when online.
+Implement code splitting, tree-shaking, and dynamic imports. Enforce file size limits (React components <200 lines, utility functions <100 lines, etc.). Use Lighthouse CI and bundle analyzer. Target initial load <50KB, route chunks <25KB, total app <200KB gzipped.
 
 # Test Strategy:
-Test offline survey completion, data sync, and tablet responsiveness.
+Run Lighthouse audits, bundle analysis, and performance tests.

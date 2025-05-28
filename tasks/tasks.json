@@ -84,9 +84,7 @@
             1,
             3,
             4,
-            5,
-            7,
-            8
+            5
           ],
           "details": "Connect the repository to Vercel, configure project settings, and verify successful deployment of the modular Next.js app.\n<info added on 2025-05-26T18:01:13.809Z>\nImplementation Plan for Vercel Deployment:\n\n1. Repository Assessment:\n   - Verify Git repository is properly configured\n   - Ensure all code is committed and pushed to remote repository\n   - Check that the project builds successfully locally\n\n2. Vercel Configuration:\n   - Create vercel.json configuration file if needed\n   - Set up environment variables for deployment\n   - Configure build settings and output directory\n\n3. Deployment Setup:\n   - Connect repository to Vercel (either via GitHub integration or Vercel CLI)\n   - Configure project settings in Vercel dashboard\n   - Set up automatic deployments on push to main branch\n\n4. Verification:\n   - Test successful deployment\n   - Verify all features work in production environment\n   - Check that the modular component library renders correctly\n   - Ensure build process completes without errors\n\n5. Documentation:\n   - Document deployment process\n   - Add deployment status and URL to project documentation\n</info added on 2025-05-26T18:01:13.809Z>\n<info added on 2025-05-26T18:07:17.654Z>\nVercel Deployment Configuration Completed:\n\n1. Repository Assessment:\n   - Git repository verified with clean working tree\n   - Build process tested successfully (101KB bundle, under 200KB target)\n   - All dependencies and scripts functioning properly\n\n2. Vercel Configuration:\n   - Created optimized vercel.json with:\n     - Security headers (XSS protection, content type options, frame options)\n     - Static asset caching (1-year cache for immutable assets)\n     - Function timeout configuration (30 seconds)\n     - Regional deployment (US East - iad1)\n     - Build and install command optimization\n\n3. Health Check Endpoint:\n   - Implemented /api/health endpoint for monitoring\n   - Returns JSON with status, timestamp, version, and environment\n   - Tested locally and verified\n   - Accessible via /health rewrite rule\n\n4. Deployment Scripts:\n   - Added npm run deploy for production deployment\n   - Added npm run deploy:preview for preview deployments\n   - Integrated with existing code quality checks\n\n5. Documentation:\n   - Created docs/deployment.md with comprehensive deployment guide\n   - Includes Vercel dashboard and CLI deployment methods\n   - Environment variable configuration instructions\n   - Performance monitoring and troubleshooting guides\n   - Security features documentation\n   - Bundle analysis and performance targets verification\n\n6. Performance Verification:\n   - Current bundle: 101KB (Target: <200KB)\n   - Route chunks: <1KB (Target: <25KB)\n   - All PRD performance targets exceeded\n\n7. Security Implementation:\n   - Content Security Policy headers\n   - XSS protection enabled\n   - Frame options configured\n   - Referrer policy set\n   - Static asset optimization\n\nProject is now fully configured for Vercel deployment with optimized performance, security, and monitoring capabilities.\n</info added on 2025-05-26T18:07:17.654Z>",
           "status": "done"
@@ -302,7 +300,7 @@
       "id": 5,
       "title": "Implement Dynamic Report Generation",
       "description": "Develop a system to generate personalized PDF reports from survey responses for online use.",
-      "status": "pending",
+      "status": "done",
       "dependencies": [
         3,
         4
@@ -382,8 +380,10 @@
     },
     {
       "id": 6,
-      "title": "Refactor demoreport.tsx into Dynamic, Data-Driven Report System",
-      "description": "Convert the static demoreport.tsx template into a dynamic React component that generates customizable reports from real survey data, supporting both web and PDF rendering. Implement an automated survey-to-report workflow for immediate report generation upon survey completion.",
+      "title": "Core Refactoring & Component Architecture",
+      "description": "Refactor the static demoreport.tsx template into a modular, reusable React component architecture, separating presentational and data logic, and establishing the foundation for dynamic report generation.",
+      "details": "Begin by analyzing the existing demoreport.tsx template to identify logical UI sections and data dependencies. Decompose the template into atomic design components (atoms, molecules, organisms) and organize them within a clear directory structure under /src/components, following best practices for scalable React architecture. Separate presentational components (focused on UI) from container components (handling data and logic), leveraging patterns such as container/presentational split, compound components, and render props where appropriate. Define clear TypeScript interfaces and prop types for each component to ensure reusability and type safety. Implement responsive design using CSS-in-JS or utility-first CSS frameworks, ensuring accessibility and mobile-first layouts. Document each component with usage examples and prop documentation. Integrate the new architecture with the dynamic report generation logic, ensuring components are parameterized to accept data from the survey and database. Coordinate with the report generation system to support dynamic rendering and branding. Maintain code quality with ESLint, Prettier, and thorough inline documentation.",
+      "testStrategy": "1. Verify that demoreport.tsx is fully refactored into atomic, reusable components with no duplicated logic. 2. Ensure presentational and container components are clearly separated and follow established patterns. 3. Confirm all components are parameterized, type-safe, and documented with usage examples. 4. Test responsive behavior across devices and browsers. 5. Integrate with dynamic report generation to validate that components render correctly with real survey data. 6. Run unit and integration tests for all new components. 7. Review code for adherence to architectural and style guidelines.",
       "status": "pending",
       "dependencies": [
         3,
@@ -391,49 +391,200 @@
         5
       ],
       "priority": "medium",
-      "details": "Refactor demoreport.tsx to separate presentational and data logic, transforming static content into reusable, parameterized components. Integrate the component with the survey data model, ensuring it can accept and render real user responses, charts, and practice branding dynamically. Implement data fetching and mapping logic to populate the report with live data. Create an automated workflow that generates reports immediately after survey completion. Implement Next.js Server Actions for form handling and automatic redirect to the report page. Develop a dynamic report view at /dashboard/reports/[reportId] with PDF export functionality. Use React-PDF with dynamic imports or jsPDF for client-side PDF generation. Ensure the component is modular for future template expansion and supports responsive design. Implement user experience enhancements including completion confirmation, 'View Report' and 'Download PDF' buttons, and report sharing capabilities. Document the component API and provide usage examples for both web and PDF contexts.",
-      "testStrategy": "1. Unit test the refactored report component for correct rendering with various data inputs. 2. Verify that all dynamic fields populate accurately from real survey data. 3. Test PDF export for layout consistency and data integrity. 4. Perform regression testing to ensure no loss of existing report features. 5. Manually review web and PDF outputs for branding, responsiveness, and accessibility. 6. Validate integration with the dynamic report generation system and survey data pipeline. 7. Test the complete survey-to-report automation workflow, including server actions and redirects. 8. Verify the functionality of 'View Report' and 'Download PDF' buttons. 9. Test report sharing capabilities. 10. Ensure proper handling of edge cases such as incomplete surveys or data errors.",
       "subtasks": [
         {
-          "id": "6.1",
-          "title": "Implement Survey Completion Flow",
-          "description": "Add onComplete callback to survey that automatically redirects to report page after submission",
-          "status": "pending"
+          "id": 1,
+          "title": "Analyze and Modularize Existing Template",
+          "description": "Review the current demoreport.tsx template to identify logical UI sections and data dependencies. Break down the template into modular components, establishing a clear separation between presentational and container components.",
+          "dependencies": [],
+          "details": "Map out the structure of the existing template, noting repeated patterns and distinct UI blocks. Propose an initial modular breakdown that will inform atomic design implementation.",
+          "status": "pending",
+          "testStrategy": "Verify that all logical UI sections and data dependencies are identified and mapped. Ensure the proposed modular breakdown covers the entire template without redundancy.",
+          "parentTaskId": 6
         },
         {
-          "id": "6.2",
-          "title": "Implement Server Actions",
-          "description": "Use Next.js Server Actions for form handling and automatic redirect using redirect() function",
-          "status": "pending"
+          "id": 2,
+          "title": "Implement Atomic Design Component Structure",
+          "description": "Decompose the template into atomic design components (atoms, molecules, organisms) and organize them within a scalable directory structure under /src/components.",
+          "dependencies": [
+            1
+          ],
+          "details": "Create React components following atomic design principles. Ensure components are reusable, composable, and organized for scalability. Use best practices for directory layout and naming conventions.",
+          "status": "pending",
+          "testStrategy": "Check that all components fit atomic design categories and are placed in the correct directories. Confirm reusability by composing higher-level components from lower-level ones.",
+          "parentTaskId": 6
         },
         {
-          "id": "6.3",
-          "title": "Create Dynamic Report View",
-          "description": "Develop /dashboard/reports/[reportId] page for immediate web report viewing with PDF export option",
-          "status": "pending"
+          "id": 3,
+          "title": "Define TypeScript Interfaces and Prop Types",
+          "description": "Establish clear TypeScript interfaces and prop types for each component to ensure type safety and reusability.",
+          "dependencies": [
+            2
+          ],
+          "details": "For each component, define explicit TypeScript interfaces for props and state. Ensure all data passed between components is strongly typed and documented.",
+          "status": "pending",
+          "testStrategy": "Run TypeScript compiler to ensure type correctness. Write unit tests to validate prop types and interface contracts.",
+          "parentTaskId": 6
         },
         {
-          "id": "6.4",
-          "title": "Integrate PDF Generation Library",
-          "description": "Implement React-PDF with dynamic imports or jsPDF for client-side PDF generation",
-          "status": "pending"
+          "id": 4,
+          "title": "Implement Responsive and Accessible Design",
+          "description": "Apply responsive design principles using CSS-in-JS or utility-first CSS frameworks, ensuring accessibility and mobile-first layouts.",
+          "dependencies": [
+            3
+          ],
+          "details": "Style components to be responsive across devices and screen sizes. Incorporate accessibility best practices, such as semantic HTML and ARIA attributes.",
+          "status": "pending",
+          "testStrategy": "Test components on multiple devices and screen sizes. Use accessibility testing tools to verify compliance with WCAG standards.",
+          "parentTaskId": 6
         },
         {
-          "id": "6.5",
-          "title": "Implement Data Architecture",
-          "description": "Create workflow: Survey completion → Server Action → Database save → Redirect to report → Generate views",
-          "status": "pending"
-        },
-        {
-          "id": "6.6",
-          "title": "Enhance User Experience",
-          "description": "Add completion confirmation, 'View Report' and 'Download PDF' buttons, and enable report sharing",
-          "status": "pending"
+          "id": 5,
+          "title": "Document Components and Usage",
+          "description": "Create comprehensive documentation for each component, including usage examples, prop documentation, and integration guidelines.",
+          "dependencies": [
+            4
+          ],
+          "details": "Write clear documentation for each component, covering purpose, props, usage examples, and integration with dynamic report generation logic. Include inline comments and maintain code quality with ESLint and Prettier.",
+          "status": "pending",
+          "testStrategy": "Review documentation for completeness and clarity. Ensure all components have usage examples and prop documentation. Run linting and formatting tools to maintain code quality.",
+          "parentTaskId": 6
         }
       ]
     },
     {
       "id": 7,
+      "title": "Implement Supabase Integration & Real-time Data Flow",
+      "description": "Integrate Supabase to enable real-time survey data retrieval, optimized report generation, and seamless data flow throughout the application.",
+      "details": "1. Set up Supabase Realtime subscriptions using the client library to listen for INSERT, UPDATE, and DELETE events on survey response tables, leveraging both Postgres Changes and Broadcast from Database as appropriate for scalability and selective data delivery[1][4].\n2. Design and implement efficient SQL queries and Supabase API calls for aggregating and retrieving report data, optimizing for minimal latency and bandwidth.\n3. Develop secure Server Actions (e.g., Next.js API routes or server functions) to handle form submissions, perform input validation (using Yup or Zod), and execute transactional writes to Supabase, ensuring atomicity and error handling.\n4. Implement comprehensive validation and error handling at both client (Formik/Yup) and server levels, providing clear user feedback and robust logging.\n5. Establish an end-to-end workflow: from survey submission, through secure data write, to real-time updates that trigger report regeneration and UI refreshes, ensuring seamless user experience and data consistency[2][3].\n6. Document integration patterns and provide code samples for subscribing to real-time updates, handling optimistic UI updates, and managing subscription lifecycles.",
+      "testStrategy": "- Write integration tests to verify real-time updates are received and reflected in the UI upon database changes (insert, update, delete) to survey response tables.\n- Simulate concurrent survey submissions and validate that reports update in real time without data loss or race conditions.\n- Test Server Actions for secure, validated, and transactional writes, including error scenarios (invalid data, network failures).\n- Perform end-to-end tests: submit a survey, confirm data is written to Supabase, and verify that the report UI updates in real time.\n- Review logs and error handling to ensure all failure modes are gracefully managed and surfaced to users.",
+      "status": "pending",
+      "dependencies": [
+        3,
+        4,
+        5,
+        6
+      ],
+      "priority": "medium",
+      "subtasks": [
+        {
+          "id": 1,
+          "title": "API Authentication and Configuration",
+          "description": "Set up secure authentication with the email API and configure basic connection parameters",
+          "dependencies": [],
+          "details": "Implement standard and secure authentication methods for the email API. Configure API keys, tokens, or OAuth as required by the provider. Set up error handling for authentication failures and implement proper credential management.",
+          "status": "pending"
+        },
+        {
+          "id": 2,
+          "title": "Email Template System Implementation",
+          "description": "Create a flexible template system for managing email content and personalization",
+          "dependencies": [
+            1
+          ],
+          "details": "Develop a template management system that supports dynamic content insertion, responsive design, and proper formatting. Implement template versioning and testing capabilities to ensure emails render correctly across devices and clients.",
+          "status": "pending"
+        },
+        {
+          "id": 3,
+          "title": "Scheduling and Delivery Mechanism",
+          "description": "Build a robust scheduling system with rate limiting compliance and retry logic",
+          "dependencies": [
+            1,
+            2
+          ],
+          "details": "Implement scheduling functionality that respects API rate limits. Create a queuing system for handling large volumes of emails. Develop retry logic for failed delivery attempts and implement monitoring for delivery status.",
+          "status": "pending"
+        },
+        {
+          "id": 4,
+          "title": "Analytics and Tracking Integration",
+          "description": "Implement comprehensive tracking for email opens, clicks, and engagement metrics",
+          "dependencies": [
+            3
+          ],
+          "details": "Set up tracking mechanisms for email opens, clicks, and other engagement metrics. Create a data storage solution for tracking information. Implement reporting capabilities to analyze email performance and deliverability rates.",
+          "status": "pending"
+        },
+        {
+          "id": 5,
+          "title": "Testing and Optimization Framework",
+          "description": "Develop a comprehensive testing framework for email deliverability and performance",
+          "dependencies": [
+            2,
+            3,
+            4
+          ],
+          "details": "Create automated tests for email delivery across different providers. Implement spam score checking and deliverability optimization. Set up A/B testing capabilities for email content and sending parameters. Develop a monitoring system for ongoing performance analysis.",
+          "status": "pending"
+        }
+      ]
+    },
+    {
+      "id": 8,
+      "title": "Implement PDF Generation, Dynamic Report Viewing, and UX Enhancements for Survey Reports",
+      "description": "Integrate client-side PDF export, dynamic report viewing, and user experience improvements into the survey report system, focusing on performance and sharing capabilities.",
+      "details": "1. Integrate a client-side PDF generation library, prioritizing React-PDF or @react-pdf/renderer for seamless React compatibility and modular PDF creation using React components. If advanced customization or editing is required, consider alternatives like jsPDF or pdf-lib, but ensure the solution supports dynamic, data-driven PDF generation and efficient rendering in the browser.[2][3][4]\n2. Build a dynamic report view at /dashboard/reports/[reportId] using the modular component architecture established in previous tasks. Ensure components are reusable, data-driven, and optimized for real-time updates via Supabase integration.\n3. Enhance user experience by adding a prominent PDF download button, completion confirmations (e.g., toast notifications), and smooth UI transitions (e.g., loading spinners, fade-ins) for report generation and sharing workflows.\n4. Optimize PDF generation and report rendering for minimal memory usage and fast load times by leveraging code-splitting, memoization, and efficient data fetching. Profile performance and address bottlenecks, especially for large or complex reports.\n5. Implement sharing features, such as generating shareable links or enabling direct sharing via email, ensuring secure access controls.\n6. Document the implementation and provide clear usage instructions for both end-users and developers.",
+      "testStrategy": "- Verify that PDF export produces accurate, branded, and complete reports for a variety of survey data scenarios, including edge cases (e.g., large datasets, missing fields).\n- Test the dynamic report view at /dashboard/reports/[reportId] for correct data loading, real-time updates, and UI responsiveness across devices and browsers.\n- Confirm that the PDF download button, completion confirmations, and UI transitions function smoothly and enhance the user experience.\n- Profile and benchmark PDF generation and report rendering for performance, ensuring minimal render time and memory usage.\n- Test sharing features for correct link generation, access control, and usability.\n- Conduct comprehensive manual and automated tests covering PDF output, dynamic content, UI/UX, and sharing workflows.",
+      "status": "pending",
+      "dependencies": [
+        6,
+        7
+      ],
+      "priority": "medium",
+      "subtasks": [
+        {
+          "id": 1,
+          "title": "PDF Library Integration",
+          "description": "Integrate a robust PDF generation library to handle dynamic report creation",
+          "dependencies": [],
+          "details": "Research and implement a PDF generation library that supports dynamic content, charts, and tables. Ensure the library can handle various data formats and maintain consistent styling across generated documents.",
+          "status": "pending"
+        },
+        {
+          "id": 2,
+          "title": "Dynamic Report Template Development",
+          "description": "Create flexible report templates that can adapt to different data views and user preferences",
+          "dependencies": [
+            1
+          ],
+          "details": "Design and implement customizable report templates that can dynamically incorporate analytics data, charts, and metrics. Include options for different layouts, data visualization styles, and content sections based on user needs.",
+          "status": "pending"
+        },
+        {
+          "id": 3,
+          "title": "User Interface Enhancements for Report Generation",
+          "description": "Develop intuitive UI components for report customization and generation",
+          "dependencies": [
+            2
+          ],
+          "details": "Create user-friendly interfaces for selecting report parameters, choosing data to include, previewing reports, and initiating the generation process. Implement progress indicators and clear feedback mechanisms during PDF creation.",
+          "status": "pending"
+        },
+        {
+          "id": 4,
+          "title": "Performance Optimization for PDF Generation",
+          "description": "Optimize the PDF generation process for speed and resource efficiency",
+          "dependencies": [
+            3
+          ],
+          "details": "Implement caching strategies, background processing, and resource management techniques to ensure PDF generation remains responsive even with large datasets or complex reports. Monitor and optimize memory usage during the generation process.",
+          "status": "pending"
+        },
+        {
+          "id": 5,
+          "title": "Comprehensive Testing of PDF Functionality",
+          "description": "Conduct thorough testing of all PDF generation features and user interactions",
+          "dependencies": [
+            4
+          ],
+          "details": "Develop and execute test cases covering various report types, data volumes, user interactions, and edge cases. Test across different browsers and devices to ensure consistent functionality and appearance of generated PDFs.",
+          "status": "pending"
+        }
+      ]
+    },
+    {
+      "id": 9,
       "title": "Build Chiropractor Dashboard",
       "description": "Develop the chiropractor dashboard for practice management and customization.",
       "details": "Create dashboard layout with reusable components. Implement practice branding, contact management, and video upload. Use Next.js App Router for routing. Support customization of email templates and assessment questions.",
@@ -447,7 +598,7 @@
       "subtasks": []
     },
     {
-      "id": 8,
+      "id": 10,
       "title": "Integrate Email Service (Resend)",
       "description": "Integrate Resend for automated email delivery and campaign management.",
       "details": "Use Resend API (latest) for sending emails. Implement email templates, scheduling, and tracking. Support bi-weekly educational sequences and custom content.",
@@ -455,13 +606,13 @@
       "priority": "medium",
       "dependencies": [
         3,
-        7
+        9
       ],
       "status": "pending",
       "subtasks": []
     },
     {
-      "id": 9,
+      "id": 11,
       "title": "Develop Analytics and Reporting Module",
       "description": "Build analytics dashboard for survey completion, sharing, and lead conversion tracking.",
       "details": "Use Chart.js (v4+) or similar for data visualization. Track survey completion, report sharing, and viral coefficient. Implement lead generation and conversion metrics.",
@@ -469,13 +620,13 @@
       "priority": "medium",
       "dependencies": [
         3,
-        7
+        9
       ],
       "status": "pending",
       "subtasks": []
     },
     {
-      "id": 10,
+      "id": 12,
       "title": "Implement Social Media Sharing and Viral Tracking",
       "description": "Add social media sharing and viral marketing tracking features.",
       "details": "Integrate social sharing APIs (Facebook, Twitter, LinkedIn). Track sharing events and viral coefficient. Use practice-specific landing pages for sharing links.",
@@ -483,27 +634,27 @@
       "priority": "medium",
       "dependencies": [
         5,
-        7
+        9
       ],
       "status": "pending",
       "subtasks": []
     },
     {
-      "id": 11,
+      "id": 13,
       "title": "Build Content Library and Template Engine",
       "description": "Develop a content library and template engine for educational content and campaigns.",
       "details": "Create a content management system for text, images, and videos. Support customizable templates and multi-format content. Use React components for content rendering.",
       "testStrategy": "Test content upload, template customization, and rendering.",
       "priority": "medium",
       "dependencies": [
-        7,
-        8
+        9,
+        10
       ],
       "status": "pending",
       "subtasks": []
     },
     {
-      "id": 12,
+      "id": 14,
       "title": "Optimize for Performance and Bundle Size",
       "description": "Optimize application for fast load times and minimal bundle size.",
       "details": "Implement code splitting, tree-shaking, and dynamic imports. Enforce file size limits (React components <200 lines, utility functions <100 lines, etc.). Use Lighthouse CI and bundle analyzer. Target initial load <50KB, route chunks <25KB, total app <200KB gzipped.",
@@ -518,7 +669,7 @@
       "subtasks": []
     },
     {
-      "id": 13,
+      "id": 15,
       "title": "Implement Security and Compliance Features",
       "description": "Add security and compliance features including HTTPS, data encryption, and HIPAA-ready architecture.",
       "details": "Enforce HTTPS, data encryption at rest, secure authentication, input validation, session timeout, audit trails, and consent management. Prepare for future HIPAA compliance.",
@@ -532,7 +683,7 @@
       "subtasks": []
     },
     {
-      "id": 14,
+      "id": 16,
       "title": "Develop Tablet and Offline Survey Experience",
       "description": "Build tablet-optimized, offline-capable survey experience for waiting rooms.",
       "details": "Use Progressive Web App (PWA) capabilities for offline support. Optimize UI for tablets. Integrate with existing patient check-in processes. Store survey responses locally and sync when online.",
@@ -540,21 +691,7 @@
       "priority": "medium",
       "dependencies": [
         4,
-        12
-      ],
-      "status": "pending",
-      "subtasks": []
-    },
-    {
-      "id": 15,
-      "title": "Integrate Payment Processing (Stripe)",
-      "description": "Add Stripe integration for payment processing and subscription management.",
-      "details": "Use Stripe API (latest) for payments and subscriptions. Support practice billing and premium features. Implement secure checkout and subscription management.",
-      "testStrategy": "Test payment processing, subscription management, and security.",
-      "priority": "medium",
-      "dependencies": [
-        2,
-        3
+        14
       ],
       "status": "pending",
       "subtasks": []

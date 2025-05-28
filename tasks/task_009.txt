@@ -1,11 +1,11 @@
 # Task ID: 9
-# Title: Develop Analytics and Reporting Module
+# Title: Build Chiropractor Dashboard
 # Status: pending
-# Dependencies: 3, 7
+# Dependencies: 2, 3
 # Priority: medium
-# Description: Build analytics dashboard for survey completion, sharing, and lead conversion tracking.
+# Description: Develop the chiropractor dashboard for practice management and customization.
 # Details:
-Use Chart.js (v4+) or similar for data visualization. Track survey completion, report sharing, and viral coefficient. Implement lead generation and conversion metrics.
+Create dashboard layout with reusable components. Implement practice branding, contact management, and video upload. Use Next.js App Router for routing. Support customization of email templates and assessment questions.
 
 # Test Strategy:
-Test data visualization, metric calculation, and dashboard updates.
+Test dashboard navigation, customization features, and data display.

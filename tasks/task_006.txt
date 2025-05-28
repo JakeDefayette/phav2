@@ -1,49 +1,43 @@
 # Task ID: 6
-# Title: Refactor demoreport.tsx into Dynamic, Data-Driven Report System
+# Title: Core Refactoring & Component Architecture
 # Status: pending
 # Dependencies: 3, 4, 5
 # Priority: medium
-# Description: Convert the static demoreport.tsx template into a dynamic React component that generates customizable reports from real survey data, supporting both web and PDF rendering. Implement an automated survey-to-report workflow for immediate report generation upon survey completion.
+# Description: Refactor the static demoreport.tsx template into a modular, reusable React component architecture, separating presentational and data logic, and establishing the foundation for dynamic report generation.
 # Details:
-Refactor demoreport.tsx to separate presentational and data logic, transforming static content into reusable, parameterized components. Integrate the component with the survey data model, ensuring it can accept and render real user responses, charts, and practice branding dynamically. Implement data fetching and mapping logic to populate the report with live data. Create an automated workflow that generates reports immediately after survey completion. Implement Next.js Server Actions for form handling and automatic redirect to the report page. Develop a dynamic report view at /dashboard/reports/[reportId] with PDF export functionality. Use React-PDF with dynamic imports or jsPDF for client-side PDF generation. Ensure the component is modular for future template expansion and supports responsive design. Implement user experience enhancements including completion confirmation, 'View Report' and 'Download PDF' buttons, and report sharing capabilities. Document the component API and provide usage examples for both web and PDF contexts.
+Begin by analyzing the existing demoreport.tsx template to identify logical UI sections and data dependencies. Decompose the template into atomic design components (atoms, molecules, organisms) and organize them within a clear directory structure under /src/components, following best practices for scalable React architecture. Separate presentational components (focused on UI) from container components (handling data and logic), leveraging patterns such as container/presentational split, compound components, and render props where appropriate. Define clear TypeScript interfaces and prop types for each component to ensure reusability and type safety. Implement responsive design using CSS-in-JS or utility-first CSS frameworks, ensuring accessibility and mobile-first layouts. Document each component with usage examples and prop documentation. Integrate the new architecture with the dynamic report generation logic, ensuring components are parameterized to accept data from the survey and database. Coordinate with the report generation system to support dynamic rendering and branding. Maintain code quality with ESLint, Prettier, and thorough inline documentation.
 
 # Test Strategy:
-1. Unit test the refactored report component for correct rendering with various data inputs. 2. Verify that all dynamic fields populate accurately from real survey data. 3. Test PDF export for layout consistency and data integrity. 4. Perform regression testing to ensure no loss of existing report features. 5. Manually review web and PDF outputs for branding, responsiveness, and accessibility. 6. Validate integration with the dynamic report generation system and survey data pipeline. 7. Test the complete survey-to-report automation workflow, including server actions and redirects. 8. Verify the functionality of 'View Report' and 'Download PDF' buttons. 9. Test report sharing capabilities. 10. Ensure proper handling of edge cases such as incomplete surveys or data errors.
+1. Verify that demoreport.tsx is fully refactored into atomic, reusable components with no duplicated logic. 2. Ensure presentational and container components are clearly separated and follow established patterns. 3. Confirm all components are parameterized, type-safe, and documented with usage examples. 4. Test responsive behavior across devices and browsers. 5. Integrate with dynamic report generation to validate that components render correctly with real survey data. 6. Run unit and integration tests for all new components. 7. Review code for adherence to architectural and style guidelines.
 
 # Subtasks:
-## 6.1. Implement Survey Completion Flow [pending]
+## 1. Analyze and Modularize Existing Template [pending]
 ### Dependencies: None
-### Description: Add onComplete callback to survey that automatically redirects to report page after submission
+### Description: Review the current demoreport.tsx template to identify logical UI sections and data dependencies. Break down the template into modular components, establishing a clear separation between presentational and container components.
 ### Details:
+Map out the structure of the existing template, noting repeated patterns and distinct UI blocks. Propose an initial modular breakdown that will inform atomic design implementation.
 
-
-## 6.2. Implement Server Actions [pending]
-### Dependencies: None
-### Description: Use Next.js Server Actions for form handling and automatic redirect using redirect() function
+## 2. Implement Atomic Design Component Structure [pending]
+### Dependencies: 6.1
+### Description: Decompose the template into atomic design components (atoms, molecules, organisms) and organize them within a scalable directory structure under /src/components.
 ### Details:
+Create React components following atomic design principles. Ensure components are reusable, composable, and organized for scalability. Use best practices for directory layout and naming conventions.
 
-
-## 6.3. Create Dynamic Report View [pending]
-### Dependencies: None
-### Description: Develop /dashboard/reports/[reportId] page for immediate web report viewing with PDF export option
+## 3. Define TypeScript Interfaces and Prop Types [pending]
+### Dependencies: 6.2
+### Description: Establish clear TypeScript interfaces and prop types for each component to ensure type safety and reusability.
 ### Details:
+For each component, define explicit TypeScript interfaces for props and state. Ensure all data passed between components is strongly typed and documented.
 
-
-## 6.4. Integrate PDF Generation Library [pending]
-### Dependencies: None
-### Description: Implement React-PDF with dynamic imports or jsPDF for client-side PDF generation
+## 4. Implement Responsive and Accessible Design [pending]
+### Dependencies: 6.3
+### Description: Apply responsive design principles using CSS-in-JS or utility-first CSS frameworks, ensuring accessibility and mobile-first layouts.
 ### Details:
+Style components to be responsive across devices and screen sizes. Incorporate accessibility best practices, such as semantic HTML and ARIA attributes.
 
-
-## 6.5. Implement Data Architecture [pending]
-### Dependencies: None
-### Description: Create workflow: Survey completion → Server Action → Database save → Redirect to report → Generate views
+## 5. Document Components and Usage [pending]
+### Dependencies: 6.4
+### Description: Create comprehensive documentation for each component, including usage examples, prop documentation, and integration guidelines.
 ### Details:
-
-
-## 6.6. Enhance User Experience [pending]
-### Dependencies: None
-### Description: Add completion confirmation, 'View Report' and 'Download PDF' buttons, and enable report sharing
-### Details:
-
+Write clear documentation for each component, covering purpose, props, usage examples, and integration with dynamic report generation logic. Include inline comments and maintain code quality with ESLint and Prettier.
 
