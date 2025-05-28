@@ -1119,3 +1119,6 @@ export const Constants = {
     },
   },
 } as const;
+
+// Convenience type exports
+export type Practice = Tables<'practices'>;

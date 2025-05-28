@@ -1,11 +1,49 @@
 # Task ID: 6
-# Title: Build Chiropractor Dashboard
+# Title: Refactor demoreport.tsx into Dynamic, Data-Driven Report System
 # Status: pending
-# Dependencies: 2, 3
+# Dependencies: 3, 4, 5
 # Priority: medium
-# Description: Develop the chiropractor dashboard for practice management and customization.
+# Description: Convert the static demoreport.tsx template into a dynamic React component that generates customizable reports from real survey data, supporting both web and PDF rendering. Implement an automated survey-to-report workflow for immediate report generation upon survey completion.
 # Details:
-Create dashboard layout with reusable components. Implement practice branding, contact management, and video upload. Use Next.js App Router for routing. Support customization of email templates and assessment questions.
+Refactor demoreport.tsx to separate presentational and data logic, transforming static content into reusable, parameterized components. Integrate the component with the survey data model, ensuring it can accept and render real user responses, charts, and practice branding dynamically. Implement data fetching and mapping logic to populate the report with live data. Create an automated workflow that generates reports immediately after survey completion. Implement Next.js Server Actions for form handling and automatic redirect to the report page. Develop a dynamic report view at /dashboard/reports/[reportId] with PDF export functionality. Use React-PDF with dynamic imports or jsPDF for client-side PDF generation. Ensure the component is modular for future template expansion and supports responsive design. Implement user experience enhancements including completion confirmation, 'View Report' and 'Download PDF' buttons, and report sharing capabilities. Document the component API and provide usage examples for both web and PDF contexts.
 
 # Test Strategy:
-Test dashboard navigation, customization features, and data display.
+1. Unit test the refactored report component for correct rendering with various data inputs. 2. Verify that all dynamic fields populate accurately from real survey data. 3. Test PDF export for layout consistency and data integrity. 4. Perform regression testing to ensure no loss of existing report features. 5. Manually review web and PDF outputs for branding, responsiveness, and accessibility. 6. Validate integration with the dynamic report generation system and survey data pipeline. 7. Test the complete survey-to-report automation workflow, including server actions and redirects. 8. Verify the functionality of 'View Report' and 'Download PDF' buttons. 9. Test report sharing capabilities. 10. Ensure proper handling of edge cases such as incomplete surveys or data errors.
+
+# Subtasks:
+## 6.1. Implement Survey Completion Flow [pending]
+### Dependencies: None
+### Description: Add onComplete callback to survey that automatically redirects to report page after submission
+### Details:
+
+
+## 6.2. Implement Server Actions [pending]
+### Dependencies: None
+### Description: Use Next.js Server Actions for form handling and automatic redirect using redirect() function
+### Details:
+
+
+## 6.3. Create Dynamic Report View [pending]
+### Dependencies: None
+### Description: Develop /dashboard/reports/[reportId] page for immediate web report viewing with PDF export option
+### Details:
+
+
+## 6.4. Integrate PDF Generation Library [pending]
+### Dependencies: None
+### Description: Implement React-PDF with dynamic imports or jsPDF for client-side PDF generation
+### Details:
+
+
+## 6.5. Implement Data Architecture [pending]
+### Dependencies: None
+### Description: Create workflow: Survey completion → Server Action → Database save → Redirect to report → Generate views
+### Details:
+
+
+## 6.6. Enhance User Experience [pending]
+### Dependencies: None
+### Description: Add completion confirmation, 'View Report' and 'Download PDF' buttons, and enable report sharing
+### Details:
+
+

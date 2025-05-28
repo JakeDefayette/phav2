@@ -1,11 +1,11 @@
 # Task ID: 14
-# Title: Integrate Payment Processing (Stripe)
+# Title: Develop Tablet and Offline Survey Experience
 # Status: pending
-# Dependencies: 2, 3
+# Dependencies: 4, 12
 # Priority: medium
-# Description: Add Stripe integration for payment processing and subscription management.
+# Description: Build tablet-optimized, offline-capable survey experience for waiting rooms.
 # Details:
-Use Stripe API (latest) for payments and subscriptions. Support practice billing and premium features. Implement secure checkout and subscription management.
+Use Progressive Web App (PWA) capabilities for offline support. Optimize UI for tablets. Integrate with existing patient check-in processes. Store survey responses locally and sync when online.
 
 # Test Strategy:
-Test payment processing, subscription management, and security.
+Test offline survey completion, data sync, and tablet responsiveness.

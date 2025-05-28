@@ -7,3 +7,5 @@ export {
   type MultiStepSurveyFormProps,
   type SurveyFormData,
 } from './MultiStepSurveyForm';
+export { ChartDisplay, type ChartDisplayProps } from './ChartDisplay';
+export { ChartsGrid, type ChartsGridProps } from './ChartsGrid';

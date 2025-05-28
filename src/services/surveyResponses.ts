@@ -32,6 +32,8 @@ export interface SurveyResponseWithQuestion extends SurveyResponse {
     options?: any;
     category: string;
     order_index: number;
+    is_required: boolean;
+    validation_rules?: any;
   };
 }
 
@@ -79,7 +81,9 @@ export class SurveyResponsesService extends BaseService<
             question_type,
             options,
             category,
-            order_index
+            order_index,
+            is_required,
+            validation_rules
           )
         `
         )

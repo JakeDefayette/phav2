@@ -1,11 +1,11 @@
 # Task ID: 7
-# Title: Integrate Email Service (Resend)
+# Title: Build Chiropractor Dashboard
 # Status: pending
-# Dependencies: 3, 6
+# Dependencies: 2, 3
 # Priority: medium
-# Description: Integrate Resend for automated email delivery and campaign management.
+# Description: Develop the chiropractor dashboard for practice management and customization.
 # Details:
-Use Resend API (latest) for sending emails. Implement email templates, scheduling, and tracking. Support bi-weekly educational sequences and custom content.
+Create dashboard layout with reusable components. Implement practice branding, contact management, and video upload. Use Next.js App Router for routing. Support customization of email templates and assessment questions.
 
 # Test Strategy:
-Test email delivery, scheduling, and template rendering.
+Test dashboard navigation, customization features, and data display.

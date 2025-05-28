@@ -6,4 +6,14 @@
 // export { validateEmail } from './validation';
 // export { debounce } from './performance';
 
-export {};
+export { cn } from './cn';
+export {
+  PerformanceMonitor,
+  timed,
+  timeOperation,
+  debounce,
+  throttle,
+  getMemoryUsage,
+  type PerformanceMetrics,
+  type PerformanceReport,
+} from './performance';

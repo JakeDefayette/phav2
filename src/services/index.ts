@@ -61,6 +61,22 @@ export {
   type ReportWithShares,
   type ViralMetrics,
 } from './reports';
+export { pdfService, PDFService, type PDFReportProps, PDFReport } from './pdf';
+
+// Additional services
+export {
+  brandingService,
+  BrandingService,
+  type BrandingConfig,
+} from './brandingService';
+export { ChartService } from './chartService';
+export { SurveyDataMapper, type ReportDataStructure } from './SurveyDataMapper';
+export {
+  EmailService,
+  type EmailResult,
+  type ReportDeliveryEmailOptions,
+} from './email';
+export { ReportCacheService } from './reportCache';
 
 // Import service instances
 import { practiceService } from './practices';
@@ -68,6 +84,10 @@ import { childrenService } from './children';
 import { assessmentsService } from './assessments';
 import { surveyResponsesService } from './surveyResponses';
 import { reportsService } from './reports';
+import { pdfService } from './pdf';
+import { brandingService } from './brandingService';
+import { ChartService } from './chartService';
+import { ReportCacheService } from './reportCache';
 import {
   registerUser,
   loginUser,
@@ -97,4 +117,8 @@ export const services = {
   assessments: assessmentsService,
   surveyResponses: surveyResponsesService,
   reports: reportsService,
+  pdf: pdfService,
+  branding: brandingService,
+  charts: ChartService.getInstance(),
+  reportCache: ReportCacheService.getInstance(),
 } as const;

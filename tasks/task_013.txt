@@ -1,11 +1,11 @@
 # Task ID: 13
-# Title: Develop Tablet and Offline Survey Experience
-# Status: pending
-# Dependencies: 4, 11
-# Priority: medium
-# Description: Build tablet-optimized, offline-capable survey experience for waiting rooms.
+# Title: Implement Security and Compliance Features
+# Status: in-progress
+# Dependencies: 2, 3
+# Priority: high
+# Description: Add security and compliance features including HTTPS, data encryption, and HIPAA-ready architecture.
 # Details:
-Use Progressive Web App (PWA) capabilities for offline support. Optimize UI for tablets. Integrate with existing patient check-in processes. Store survey responses locally and sync when online.
+Enforce HTTPS, data encryption at rest, secure authentication, input validation, session timeout, audit trails, and consent management. Prepare for future HIPAA compliance.
 
 # Test Strategy:
-Test offline survey completion, data sync, and tablet responsiveness.
+Test security headers, encryption, session management, and audit trails.

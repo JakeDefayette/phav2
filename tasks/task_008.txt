@@ -1,11 +1,11 @@
 # Task ID: 8
-# Title: Develop Analytics and Reporting Module
+# Title: Integrate Email Service (Resend)
 # Status: pending
-# Dependencies: 3, 6
+# Dependencies: 3, 7
 # Priority: medium
-# Description: Build analytics dashboard for survey completion, sharing, and lead conversion tracking.
+# Description: Integrate Resend for automated email delivery and campaign management.
 # Details:
-Use Chart.js (v4+) or similar for data visualization. Track survey completion, report sharing, and viral coefficient. Implement lead generation and conversion metrics.
+Use Resend API (latest) for sending emails. Implement email templates, scheduling, and tracking. Support bi-weekly educational sequences and custom content.
 
 # Test Strategy:
-Test data visualization, metric calculation, and dashboard updates.
+Test email delivery, scheduling, and template rendering.

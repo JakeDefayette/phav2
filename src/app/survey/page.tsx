@@ -4,10 +4,8 @@ import { MultiStepSurveyForm, SurveyFormData } from '@/components/organisms';
 
 export default function SurveyPage() {
   const handleSubmit = async (values: SurveyFormData) => {
-    // eslint-disable-next-line no-console
-    console.log('Survey submitted:', values);
     // TODO: Implement actual submission logic
-    alert('Survey submitted! Check console for data.');
+    alert('Survey submitted successfully!');
   };
 
   return (

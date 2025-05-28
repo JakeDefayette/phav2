@@ -1,4 +1,5 @@
 import { config } from 'dotenv';
+import '@testing-library/jest-dom';
 
 // Load environment variables from .env.local, .env.test, or .env
 config({ path: '.env.local' });
@@ -40,13 +41,38 @@ if (missingVars.length > 0) {
 // Set test timeout globally
 jest.setTimeout(30000);
 
+// Mock Next.js router
+jest.mock('next/router', () => ({
+  useRouter: () => ({
+    push: jest.fn(),
+    replace: jest.fn(),
+    prefetch: jest.fn(),
+    back: jest.fn(),
+    pathname: '/',
+    query: {},
+    asPath: '/',
+  }),
+}));
+
+// Mock Next.js navigation
+jest.mock('next/navigation', () => ({
+  useRouter: () => ({
+    push: jest.fn(),
+    replace: jest.fn(),
+    prefetch: jest.fn(),
+    back: jest.fn(),
+  }),
+  usePathname: () => '/',
+  useSearchParams: () => new URLSearchParams(),
+}));
+
 // Global test setup
 beforeAll(async () => {
   // Any global setup can go here
-  console.log('🧪 Running database tests...');
+  console.log('🧪 Running tests...');
 });
 
 afterAll(async () => {
   // Any global cleanup can go here
-  console.log('✅ Database tests completed');
+  console.log('✅ Tests completed');
 });

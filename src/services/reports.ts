@@ -1,5 +1,11 @@
 import { BaseService, ServiceError } from './base';
 import { supabase } from '@/lib/supabase';
+import { SurveyDataMapper, ReportDataStructure } from './SurveyDataMapper';
+import { SurveyResponsesService } from './surveyResponses';
+import { ChartService } from './chartService';
+import { TransformedChartData } from '@/components/molecules/Charts/types';
+import { ReportCacheService } from './reportCache';
+import { PerformanceMonitor, timed, timeOperation } from '@/utils/performance';
 
 // Types for the new schema
 export interface Report {
@@ -90,59 +96,120 @@ export class ReportsService extends BaseService<
   ReportInsert,
   ReportUpdate
 > {
+  private surveyDataMapper: SurveyDataMapper;
+  private surveyResponsesService: SurveyResponsesService;
+  private chartService: ChartService;
+  private reportCacheService: ReportCacheService;
+  private performanceMonitor: PerformanceMonitor;
+
   constructor() {
     super('reports');
+    this.surveyDataMapper = SurveyDataMapper.getInstance();
+    this.surveyResponsesService = new SurveyResponsesService();
+    this.chartService = ChartService.getInstance();
+    this.reportCacheService = ReportCacheService.getInstance();
+    this.performanceMonitor = PerformanceMonitor.getInstance();
   }
 
   /**
-   * Generate a report for an assessment
+   * Generate a report for an assessment using the new data mapping system
    */
+  @timed('generateReport')
   async generateReport(
     assessmentId: string,
     reportType: 'standard' | 'detailed' | 'summary' = 'standard',
     practiceId?: string
   ): Promise<Report> {
+    const cacheKey = `report:${assessmentId}:${reportType}:${practiceId || 'no-practice'}`;
+
+    // Check cache first
+    const cachedReport = await this.reportCacheService.getReport(cacheKey);
+    if (cachedReport) {
+      this.performanceMonitor.recordMetric('generateReport', 'cache_hit', {
+        assessmentId,
+        reportType,
+      });
+      return cachedReport;
+    }
+
     try {
-      // Get assessment with responses and child data
-      const { data: assessmentData, error: assessmentError } = await supabase
-        .from('assessments')
-        .select(
-          `
-          *,
-          children (
-            id,
-            first_name,
-            last_name,
-            date_of_birth,
-            gender
-          ),
-          survey_responses (
-            id,
-            question_id,
-            response_value,
-            response_text,
-            survey_question_definitions (
-              question_text,
-              question_type,
-              category,
-              options
+      this.performanceMonitor.startOperation('generateReport', {
+        assessmentId,
+        reportType,
+      });
+
+      // Get assessment data with performance tracking
+      const assessmentData = await timeOperation(
+        'getAssessmentData',
+        async () => {
+          const { data, error } = await supabase
+            .from('assessments')
+            .select(
+              `
+            *,
+            children (
+              id,
+              first_name,
+              last_name,
+              date_of_birth,
+              gender
             )
-          )
-        `
-        )
-        .eq('id', assessmentId)
-        .single();
+          `
+            )
+            .eq('id', assessmentId)
+            .single();
 
-      if (assessmentError) {
-        this.handleError(assessmentError, 'Get assessment data for report');
-      }
+          if (error) {
+            this.handleError(error, 'Get assessment data for report');
+          }
 
-      if (!assessmentData) {
-        throw new ServiceError('Assessment not found', 'NOT_FOUND');
-      }
+          if (!data) {
+            throw new ServiceError('Assessment not found', 'NOT_FOUND');
+          }
 
-      // Generate report content based on type
-      const content = this.generateReportContent(assessmentData, reportType);
+          return data;
+        }
+      );
+
+      // Get survey responses with caching
+      const responses = await timeOperation('getSurveyResponses', async () => {
+        const cacheKey = `responses:${assessmentId}`;
+        const cached =
+          await this.reportCacheService.getSurveyResponses(cacheKey);
+        if (cached) {
+          return cached;
+        }
+
+        const responses =
+          await this.surveyResponsesService.findByAssessmentId(assessmentId);
+        await this.reportCacheService.cacheSurveyResponses(cacheKey, responses);
+        return responses;
+      });
+
+      // Use the new data mapper to transform responses with caching
+      const mappedData = await timeOperation('mapSurveyData', async () => {
+        const cacheKey = `mapped:${assessmentId}`;
+        const cached = await this.reportCacheService.getMappedData(cacheKey);
+        if (cached) {
+          return cached;
+        }
+
+        const mapped = await this.surveyDataMapper.mapSurveyData(
+          responses,
+          assessmentId
+        );
+        await this.reportCacheService.cacheMappedData(cacheKey, mapped);
+        return mapped;
+      });
+
+      // Generate report content
+      const content = await timeOperation('generateContent', async () => {
+        return this.generateReportContentFromMappedData(
+          assessmentData,
+          mappedData,
+          reportType
+        );
+      });
 
       const reportData: ReportInsert = {
         assessment_id: assessmentId,
@@ -152,8 +219,22 @@ export class ReportsService extends BaseService<
         generated_at: new Date().toISOString(),
       };
 
-      return await this.create(reportData);
+      const report = await timeOperation('createReport', async () => {
+        return await this.create(reportData);
+      });
+
+      // Cache the generated report
+      await this.reportCacheService.cacheReport(cacheKey, report);
+
+      this.performanceMonitor.endOperation('generateReport');
+      this.performanceMonitor.recordMetric('generateReport', 'cache_miss', {
+        assessmentId,
+        reportType,
+      });
+
+      return report;
     } catch (error) {
+      this.performanceMonitor.endOperation('generateReport', error as Error);
       if (error instanceof ServiceError) {
         throw error;
       }
@@ -162,25 +243,14 @@ export class ReportsService extends BaseService<
   }
 
   /**
-   * Generate report content based on assessment data and type
+   * Generate report content from mapped survey data
    */
-  private generateReportContent(
+  private async generateReportContentFromMappedData(
     assessmentData: any,
+    mappedData: ReportDataStructure,
     reportType: string
-  ): Record<string, any> {
+  ): Promise<Record<string, any>> {
     const child = assessmentData.children;
-    const responses = assessmentData.survey_responses || [];
-
-    // Group responses by category
-    const responsesByCategory: Record<string, any[]> = {};
-    responses.forEach((response: any) => {
-      const category =
-        response.survey_question_definitions?.category || 'general';
-      if (!responsesByCategory[category]) {
-        responsesByCategory[category] = [];
-      }
-      responsesByCategory[category].push(response);
-    });
 
     const baseContent = {
       child: {
@@ -190,26 +260,29 @@ export class ReportsService extends BaseService<
       },
       assessment: {
         id: assessmentData.id,
-        brain_o_meter_score: assessmentData.brain_o_meter_score,
+        brain_o_meter_score:
+          mappedData.overallStatistics.brainOMeterScore ||
+          assessmentData.brain_o_meter_score,
         completed_at: assessmentData.completed_at,
         status: assessmentData.status,
       },
-      categories: responsesByCategory,
-      summary: this.generateSummary(
-        responses,
-        assessmentData.brain_o_meter_score
-      ),
+      metadata: mappedData.metadata,
+      categories: mappedData.categories,
+      overallStatistics: mappedData.overallStatistics,
+      visualData: mappedData.visualData,
+      insights: this.surveyDataMapper.generateInsights(mappedData),
+      charts: await this.generateChartsForReport(mappedData),
     };
 
     switch (reportType) {
       case 'detailed':
         return {
           ...baseContent,
-          detailed_analysis: this.generateDetailedAnalysis(responses),
-          recommendations: this.generateRecommendations(
-            responses,
-            assessmentData.brain_o_meter_score
-          ),
+          detailed_analysis:
+            this.generateDetailedAnalysisFromMappedData(mappedData),
+          recommendations:
+            this.generateRecommendationsFromMappedData(mappedData),
+          rawResponses: mappedData.rawResponses,
         };
 
       case 'summary':
@@ -219,12 +292,137 @@ export class ReportsService extends BaseService<
             brain_o_meter_score: baseContent.assessment.brain_o_meter_score,
             completed_at: baseContent.assessment.completed_at,
           },
-          key_insights: this.generateKeyInsights(responses),
+          key_insights: baseContent.insights.slice(0, 3), // Top 3 insights for summary
+          categoryScores: mappedData.overallStatistics.categoryScores,
+          dataQuality: mappedData.metadata.dataQuality,
         };
 
       default: // standard
         return baseContent;
     }
+  }
+
+  /**
+   * Generate chart data for report visualization
+   */
+  @timed('generateChartsForReport')
+  public async generateChartsForReport(
+    mappedData: ReportDataStructure
+  ): Promise<TransformedChartData[]> {
+    try {
+      // Create cache key based on mapped data hash
+      const dataHash = this.createDataHash(mappedData);
+      const cacheKey = `charts:${dataHash}`;
+
+      // Check cache first
+      const cachedCharts = await this.reportCacheService.getChartData(cacheKey);
+      if (cachedCharts) {
+        return cachedCharts;
+      }
+
+      // Generate charts with performance tracking
+      const charts = await timeOperation(
+        'transformSurveyDataToCharts',
+        async () => {
+          return this.chartService.transformSurveyDataToCharts(mappedData);
+        }
+      );
+
+      // Cache the generated charts
+      await this.reportCacheService.cacheChartData(cacheKey, charts);
+
+      return charts;
+    } catch (error) {
+      this.performanceMonitor.recordMetric('generateChartsForReport', 'error', {
+        error: error.message,
+      });
+      return [];
+    }
+  }
+
+  /**
+   * Get chart data by assessment ID with caching
+   */
+  @timed('getChartsForAssessment')
+  public async getChartsForAssessment(
+    assessmentId: string
+  ): Promise<TransformedChartData[]> {
+    try {
+      const cacheKey = `assessment-charts:${assessmentId}`;
+
+      // Check cache first
+      const cachedCharts = await this.reportCacheService.getChartData(cacheKey);
+      if (cachedCharts) {
+        return cachedCharts;
+      }
+
+      // Get survey responses with caching
+      const responses = await timeOperation('getSurveyResponses', async () => {
+        const responsesCacheKey = `responses:${assessmentId}`;
+        const cached =
+          await this.reportCacheService.getSurveyResponses(responsesCacheKey);
+        if (cached) {
+          return cached;
+        }
+
+        const responses =
+          await this.surveyResponsesService.findByAssessmentId(assessmentId);
+        await this.reportCacheService.cacheSurveyResponses(
+          responsesCacheKey,
+          responses
+        );
+        return responses;
+      });
+
+      // Map the data with caching
+      const mappedData = await timeOperation('mapSurveyData', async () => {
+        const mappedCacheKey = `mapped:${assessmentId}`;
+        const cached =
+          await this.reportCacheService.getMappedData(mappedCacheKey);
+        if (cached) {
+          return cached;
+        }
+
+        const mapped = await this.surveyDataMapper.mapSurveyData(
+          responses,
+          assessmentId
+        );
+        await this.reportCacheService.cacheMappedData(mappedCacheKey, mapped);
+        return mapped;
+      });
+
+      // Generate charts
+      const charts = await this.generateChartsForReport(mappedData);
+
+      // Cache the result
+      await this.reportCacheService.cacheChartData(cacheKey, charts);
+
+      return charts;
+    } catch (error) {
+      this.performanceMonitor.recordMetric('getChartsForAssessment', 'error', {
+        assessmentId,
+        error: error.message,
+      });
+      return [];
+    }
+  }
+
+  /**
+   * Create a hash from mapped data for cache key generation
+   */
+  private createDataHash(mappedData: ReportDataStructure): string {
+    // Create a simplified hash based on key data points
+    const hashData = {
+      assessmentId: mappedData.metadata.assessmentId,
+      totalResponses: mappedData.metadata.totalResponses,
+      dataQuality: mappedData.metadata.dataQuality,
+      categoryCount: Object.keys(mappedData.categories).length,
+      brainOMeterScore: mappedData.overallStatistics.brainOMeterScore,
+    };
+
+    return Buffer.from(JSON.stringify(hashData))
+      .toString('base64')
+      .slice(0, 16);
   }
 
   /**
@@ -262,48 +460,99 @@ export class ReportsService extends BaseService<
   }
 
   /**
-   * Generate detailed analysis
+   * Generate detailed analysis from mapped data
    */
-  private generateDetailedAnalysis(responses: any[]): Record<string, any> {
-    // This would contain more sophisticated analysis logic
-    return {
-      response_patterns: 'Analysis of response patterns would go here',
-      strengths: 'Identified strengths based on responses',
-      areas_for_improvement: 'Areas that may need attention',
+  private generateDetailedAnalysisFromMappedData(
+    mappedData: ReportDataStructure
+  ): Record<string, any> {
+    const analysis: Record<string, any> = {
+      data_quality_assessment: {
+        overall_quality: mappedData.metadata.dataQuality,
+      },
+      category_performance: {},
+      response_patterns: {},
+      statistical_insights: {},
     };
+
+    // Analyze each category
+    Object.entries(mappedData.categories).forEach(([categoryName, summary]) => {
+      analysis.category_performance[categoryName] = {
+        completion_rate: summary.completionRate,
+        score_percentage: summary.statistics.scorePercentage,
+        average_score: summary.statistics.averageScore,
+        total_questions: summary.totalQuestions,
+        answered_questions: summary.answeredQuestions,
+        most_common_responses: summary.statistics.commonResponses.slice(0, 3),
+      };
+
+      // Identify response patterns
+      analysis.response_patterns[categoryName] = {
+        response_distribution: summary.statistics.responseDistribution,
+      };
+    });
+
+    // Generate statistical insights
+    analysis.statistical_insights = {
+      strongest_categories: mappedData.overallStatistics.strengthAreas,
+      concern_categories: mappedData.overallStatistics.concernAreas,
+      overall_brain_o_meter: mappedData.overallStatistics.brainOMeterScore,
+    };
+
+    return analysis;
   }
 
   /**
-   * Generate recommendations
+   * Generate recommendations from mapped data
    */
-  private generateRecommendations(
-    responses: any[],
-    brainOMeterScore?: number
+  private generateRecommendationsFromMappedData(
+    mappedData: ReportDataStructure
   ): string[] {
-    // This would contain logic to generate personalized recommendations
-    const recommendations = [];
+    const recommendations: string[] = [];
 
-    if (brainOMeterScore && brainOMeterScore < 50) {
+    // Generate recommendations based on brain-o-meter score
+    const brainOMeterScore = mappedData.overallStatistics.brainOMeterScore;
+    if (brainOMeterScore !== undefined && brainOMeterScore < 50) {
       recommendations.push(
         'Consider additional support in key developmental areas'
       );
+    } else if (brainOMeterScore !== undefined && brainOMeterScore >= 80) {
+      recommendations.push(
+        'Excellent development progress - continue current activities'
+      );
     }
 
-    recommendations.push('Continue regular assessments to track progress');
+    // Generate recommendations based on category performance
+    Object.entries(mappedData.categories).forEach(([categoryName, summary]) => {
+      if (
+        summary.statistics.scorePercentage !== undefined &&
+        summary.statistics.scorePercentage < 60
+      ) {
+        recommendations.push(
+          `Focus on strengthening ${categoryName.toLowerCase()} skills through targeted activities`
+        );
+      }
+    });
+
+    // Generate recommendations based on concern areas
+    if (mappedData.overallStatistics.concernAreas.length > 0) {
+      recommendations.push(
+        `Pay special attention to: ${mappedData.overallStatistics.concernAreas.join(', ')}`
+      );
+    }
+
+    // Generate recommendations based on strength areas
+    if (mappedData.overallStatistics.strengthAreas.length > 0) {
+      recommendations.push(
+        `Continue to build on strengths in: ${mappedData.overallStatistics.strengthAreas.join(', ')}`
+      );
+    }
+
+    // Default recommendation
+    if (recommendations.length === 0) {
+      recommendations.push('Continue regular assessments to track progress');
+    }
 
     return recommendations;
-  }
-
-  /**
-   * Generate key insights for summary reports
-   */
-  private generateKeyInsights(responses: any[]): string[] {
-    // This would contain logic to extract key insights
-    return [
-      'Assessment completed successfully',
-      'Development appears to be on track',
-      'Regular follow-up recommended',
-    ];
   }
 
   /**

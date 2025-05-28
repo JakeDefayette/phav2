@@ -1,9 +1,9 @@
 {
   "meta": {
-    "generatedAt": "2025-05-27T13:46:59.665Z",
-    "tasksAnalyzed": 1,
+    "generatedAt": "2025-05-27T16:31:51.587Z",
+    "tasksAnalyzed": 11,
     "totalTasks": 15,
-    "analysisCount": 3,
+    "analysisCount": 14,
     "thresholdScore": 5,
     "projectName": "Taskmaster",
     "usedResearch": true
@@ -32,6 +32,94 @@
       "recommendedSubtasks": 5,
       "expansionPrompt": "Break down the 'Develop Core Survey Form Components' task into subtasks covering: 1) Form architecture setup with Formik/Yup, 2) Step 1: Lifestyle Stressors component, 3) Step 2: Symptoms component, 4) Step 3: Contact/Consent component, and 5) Progress indicator and navigation system.",
       "reasoning": "This task involves creating a multi-step form with validation, accessibility requirements, and mobile responsiveness. The complexity comes from managing form state across multiple steps, implementing validation logic, ensuring accessibility, and creating a cohesive user experience. Breaking it into component-specific subtasks following the 3-layer approach (Apollo/Logic/View) would make it more manageable."
+    },
+    {
+      "taskId": 5,
+      "taskTitle": "Implement Dynamic Report Generation",
+      "complexityScore": 8,
+      "recommendedSubtasks": 7,
+      "expansionPrompt": "Break down the report generation task into subtasks covering PDF library setup, survey data mapping, chart/diagram rendering, branding integration, performance optimization, online delivery mechanisms, and comprehensive testing (including edge cases and accessibility).",
+      "reasoning": "This task involves integrating PDF generation libraries, mapping dynamic survey data to visual elements, handling branding, and optimizing for online delivery. Each step requires specialized logic and testing, making the overall complexity high and justifying further subtask expansion."
+    },
+    {
+      "taskId": 6,
+      "taskTitle": "Build Chiropractor Dashboard",
+      "complexityScore": 7,
+      "recommendedSubtasks": 8,
+      "expansionPrompt": "Expand the dashboard task into subtasks for layout design, reusable component creation, branding integration, contact management, video upload, routing setup, email template customization, assessment question customization, and end-to-end testing.",
+      "reasoning": "The dashboard must support multiple features (branding, contact management, video, customization) and reusable components, requiring careful architecture and integration. The breadth of features and need for modularity increase complexity."
+    },
+    {
+      "taskId": 7,
+      "taskTitle": "Integrate Email Service (Resend)",
+      "complexityScore": 6,
+      "recommendedSubtasks": 6,
+      "expansionPrompt": "Divide the email integration into subtasks for API integration, template management, scheduling, tracking, educational sequence setup, and delivery testing.",
+      "reasoning": "While integrating an email API is straightforward, supporting scheduling, tracking, and custom content adds moderate complexity and requires several distinct implementation and testing steps."
+    },
+    {
+      "taskId": 8,
+      "taskTitle": "Develop Analytics and Reporting Module",
+      "complexityScore": 8,
+      "recommendedSubtasks": 7,
+      "expansionPrompt": "Break down analytics module into subtasks for data collection, metric calculation, Chart.js integration, dashboard UI, sharing/viral tracking, lead conversion tracking, and comprehensive testing.",
+      "reasoning": "This module requires real-time data aggregation, metric computation, advanced visualization, and integration with other modules, making it complex and necessitating multiple focused subtasks."
+    },
+    {
+      "taskId": 9,
+      "taskTitle": "Implement Social Media Sharing and Viral Tracking",
+      "complexityScore": 6,
+      "recommendedSubtasks": 5,
+      "expansionPrompt": "Expand this task into subtasks for API integration (Facebook, Twitter, LinkedIn), event tracking, viral coefficient calculation, landing page setup, and testing.",
+      "reasoning": "Integrating multiple APIs and tracking viral metrics involves several moving parts but is less complex than analytics or report generation, though still requires careful coordination."
+    },
+    {
+      "taskId": 10,
+      "taskTitle": "Build Content Library and Template Engine",
+      "complexityScore": 8,
+      "recommendedSubtasks": 8,
+      "expansionPrompt": "Divide the content library task into subtasks for CMS backend, media upload/management, template engine development, multi-format support, React component rendering, template customization, user permissions, and testing.",
+      "reasoning": "Building a CMS with template engine and multi-format support is a significant undertaking, involving backend, frontend, and user management, each requiring dedicated subtasks."
+    },
+    {
+      "taskId": 11,
+      "taskTitle": "Optimize for Performance and Bundle Size",
+      "complexityScore": 7,
+      "recommendedSubtasks": 6,
+      "expansionPrompt": "Break down optimization into subtasks for code splitting, tree-shaking, dynamic imports, file size enforcement, Lighthouse/bundle analysis setup, and performance regression testing.",
+      "reasoning": "Performance optimization is multifaceted, involving build tooling, codebase refactoring, and continuous monitoring, each needing focused attention."
+    },
+    {
+      "taskId": 12,
+      "taskTitle": "Implement Security and Compliance Features",
+      "complexityScore": 9,
+      "recommendedSubtasks": 9,
+      "expansionPrompt": "Expand security and compliance into subtasks for HTTPS enforcement, data encryption, authentication, input validation, session management, audit trails, consent management, HIPAA readiness, and security testing.",
+      "reasoning": "Security and compliance are critical and complex, requiring multiple layers of protection, regulatory preparation, and thorough validation, justifying a high complexity score and detailed subtask breakdown."
+    },
+    {
+      "taskId": 13,
+      "taskTitle": "Develop Tablet and Offline Survey Experience",
+      "complexityScore": 8,
+      "recommendedSubtasks": 7,
+      "expansionPrompt": "Break down this task into subtasks for PWA setup, offline data storage, UI optimization for tablets, check-in process integration, sync logic, error handling, and offline/online testing.",
+      "reasoning": "Supporting offline capabilities and tablet optimization involves advanced PWA features, local storage, synchronization, and responsive design, each requiring dedicated implementation and testing."
+    },
+    {
+      "taskId": 14,
+      "taskTitle": "Integrate Payment Processing (Stripe)",
+      "complexityScore": 7,
+      "recommendedSubtasks": 6,
+      "expansionPrompt": "Expand payment integration into subtasks for Stripe API setup, payment flow implementation, subscription management, secure checkout, billing support, and payment/security testing.",
+      "reasoning": "Integrating payments and subscriptions is moderately complex due to security, compliance, and multiple user flows, requiring several focused subtasks."
+    },
+    {
+      "taskId": 15,
+      "taskTitle": "Prepare for Mobile App Conversion and Scale Testing",
+      "complexityScore": 7,
+      "recommendedSubtasks": 6,
+      "expansionPrompt": "Divide this task into subtasks for PWA optimization, API modularization, scale test setup, load testing, performance monitoring, and mobile readiness validation.",
+      "reasoning": "Preparing for mobile conversion and scale involves architectural changes, performance testing, and future-proofing, each needing clear subtask delineation."
     }
   ]
 }

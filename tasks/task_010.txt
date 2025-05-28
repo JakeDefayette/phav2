@@ -1,11 +1,11 @@
 # Task ID: 10
-# Title: Build Content Library and Template Engine
+# Title: Implement Social Media Sharing and Viral Tracking
 # Status: pending
-# Dependencies: 6, 7
+# Dependencies: 5, 7
 # Priority: medium
-# Description: Develop a content library and template engine for educational content and campaigns.
+# Description: Add social media sharing and viral marketing tracking features.
 # Details:
-Create a content management system for text, images, and videos. Support customizable templates and multi-format content. Use React components for content rendering.
+Integrate social sharing APIs (Facebook, Twitter, LinkedIn). Track sharing events and viral coefficient. Use practice-specific landing pages for sharing links.
 
 # Test Strategy:
-Test content upload, template customization, and rendering.
+Test sharing functionality and tracking of sharing events.

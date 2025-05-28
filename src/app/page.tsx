@@ -49,13 +49,16 @@ export default function Home() {
           management, growth analytics, and family-centered care coordination.
         </p>
 
+        <div className='flex gap-4 mb-6'>
+          <Link href='/survey'>
+            <Button variant='primary' size='lg'>
+              Take Assessment
+            </Button>
+          </Link>
+        </div>
+
         {!loading && !user && (
           <div className='flex gap-4'>
-            <Link href='/survey'>
-              <Button variant='primary' size='lg'>
-                Take Assessment
-              </Button>
-            </Link>
             <Link href='/auth/register'>
               <Button variant='outline' size='lg'>
                 Get Started
@@ -64,6 +67,16 @@ export default function Home() {
             <Link href='/auth/login'>
               <Button variant='outline' size='lg'>
                 Sign In
+              </Button>
+            </Link>
+          </div>
+        )}
+
+        {!loading && user && (
+          <div className='flex gap-4'>
+            <Link href='/dashboard'>
+              <Button variant='outline' size='lg'>
+                Go to Dashboard
               </Button>
             </Link>
           </div>

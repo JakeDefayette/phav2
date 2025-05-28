@@ -1,11 +1,11 @@
 # Task ID: 12
-# Title: Implement Security and Compliance Features
+# Title: Optimize for Performance and Bundle Size
 # Status: pending
-# Dependencies: 2, 3
+# Dependencies: 1, 4, 5
 # Priority: high
-# Description: Add security and compliance features including HTTPS, data encryption, and HIPAA-ready architecture.
+# Description: Optimize application for fast load times and minimal bundle size.
 # Details:
-Enforce HTTPS, data encryption at rest, secure authentication, input validation, session timeout, audit trails, and consent management. Prepare for future HIPAA compliance.
+Implement code splitting, tree-shaking, and dynamic imports. Enforce file size limits (React components <200 lines, utility functions <100 lines, etc.). Use Lighthouse CI and bundle analyzer. Target initial load <50KB, route chunks <25KB, total app <200KB gzipped.
 
 # Test Strategy:
-Test security headers, encryption, session management, and audit trails.
+Run Lighthouse audits, bundle analysis, and performance tests.
