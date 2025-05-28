@@ -9,10 +9,10 @@ export async function GET(
   try {
     const { token } = await params;
     const supabase = supabaseServer;
-    const pdfService = new PDFService();
+    const pdfService = PDFService.getInstance();
 
     // Validate share token and get report details
-    const { data: report, error } = await supabase
+    const { data: reportData, error } = await supabase
       .from('reports')
       .select(
         `
@@ -22,14 +22,17 @@ export async function GET(
         user_id,
         share_token,
         share_expires_at,
-        is_public
+        is_public,
+        content,
+        report_type,
+        generated_at
       `
       )
       .eq('share_token', token)
       .eq('is_public', true)
       .single();
 
-    if (error || !report) {
+    if (error || !reportData) {
       return NextResponse.json(
         { error: 'Invalid or expired download link' },
         { status: 404 }
@@ -37,8 +40,8 @@ export async function GET(
     }
 
     // Check if token has expired
-    if (report.share_expires_at) {
-      const expirationDate = new Date(report.share_expires_at);
+    if (reportData.share_expires_at) {
+      const expirationDate = new Date(reportData.share_expires_at);
       if (expirationDate < new Date()) {
         return NextResponse.json(
           { error: 'Download link has expired' },
@@ -48,14 +51,14 @@ export async function GET(
     }
 
     // Log access attempt
-    await logDownloadAccess(supabase, report.id, token, request);
+    await logDownloadAccess(supabase, reportData.id, token, request);
 
-    // Generate PDF
-    const pdfBuffer = await pdfService.generateReportPDF(report.id);
+    // Generate PDF using the correct method
+    const pdfBuffer = await pdfService.generatePDFBuffer(reportData);
 
     // Create filename
     const filename =
-      `pediatric-assessment-${report.child_name}-${report.assessment_date}.pdf`.replace(
+      `pediatric-assessment-${reportData.child_name}-${reportData.assessment_date}.pdf`.replace(
         /[^a-zA-Z0-9.-]/g,
         '_'
       );
