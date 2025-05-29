@@ -1,11 +1,17 @@
 'use client';
 
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { useAuth } from '@/shared/hooks';
 import { Button } from '@/shared/components/atoms/Button';
 
 export default function Home() {
   const { user, loading } = useAuth();
+  const router = useRouter();
+
+  const handleStartAssessment = () => {
+    router.push('/survey');
+  };
 
   return (
     <main className='flex min-h-screen flex-col items-center justify-between p-24'>
@@ -30,7 +36,7 @@ export default function Home() {
                   </Button>
                 </Link>
                 <Link href='/auth/register'>
-                  <Button variant='primary' size='sm'>
+                  <Button variant='outline' size='sm'>
                     Sign Up
                   </Button>
                 </Link>
@@ -41,94 +47,134 @@ export default function Home() {
       </div>
 
       <div className="relative flex flex-col place-items-center before:absolute before:h-[300px] before:w-[480px] before:-translate-x-1/2 before:rounded-full before:bg-gradient-radial before:from-white before:to-transparent before:blur-2xl before:content-[''] after:absolute after:-z-20 after:h-[180px] after:w-[240px] after:translate-x-1/3 after:bg-gradient-conic after:from-sky-200 after:via-blue-200 after:blur-2xl after:content-[''] before:dark:bg-gradient-to-br before:dark:from-transparent before:dark:to-blue-700 before:dark:opacity-10 after:dark:from-sky-900 after:dark:via-[#0141ff] after:dark:opacity-40 before:lg:h-[360px] z-[-1]">
-        <h1 className='text-4xl font-bold text-center mb-6'>
-          Chiropractic Practice Growth Platform
+        <h1 className='text-5xl font-bold text-center mb-6 max-w-4xl leading-tight'>
+          Get Your Child's Complete
+          <span className='text-blue-600'> Health Assessment</span>
         </h1>
-        <p className='text-lg text-gray-600 text-center max-w-2xl mb-8'>
-          Streamline your chiropractic practice with comprehensive patient
-          management, growth analytics, and family-centered care coordination.
+        <p className='text-xl text-gray-600 text-center max-w-3xl mb-4 leading-relaxed'>
+          Receive a personalized health report with expert insights, growth
+          tracking, and actionable recommendations for your child's development
+          and wellbeing.
         </p>
 
-        <div className='flex gap-4 mb-6'>
-          <Link href='/survey'>
-            <Button variant='primary' size='lg'>
-              Take Assessment
-            </Button>
-          </Link>
+        <div className='flex flex-wrap justify-center gap-4 mb-8 text-sm text-gray-500'>
+          <span className='flex items-center gap-1'>
+            <span className='text-green-500'>✓</span>
+            5-minute assessment
+          </span>
+          <span className='flex items-center gap-1'>
+            <span className='text-green-500'>✓</span>
+            Instant PDF report
+          </span>
+          <span className='flex items-center gap-1'>
+            <span className='text-green-500'>✓</span>
+            Expert pediatric insights
+          </span>
+          <span className='flex items-center gap-1'>
+            <span className='text-green-500'>✓</span>
+            {user ? 'Saved to your account' : 'No signup required'}
+          </span>
         </div>
-
-        {!loading && !user && (
-          <div className='flex gap-4'>
-            <Link href='/auth/register'>
-              <Button variant='outline' size='lg'>
-                Get Started
-              </Button>
-            </Link>
-            <Link href='/auth/login'>
-              <Button variant='outline' size='lg'>
-                Sign In
-              </Button>
-            </Link>
-          </div>
-        )}
-
-        {!loading && user && (
-          <div className='flex gap-4'>
-            <Link href='/dashboard'>
-              <Button variant='outline' size='lg'>
-                Go to Dashboard
-              </Button>
-            </Link>
-          </div>
-        )}
       </div>
+
+      <div className='mb-8 flex justify-center items-center relative z-50'>
+        <Button
+          variant='primary'
+          size='lg'
+          onClick={handleStartAssessment}
+          className='shadow-lg hover:shadow-xl transition-all duration-200 font-semibold text-white bg-blue-600 hover:bg-blue-700 border-0 cursor-pointer'
+          style={{ position: 'relative', zIndex: 100 }}
+        >
+          Start Free Assessment →
+        </Button>
+      </div>
+
+      {!loading && (
+        <div className='flex flex-col items-center gap-4'>
+          {!user ? (
+            <div className='flex flex-col items-center'>
+              <p className='text-sm text-gray-500 mb-3'>
+                Want to save your results and track progress over time?
+              </p>
+              <div className='flex gap-3'>
+                <Link href='/auth/register'>
+                  <Button variant='outline' size='md'>
+                    Create Free Account
+                  </Button>
+                </Link>
+                <Link href='/auth/login'>
+                  <Button variant='ghost' size='md'>
+                    Sign In
+                  </Button>
+                </Link>
+              </div>
+            </div>
+          ) : (
+            <div className='flex flex-col items-center'>
+              <p className='text-sm text-gray-600 mb-3'>
+                Welcome back, {user.email}! Your results will be saved
+                automatically.
+              </p>
+              <Link href='/dashboard'>
+                <Button variant='outline' size='md'>
+                  View Previous Assessments
+                </Button>
+              </Link>
+            </div>
+          )}
+        </div>
+      )}
 
       <div className='mb-32 grid text-center lg:max-w-5xl lg:w-full lg:mb-0 lg:grid-cols-4 lg:text-left'>
         <div className='group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30'>
           <h2 className='mb-3 text-2xl font-semibold'>
             Health Tracking{' '}
             <span className='inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none'>
-              -&gt;
+              →
             </span>
           </h2>
           <p className='m-0 max-w-[30ch] text-sm opacity-50'>
-            Track your health metrics and progress over time.
+            Track your child's health metrics and developmental progress over
+            time.
           </p>
         </div>
 
         <div className='group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30'>
           <h2 className='mb-3 text-2xl font-semibold'>
-            Analytics{' '}
+            Expert Analysis{' '}
             <span className='inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none'>
-              -&gt;
+              →
             </span>
           </h2>
           <p className='m-0 max-w-[30ch] text-sm opacity-50'>
-            Get insights from your health data with advanced analytics.
+            Get professional insights from pediatric health experts and
+            chiropractors.
           </p>
         </div>
 
         <div className='group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30'>
           <h2 className='mb-3 text-2xl font-semibold'>
-            Recommendations{' '}
+            Personalized Reports{' '}
             <span className='inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none'>
-              -&gt;
+              →
             </span>
           </h2>
           <p className='m-0 max-w-[30ch] text-sm opacity-50'>
-            Receive personalized health recommendations.
+            Receive detailed, personalized health recommendations for your
+            child.
           </p>
         </div>
 
         <div className='group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30'>
           <h2 className='mb-3 text-2xl font-semibold'>
-            Community{' '}
+            Family Care{' '}
             <span className='inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none'>
-              -&gt;
+              →
             </span>
           </h2>
           <p className='m-0 max-w-[30ch] text-sm opacity-50'>
-            Connect with others on their health journey.
+            Connect with other families and healthcare providers in your
+            community.
           </p>
         </div>
       </div>
