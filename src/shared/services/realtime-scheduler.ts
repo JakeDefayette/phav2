@@ -28,9 +28,9 @@ export interface SchedulerMetrics {
   adaptiveAdjustments: number;
 }
 
-export interface ScheduledOperation {
+export interface ScheduledOperation<T = any> {
   id: string;
-  operation: () => Promise<any>;
+  operation: () => Promise<T>;
   priority: 'high' | 'medium' | 'low';
   resource: string;
   retryCount: number;
@@ -45,7 +45,7 @@ export interface ScheduledOperation {
 export class RealtimeScheduler {
   private static instance: RealtimeScheduler;
   private rateLimiters = new Map<string, RateLimiter>();
-  private operations = new Map<string, ScheduledOperation>();
+  private operations = new Map<string, ScheduledOperation<any>>();
   private metrics: SchedulerMetrics;
   private performanceMonitor: PerformanceMonitor;
   private options: Required<SchedulerOptions>;
@@ -139,7 +139,7 @@ export class RealtimeScheduler {
     }
 
     // Create scheduled operation
-    const scheduledOp: ScheduledOperation = {
+    const scheduledOp: ScheduledOperation<T> = {
       id: operationId,
       operation,
       priority,
@@ -352,7 +352,7 @@ export class RealtimeScheduler {
    * Execute operation with comprehensive monitoring
    */
   private async executeWithMonitoring<T>(
-    operation: ScheduledOperation
+    operation: ScheduledOperation<T>
   ): Promise<T> {
     const startTime = Date.now();
 
@@ -406,7 +406,7 @@ export class RealtimeScheduler {
    * Retry failed operation with exponential backoff
    */
   private async retryOperation<T>(
-    operation: ScheduledOperation,
+    operation: ScheduledOperation<T>,
     lastError: any
   ): Promise<T> {
     operation.retryCount++;

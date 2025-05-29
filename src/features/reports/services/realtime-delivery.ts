@@ -425,43 +425,43 @@ export class RealtimeDeliveryService {
     subscription: DeliverySubscription
   ): boolean {
     // Survey response relevance
-    if (payload.table === 'survey_responses') {
+    if (payload.data.table === 'survey_responses') {
       if (subscription.assessmentId) {
         return (
-          (payload as any).new?.assessment_id === subscription.assessmentId ||
-          (payload as any).old?.assessment_id === subscription.assessmentId
+          payload.data.new?.assessment_id === subscription.assessmentId ||
+          payload.data.old?.assessment_id === subscription.assessmentId
         );
       }
     }
 
     // Assessment relevance
-    if (payload.table === 'assessments') {
+    if (payload.data.table === 'assessments') {
       if (subscription.assessmentId) {
         return (
-          (payload as any).new?.id === subscription.assessmentId ||
-          (payload as any).old?.id === subscription.assessmentId
+          payload.data.new?.id === subscription.assessmentId ||
+          payload.data.old?.id === subscription.assessmentId
         );
       }
       if (subscription.practiceId) {
         return (
-          (payload as any).new?.practice_id === subscription.practiceId ||
-          (payload as any).old?.practice_id === subscription.practiceId
+          payload.data.new?.practice_id === subscription.practiceId ||
+          payload.data.old?.practice_id === subscription.practiceId
         );
       }
     }
 
     // Report relevance
-    if (payload.table === 'reports') {
+    if (payload.data.table === 'reports') {
       if (subscription.assessmentId) {
         return (
-          (payload as any).new?.assessment_id === subscription.assessmentId ||
-          (payload as any).old?.assessment_id === subscription.assessmentId
+          payload.data.new?.assessment_id === subscription.assessmentId ||
+          payload.data.old?.assessment_id === subscription.assessmentId
         );
       }
       if (subscription.practiceId) {
         return (
-          (payload as any).new?.practice_id === subscription.practiceId ||
-          (payload as any).old?.practice_id === subscription.practiceId
+          payload.data.new?.practice_id === subscription.practiceId ||
+          payload.data.old?.practice_id === subscription.practiceId
         );
       }
     }
@@ -475,8 +475,8 @@ export class RealtimeDeliveryService {
   private determinePriority(
     payload: RealtimePayload
   ): 'high' | 'medium' | 'low' {
-    // Supabase uses 'type' not 'eventType' for the change type
-    const eventType = (payload as any).type;
+    // Use the eventType from our structured payload
+    const eventType = payload.data.eventType;
     if (eventType === 'INSERT') return 'high';
     if (eventType === 'UPDATE') return 'medium';
     return 'low';

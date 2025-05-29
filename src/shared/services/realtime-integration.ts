@@ -1,8 +1,9 @@
 import { realtimeQueue } from './realtime-queue';
 import { realtimeScheduler } from './realtime-scheduler';
-import { realtimeDelivery } from '../../../features/reports/services/realtime-delivery';
-import { realtimeReportsService } from '../../../features/reports/services/realtimeReports';
+import { realtimeDelivery } from '@/features/reports/services/realtime-delivery';
+import { realtimeReportsService } from '@/features/reports/services/realtimeReports';
 import { PerformanceMonitor } from '@/shared/utils/performance';
+import type { RealtimePayload } from './supabase-realtime';
 
 export interface SystemHealth {
   overall: 'healthy' | 'degraded' | 'critical';
@@ -252,7 +253,7 @@ export class RealtimeIntegrationService {
           onReportUpdate: report => {
             console.log(`📊 Received report update for ${assessmentId}:`, {
               id: report.id,
-              status: report.status,
+              status: report.content.assessment.status,
               generatedAt: report.generated_at,
             });
           },
@@ -268,15 +269,27 @@ export class RealtimeIntegrationService {
       console.log('📋 Simulating survey response updates...');
 
       for (let i = 0; i < 5; i++) {
-        realtimeQueue.enqueue(
-          {
-            type: 'survey_response_simulation',
-            assessmentId,
-            responseData: { questionId: `q${i}`, value: Math.random() * 5 },
+        // Create a mock SurveyResponsePayload for simulation
+        const mockPayload: RealtimePayload = {
+          data: {
+            schema: 'public',
+            table: 'survey_responses',
+            commit_timestamp: new Date().toISOString(),
+            eventType: 'INSERT',
+            new: {
+              id: `sim-${i}`,
+              assessment_id: assessmentId,
+              question_id: `q${i}`,
+              response_value: Math.random() * 5,
+              created_at: new Date().toISOString(),
+            },
+            old: {},
+            errors: null,
           },
-          'medium',
-          2
-        );
+          ids: [i],
+        } as any; // Type assertion for simulation
+
+        realtimeQueue.enqueue(mockPayload, 'medium', 2);
       }
 
       // 3. Wait a bit and then check system status

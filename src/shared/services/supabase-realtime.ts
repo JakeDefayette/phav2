@@ -14,19 +14,38 @@ type Report = Tables['reports']['Row'];
 // Real-time event types
 export type RealtimeEventType = 'INSERT' | 'UPDATE' | 'DELETE';
 
+// Fixed payload interfaces to match actual Supabase real-time protocol
+export interface SupabaseRealtimePayload<T> {
+  data: {
+    schema: string;
+    table: string;
+    commit_timestamp: string;
+    eventType: RealtimeEventType;
+    new: T | Record<string, never>;
+    old: Partial<T> | Record<string, never>;
+    errors: string | null;
+  };
+  ids: number[];
+}
+
 // Payload types for different tables
 export interface SurveyResponsePayload
-  extends RealtimePostgresChangesPayload<SurveyResponse> {
-  table: 'survey_responses';
+  extends SupabaseRealtimePayload<SurveyResponse> {
+  data: SupabaseRealtimePayload<SurveyResponse>['data'] & {
+    table: 'survey_responses';
+  };
 }
 
-export interface AssessmentPayload
-  extends RealtimePostgresChangesPayload<Assessment> {
-  table: 'assessments';
+export interface AssessmentPayload extends SupabaseRealtimePayload<Assessment> {
+  data: SupabaseRealtimePayload<Assessment>['data'] & {
+    table: 'assessments';
+  };
 }
 
-export interface ReportPayload extends RealtimePostgresChangesPayload<Report> {
-  table: 'reports';
+export interface ReportPayload extends SupabaseRealtimePayload<Report> {
+  data: SupabaseRealtimePayload<Report>['data'] & {
+    table: 'reports';
+  };
 }
 
 // Union type for all possible payloads
@@ -52,6 +71,10 @@ export interface SubscriptionConfig {
 // Subscription manager class
 export class RealtimeSubscriptionManager {
   private channels = new Map<string, RealtimeChannel>();
+  private subscriptionCallbacks = new Map<
+    string,
+    { config: SubscriptionConfig; callback: (payload: RealtimePayload) => void }
+  >();
   private isConnected = false;
   private retryAttempts = 0;
   private maxRetries = 3;
@@ -105,7 +128,7 @@ export class RealtimeSubscriptionManager {
       filter,
     };
 
-    return this.createSubscription(config, callback);
+    return this.createSubscription<SurveyResponsePayload>(config, callback);
   }
 
   /**
@@ -135,7 +158,7 @@ export class RealtimeSubscriptionManager {
       filter,
     };
 
-    return this.createSubscription(config, callback);
+    return this.createSubscription<AssessmentPayload>(config, callback);
   }
 
   /**
@@ -165,29 +188,42 @@ export class RealtimeSubscriptionManager {
       filter,
     };
 
-    return this.createSubscription(config, callback);
+    return this.createSubscription<ReportPayload>(config, callback);
   }
 
   /**
    * Create a generic subscription
    */
-  private createSubscription(
+  private createSubscription<T extends RealtimePayload>(
+    config: SubscriptionConfig,
+    callback: (payload: T) => void
+  ): string {
+    return this.createSubscriptionInternal(
+      config,
+      callback as (payload: RealtimePayload) => void
+    );
+  }
+
+  /**
+   * Internal subscription creation method
+   */
+  private createSubscriptionInternal(
     config: SubscriptionConfig,
     callback: (payload: RealtimePayload) => void
   ): string {
     try {
       const channel = supabase.channel(config.channel);
 
-      // Configure the subscription based on config
-      const subscription = channel.on(
-        'postgres_changes',
+      // Configure the subscription based on config - using the correct Supabase API
+      channel.on(
+        'postgres_changes' as any,
         {
           event: config.event || '*',
           schema: config.schema || 'public',
           table: config.table,
           ...(config.filter && { filter: config.filter }),
         },
-        payload => {
+        (payload: RealtimePostgresChangesPayload<any>) => {
           try {
             this.handleRealtimeEvent(payload, callback);
           } catch (error) {
@@ -201,7 +237,7 @@ export class RealtimeSubscriptionManager {
       );
 
       // Subscribe and handle connection
-      subscription.subscribe((status, err) => {
+      channel.subscribe((status, err) => {
         if (status === 'SUBSCRIBED') {
           console.log(
             `✅ Successfully subscribed to ${config.table} changes on channel ${config.channel}`
@@ -228,6 +264,9 @@ export class RealtimeSubscriptionManager {
       // Store channel for management
       this.channels.set(config.channel, channel);
 
+      // Store callback information
+      this.subscriptionCallbacks.set(config.channel, { config, callback });
+
       return config.channel;
     } catch (error) {
       console.error(
@@ -250,9 +289,18 @@ export class RealtimeSubscriptionManager {
     callback: (payload: RealtimePayload) => void
   ): void {
     try {
-      // Add timestamp to payload for tracking
+      // Convert Supabase payload to our custom structure
       const enhancedPayload = {
-        ...payload,
+        data: {
+          schema: payload.schema,
+          table: payload.table,
+          commit_timestamp: payload.commit_timestamp,
+          eventType: payload.eventType as RealtimeEventType,
+          new: payload.new || {},
+          old: payload.old || {},
+          errors: payload.errors?.[0] || null,
+        },
+        ids: [], // Supabase doesn't provide this, but our interface expects it
         timestamp: new Date().toISOString(),
         processed_at: Date.now(),
       } as RealtimePayload;
@@ -282,7 +330,11 @@ export class RealtimeSubscriptionManager {
       );
 
       setTimeout(() => {
-        this.retrySubscription(config, () => {});
+        // Get the stored callback for this channel
+        const storedInfo = this.subscriptionCallbacks.get(config.channel);
+        if (storedInfo) {
+          this.retrySubscription(config, storedInfo.callback);
+        }
       }, delay);
     } else {
       console.error(
@@ -301,8 +353,8 @@ export class RealtimeSubscriptionManager {
     // Remove old channel first
     this.unsubscribe(config.channel);
 
-    // Create new subscription
-    this.createSubscription(config, callback);
+    // Create new subscription with the original callback
+    this.createSubscriptionInternal(config, callback);
   }
 
   /**
@@ -315,6 +367,10 @@ export class RealtimeSubscriptionManager {
         supabase.removeChannel(channel);
         this.channels.delete(channelName);
         console.log(`🔌 Unsubscribed from channel: ${channelName}`);
+
+        // Remove callback information
+        this.subscriptionCallbacks.delete(channelName);
+
         return true;
       } catch (error) {
         console.error(
@@ -337,12 +393,16 @@ export class RealtimeSubscriptionManager {
       try {
         supabase.removeChannel(channel);
         console.log(`✅ Unsubscribed from ${channelName}`);
+
+        // Remove callback information
+        this.subscriptionCallbacks.delete(channelName);
       } catch (error) {
         console.error(`❌ Error unsubscribing from ${channelName}:`, error);
       }
     }
 
     this.channels.clear();
+    this.subscriptionCallbacks.clear();
     this.isConnected = false;
   }
 
@@ -471,11 +531,5 @@ export const cleanupRealtime = (): void => {
   realtimeManager.unsubscribeAll();
 };
 
-// Export types for external use
-export type {
-  RealtimeEventType,
-  SurveyResponse,
-  Assessment,
-  Report,
-  SubscriptionConfig,
-};
+// Export additional types for external use
+export type { SurveyResponse, Assessment, Report };
