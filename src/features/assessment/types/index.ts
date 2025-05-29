@@ -36,11 +36,12 @@ export interface AssessmentWithResponses extends Assessment {
     response_text?: string;
     created_at: string;
   }>;
-  child?: {
+  children?: {
     id: string;
     first_name: string;
     last_name?: string;
     date_of_birth: string;
+    parent_id?: string;
   };
 }
 
