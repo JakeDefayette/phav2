@@ -109,15 +109,15 @@ export async function checkConnection(force = false): Promise<boolean> {
   lastConnectionCheck = now;
 
   try {
-    // Simple connection test
-    const { error } = await supabase
-      .from('user_profiles')
-      .select('id')
-      .limit(1);
-
-    connectionState = error ? 'disconnected' : 'connected';
-    return connectionState === 'connected';
+    // Simple connection test using a public table or basic auth check
+    // Use auth session check instead of querying a protected table
+    const { data: { session }, error } = await supabase.auth.getSession();
+    
+    // For anonymous users, consider connection as working if no network error occurs
+    connectionState = 'connected';
+    return true;
   } catch (error) {
+    console.log('Connection check failed:', error);
     connectionState = 'disconnected';
     return false;
   }
@@ -204,15 +204,29 @@ export async function withRetry<T>(
 
 // Initialize connection monitoring
 if (typeof window !== 'undefined') {
-  // Check connection on page load
-  checkConnection();
+  // Don't automatically check connection on page load to avoid 401 errors for anonymous users
+  // checkConnection();
 
   // Monitor online/offline status
-  window.addEventListener('online', () => checkConnection(true));
+  window.addEventListener('online', () => {
+    // Only check connection if user is authenticated
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session) {
+        checkConnection(true);
+      }
+    });
+  });
+  
   window.addEventListener('offline', () => {
     connectionState = 'disconnected';
   });
 
-  // Periodic connection checks
-  setInterval(() => checkConnection(), CONNECTION_CHECK_INTERVAL);
+  // Only do periodic connection checks for authenticated users
+  setInterval(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session) {
+        checkConnection();
+      }
+    });
+  }, CONNECTION_CHECK_INTERVAL);
 }

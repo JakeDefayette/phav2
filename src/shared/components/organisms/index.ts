@@ -8,7 +8,9 @@ export {
   MultiStepSurveyForm,
   type MultiStepSurveyFormProps,
   type SurveyFormData,
-} from '@/features/assessment/components/MultiStepSurveyForm';
+  MultiStepSurveyFormWithWorkflow,
+  WorkflowRecovery,
+} from '@/features/assessment/components';
 
 export {
   ChartDisplay,

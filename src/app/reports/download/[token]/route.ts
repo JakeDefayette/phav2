@@ -12,6 +12,8 @@ export async function GET(
     const supabase = supabaseServer;
     const pdfService = PDFService.getInstance();
 
+    console.log(`🔍 Looking up share token: ${token.substring(0, 8)}...`);
+    
     // Validate share token and get report details with proper joins
     const { data: shareData, error: shareError } = await supabase
       .from('report_shares')
@@ -20,7 +22,6 @@ export async function GET(
         id,
         report_id,
         share_token,
-        expires_at,
         reports!inner (
           id,
           assessment_id,
@@ -46,6 +47,13 @@ export async function GET(
       .eq('share_token', token)
       .single();
 
+    console.log('🔍 Share token lookup result:', {
+      found: !!shareData,
+      error: shareError?.message,
+      errorCode: shareError?.code,
+      tokenLength: token.length
+    });
+
     if (shareError || !shareData) {
       return NextResponse.json(
         { error: 'Invalid or expired download link' },
@@ -53,16 +61,9 @@ export async function GET(
       );
     }
 
-    // Check if token has expired
-    if (shareData.expires_at) {
-      const expirationDate = new Date(shareData.expires_at);
-      if (expirationDate < new Date()) {
-        return NextResponse.json(
-          { error: 'Download link has expired' },
-          { status: 410 }
-        );
-      }
-    }
+    // Note: No expiration check since report_shares table doesn't have expires_at field
+    // Token access is controlled by the existence of the record
+    console.log('✅ Share token found, proceeding to generate PDF...');
 
     // Extract report data and format it properly - handle nested structure
     const reportData = shareData.reports as any;

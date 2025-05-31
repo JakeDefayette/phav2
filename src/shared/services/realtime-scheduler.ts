@@ -17,6 +17,8 @@ export interface SchedulerOptions {
   maxBackpressure?: number;
   healthCheckInterval?: number;
   circuitBreakerThreshold?: number;
+  debugMode?: boolean;
+  adaptiveInterval?: number;
 }
 
 export interface SchedulerMetrics {
@@ -67,6 +69,8 @@ export class RealtimeScheduler {
       maxBackpressure: options.maxBackpressure ?? 1000,
       healthCheckInterval: options.healthCheckInterval ?? 30000, // 30 seconds
       circuitBreakerThreshold: options.circuitBreakerThreshold ?? 0.5, // 50% error rate
+      debugMode: options.debugMode ?? false,
+      adaptiveInterval: options.adaptiveInterval ?? 1000, // 1 second
     };
 
     this.metrics = {
@@ -241,15 +245,18 @@ export class RealtimeScheduler {
     if (adjustmentFactor !== 1.0) {
       this.metrics.adaptiveAdjustments++;
 
-      this.performanceMonitor.recordMetric(
-        'realtimeScheduler',
-        'adaptive_adjustment',
-        {
-          currentLoad,
-          adjustmentFactor,
-          rateLimitersAdjusted: this.rateLimiters.size,
-        }
-      );
+      // Only log performance metrics in debug mode to prevent console spam
+      if (this.options.debugMode) {
+        this.performanceMonitor.recordMetric(
+          'realtimeScheduler',
+          'adaptive_adjustment',
+          {
+            currentLoad,
+            adjustmentFactor,
+            rateLimitersAdjusted: this.rateLimiters.size,
+          }
+        );
+      }
     }
   }
 
@@ -324,7 +331,7 @@ export class RealtimeScheduler {
     this.schedulingInterval = setInterval(() => {
       this.adaptRateLimits();
       this.processQueue();
-    }, 1000); // Every second
+    }, this.options.adaptiveInterval);
   }
 
   /**

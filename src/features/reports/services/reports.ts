@@ -13,6 +13,7 @@ import {
   timed,
   timeOperation,
 } from '@/shared/utils/performance';
+import { AssessmentProgressService } from '@/features/assessment/services/progressTracking';
 import type {
   Report,
   ReportInsert,
@@ -24,6 +25,7 @@ import type {
   GeneratedReport,
   GeneratedReportContent,
 } from '../types';
+import type { ReportGenerationProgress } from '@/features/assessment/types/progress';
 
 /**
  * Service for managing report operations and viral tracking
@@ -38,6 +40,7 @@ export class ReportsService extends BaseService<
   private chartService: ChartService;
   private reportCacheService: ReportCacheService;
   private performanceMonitor: PerformanceMonitor;
+  private progressService: AssessmentProgressService;
 
   constructor() {
     super('reports');
@@ -46,6 +49,7 @@ export class ReportsService extends BaseService<
     this.chartService = ChartService.getInstance();
     this.reportCacheService = ReportCacheService.getInstance();
     this.performanceMonitor = PerformanceMonitor.getInstance();
+    this.progressService = AssessmentProgressService.getInstance();
   }
 
   /**
@@ -991,6 +995,242 @@ export class ReportsService extends BaseService<
       }
       this.handleError(error as Error, 'Get viral metrics');
     }
+  }
+
+  /**
+   * Generate a report with real-time progress tracking
+   */
+  async generateReportWithProgress(
+    assessmentId: string,
+    reportType: 'standard' | 'detailed' | 'summary' = 'standard',
+    practiceId?: string
+  ): Promise<GeneratedReport> {
+    return timeOperation('generateReportWithProgress', async () => {
+      const cacheKey = `report:${assessmentId}:${reportType}:${practiceId || 'no-practice'}`;
+
+      // Check cache first
+      this.updateReportProgress(assessmentId, {
+        stage: 'fetching_data',
+        progress: 0,
+        currentOperation: 'Checking cache',
+      });
+
+      const cachedReport = await this.reportCacheService.getReport(cacheKey);
+      if (cachedReport) {
+        this.updateReportProgress(assessmentId, {
+          stage: 'finalizing',
+          progress: 100,
+          currentOperation: 'Retrieved from cache',
+          cacheHit: true,
+        });
+
+        this.performanceMonitor.recordMetric('generateReport', 'cache_hit', {
+          assessmentId,
+          reportType,
+        });
+        return cachedReport;
+      }
+
+      try {
+        this.performanceMonitor.startOperation('generateReportWithProgress', {
+          assessmentId,
+          reportType,
+        });
+
+        // Get assessment data with progress tracking
+        this.updateReportProgress(assessmentId, {
+          stage: 'fetching_data',
+          progress: 20,
+          currentOperation: 'Fetching assessment data',
+        });
+
+        const assessmentDataResult = await timeOperation(
+          'getAssessmentData',
+          async () => {
+            const { data, error } = await supabase
+              .from('assessments')
+              .select(
+                `
+                *,
+                children (
+                  id,
+                  first_name,
+                  last_name,
+                  date_of_birth,
+                  gender
+                )
+              `
+              )
+              .eq('id', assessmentId)
+              .single();
+
+            if (error) {
+              this.handleError(error, 'Get assessment data for report');
+            }
+
+            if (!data) {
+              throw new ServiceError('Assessment not found', 'NOT_FOUND');
+            }
+
+            return data;
+          }
+        );
+        const assessmentData = assessmentDataResult.result;
+
+        // Get survey responses with progress tracking
+        this.updateReportProgress(assessmentId, {
+          stage: 'fetching_data',
+          progress: 40,
+          currentOperation: 'Fetching survey responses',
+        });
+
+        const responsesResult = await timeOperation(
+          'getSurveyResponses',
+          async () => {
+            const cacheKey = `responses:${assessmentId}`;
+            const cached =
+              await this.reportCacheService.getSurveyResponses(cacheKey);
+            if (cached) {
+              return cached;
+            }
+
+            const responsesData =
+              await this.surveyResponsesService.findByAssessmentId(
+                assessmentId
+              );
+            await this.reportCacheService.cacheSurveyResponses(
+              cacheKey,
+              responsesData
+            );
+            return responsesData;
+          }
+        );
+        const responses = responsesResult.result;
+
+        // Transform data with progress tracking
+        this.updateReportProgress(assessmentId, {
+          stage: 'mapping_responses',
+          progress: 20,
+          currentOperation: 'Mapping survey data',
+        });
+
+        const mappedDataResult = await timeOperation(
+          'mapSurveyData',
+          async () => {
+            const cacheKey = `mapped:${assessmentId}`;
+            const cached =
+              await this.reportCacheService.getMappedData(cacheKey);
+            if (cached) {
+              return cached;
+            }
+
+            const mapped = await this.surveyDataMapper.mapSurveyData(
+              responses,
+              assessmentId
+            );
+            await this.reportCacheService.cacheMappedData(cacheKey, mapped);
+            return mapped;
+          }
+        );
+        const mappedData = mappedDataResult.result;
+
+        // Generate charts with progress tracking
+        this.updateReportProgress(assessmentId, {
+          stage: 'generating_charts',
+          progress: 30,
+          currentOperation: 'Generating charts',
+        });
+
+        // Generate report content with progress tracking
+        this.updateReportProgress(assessmentId, {
+          stage: 'creating_content',
+          progress: 60,
+          currentOperation: 'Creating report content',
+        });
+
+        const contentResult = await timeOperation(
+          'generateContent',
+          async () => {
+            return this.generateReportContentFromMappedData(
+              assessmentData,
+              mappedData,
+              reportType
+            );
+          }
+        );
+        const content = contentResult.result;
+
+        // Create database report record
+        this.updateReportProgress(assessmentId, {
+          stage: 'caching_results',
+          progress: 80,
+          currentOperation: 'Saving report',
+        });
+
+        const reportData: ReportInsert = {
+          assessment_id: assessmentId,
+          practice_id: practiceId,
+        };
+
+        const reportResult = await timeOperation('createReport', async () => {
+          return await this.create(reportData);
+        });
+        const report = reportResult.result;
+
+        // Store the generated content separately
+        const generatedReport: GeneratedReport = {
+          id: report.id,
+          assessment_id: report.assessment_id,
+          practice_id: report.practice_id || undefined,
+          report_type: reportType,
+          content,
+          generated_at: new Date().toISOString(),
+          created_at: report.created_at || undefined,
+          updated_at: report.updated_at || undefined,
+        };
+
+        // Cache the generated report content
+        this.updateReportProgress(assessmentId, {
+          stage: 'finalizing',
+          progress: 95,
+          currentOperation: 'Caching results',
+        });
+
+        await this.reportCacheService.cacheReport(cacheKey, generatedReport);
+
+        this.updateReportProgress(assessmentId, {
+          stage: 'finalizing',
+          progress: 100,
+          currentOperation: 'Report generation complete',
+          cacheHit: false,
+        });
+
+        this.performanceMonitor.endOperation('generateReportWithProgress');
+        this.performanceMonitor.recordMetric(
+          'generateReportWithProgress',
+          'cache_miss',
+          {
+            assessmentId,
+            reportType,
+          }
+        );
+
+        return generatedReport;
+      } catch (error) {
+        this.performanceMonitor.endOperation('generateReportWithProgress');
+        throw error;
+      }
+    });
+  }
+
+  /**
+   * Update report generation progress
+   */
+  private updateReportProgress(
+    assessmentId: string,
+    progress: ReportGenerationProgress
+  ): void {
+    this.progressService.updateReportProgress(assessmentId, progress);
   }
 }
 

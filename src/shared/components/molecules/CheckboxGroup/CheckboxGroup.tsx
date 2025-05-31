@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useCallback } from 'react';
 import { useField } from 'formik';
 import { Checkbox } from '@/shared/components/atoms/Checkbox';
 import { Label } from '@/shared/components/atoms/Label';
@@ -33,14 +33,28 @@ export const CheckboxGroup: React.FC<CheckboxGroupProps> = ({
 }) => {
   const [field, meta, helpers] = useField<string[]>(name);
 
-  const handleChange = (optionValue: string, checked: boolean) => {
-    const currentValues = Array.isArray(field.value) ? field.value : [];
-    if (checked) {
-      helpers.setValue([...currentValues, optionValue]);
-    } else {
-      helpers.setValue(currentValues.filter(value => value !== optionValue));
-    }
-  };
+  // Memoize the change handler to prevent unnecessary re-renders
+  const handleChange = useCallback(
+    (optionValue: string, checked: boolean) => {
+      const currentValues = Array.isArray(field.value) ? field.value : [];
+      let newValues;
+
+      if (checked) {
+        // Prevent duplicates
+        if (!currentValues.includes(optionValue)) {
+          newValues = [...currentValues, optionValue];
+        } else {
+          return; // Already checked, no need to update
+        }
+      } else {
+        newValues = currentValues.filter(value => value !== optionValue);
+      }
+
+      helpers.setValue(newValues);
+      helpers.setTouched(true);
+    },
+    [field.value, helpers]
+  );
 
   const gridCols = {
     1: 'grid-cols-1',
@@ -59,24 +73,30 @@ export const CheckboxGroup: React.FC<CheckboxGroupProps> = ({
       )}
 
       <div className={cn('grid gap-3', gridCols[columns])}>
-        {options.map(option => (
-          <div key={option.value} className='space-y-1'>
-            <Checkbox
-              id={`${name}-${option.value}`}
-              label={option.label}
-              checked={
-                Array.isArray(field.value)
-                  ? field.value.includes(option.value)
-                  : false
-              }
-              onChange={e => handleChange(option.value, e.target.checked)}
-              variant={displayError ? 'error' : 'default'}
-            />
-            {option.description && (
-              <p className='ml-7 text-xs text-gray-500'>{option.description}</p>
-            )}
-          </div>
-        ))}
+        {options.map(option => {
+          const isChecked = Array.isArray(field.value)
+            ? field.value.includes(option.value)
+            : false;
+
+          return (
+            <div key={option.value} className='space-y-1'>
+              <Checkbox
+                id={`${name}-${option.value}`}
+                label={option.label}
+                checked={isChecked}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                  handleChange(option.value, e.target.checked);
+                }}
+                variant={displayError ? 'error' : 'default'}
+              />
+              {option.description && (
+                <p className='ml-7 text-xs text-gray-500'>
+                  {option.description}
+                </p>
+              )}
+            </div>
+          );
+        })}
       </div>
 
       {displayError && <p className='text-sm text-red-600'>{displayError}</p>}

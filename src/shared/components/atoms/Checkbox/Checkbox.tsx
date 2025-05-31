@@ -21,10 +21,23 @@ export const Checkbox: React.FC<CheckboxProps> = ({
   variant = 'default',
   className,
   id,
+  onChange,
   ...props
 }) => {
   const checkboxId =
     id || `checkbox-${Math.random().toString(36).substr(2, 9)}`;
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    console.log('Checkbox changed:', {
+      id: checkboxId,
+      checked: e.target.checked,
+      value: e.target.value,
+      label: label,
+    });
+    if (onChange) {
+      onChange(e);
+    }
+  };
 
   return (
     <div className='w-full'>
@@ -38,6 +51,7 @@ export const Checkbox: React.FC<CheckboxProps> = ({
             checkboxVariants[variant],
             className
           )}
+          onChange={handleChange}
           {...props}
         />
         {label && (

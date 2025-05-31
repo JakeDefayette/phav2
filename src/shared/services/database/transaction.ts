@@ -3,7 +3,9 @@ import { ServiceError } from '@/shared/services/base';
 import { AssessmentsService } from '@/features/assessment/services/assessments';
 import { SurveyResponsesService } from '@/features/assessment/services/surveyResponses';
 import { ReportsService } from '@/features/reports/services/reports';
+import { AssessmentProgressService } from '@/features/assessment/services/progressTracking';
 import type { Database } from '@/shared/types/database';
+import type { ProgressError } from '@/features/assessment/types/progress';
 
 export interface TransactionContext {
   transactionId: string;
@@ -38,27 +40,30 @@ export interface AssessmentSubmissionResult {
  *
  * Provides atomic transaction capabilities for complex database operations.
  * Uses Supabase PostgreSQL transactions for data consistency.
+ * Integrates with real-time progress tracking for live updates.
  */
 export class DatabaseTransactionService {
   private assessmentsService: AssessmentsService;
   private surveyResponsesService: SurveyResponsesService;
   private reportsService: ReportsService;
+  private progressService: AssessmentProgressService;
 
   constructor() {
     this.assessmentsService = new AssessmentsService();
     this.surveyResponsesService = new SurveyResponsesService();
     this.reportsService = new ReportsService();
+    this.progressService = AssessmentProgressService.getInstance();
   }
 
   /**
-   * Submit assessment with atomic transaction
+   * Submit assessment with atomic transaction and real-time progress tracking
    *
    * This method ensures that all assessment submission operations happen atomically:
    * 1. Insert survey responses
    * 2. Update assessment status and brain-o-meter score
    * 3. Generate report
    *
-   * Uses PostgreSQL transaction with error handling and rollback.
+   * Uses PostgreSQL transaction with error handling, rollback, and real-time progress updates.
    */
   async submitAssessmentAtomic(
     data: AssessmentSubmissionData
@@ -76,16 +81,42 @@ export class DatabaseTransactionService {
       `🔄 Starting assessment submission transaction: ${context.transactionId}`
     );
 
+    // Start progress tracking
+    this.progressService.startProgress(assessmentId);
+
     try {
       // Step 1: Verify assessment exists and is in correct state
+      this.progressService.updateProgress(
+        assessmentId,
+        'validating',
+        10,
+        'Validating assessment data'
+      );
+
       context.operations.push(`VALIDATE_ASSESSMENT: ${assessmentId}`);
 
       const assessment = await this.assessmentsService.findById(assessmentId);
       if (!assessment) {
+        const error: ProgressError = {
+          code: 'ASSESSMENT_NOT_FOUND',
+          message: 'Assessment not found',
+          stage: 'validating',
+          timestamp: new Date().toISOString(),
+          recoverable: false,
+        };
+        this.progressService.reportError(assessmentId, error);
         throw new ServiceError('Assessment not found', 'ASSESSMENT_NOT_FOUND');
       }
 
       if (assessment.status === 'completed') {
+        const error: ProgressError = {
+          code: 'ASSESSMENT_ALREADY_COMPLETED',
+          message: 'Assessment already completed',
+          stage: 'validating',
+          timestamp: new Date().toISOString(),
+          recoverable: false,
+        };
+        this.progressService.reportError(assessmentId, error);
         throw new ServiceError(
           'Assessment already completed',
           'ASSESSMENT_ALREADY_COMPLETED'
@@ -95,6 +126,13 @@ export class DatabaseTransactionService {
       context.operations.push(`ASSESSMENT_VALIDATED: ${assessment.status}`);
 
       // Step 2: Insert survey responses using PostgreSQL transaction
+      this.progressService.updateProgress(
+        assessmentId,
+        'saving_responses',
+        30,
+        'Saving survey responses'
+      );
+
       const responseData = responses.map(response => ({
         assessment_id: assessmentId,
         question_id: response.question_id,
@@ -102,14 +140,20 @@ export class DatabaseTransactionService {
         response_text: response.response_text,
       }));
 
-      // Begin PostgreSQL transaction by using .rpc with a custom function
-      // We'll execute all operations in sequence and handle rollback manually if needed
       const { data: insertedResponses, error: responsesError } = await supabase
         .from('survey_responses')
         .insert(responseData)
         .select();
 
       if (responsesError) {
+        const error: ProgressError = {
+          code: 'SURVEY_RESPONSES_INSERT_FAILED',
+          message: `Failed to insert survey responses: ${responsesError.message}`,
+          stage: 'saving_responses',
+          timestamp: new Date().toISOString(),
+          recoverable: false,
+        };
+        this.progressService.reportError(assessmentId, error);
         throw new ServiceError(
           `Failed to insert survey responses: ${responsesError.message}`,
           'SURVEY_RESPONSES_INSERT_FAILED',
@@ -125,6 +169,13 @@ export class DatabaseTransactionService {
       const insertedResponseIds = insertedResponses?.map(r => r.id) || [];
 
       // Step 3: Complete assessment with brain-o-meter score
+      this.progressService.updateProgress(
+        assessmentId,
+        'completing_assessment',
+        50,
+        'Completing assessment'
+      );
+
       const completedAt = new Date().toISOString();
       const { data: updatedAssessment, error: assessmentError } = await supabase
         .from('assessments')
@@ -149,6 +200,14 @@ export class DatabaseTransactionService {
             .in('id', insertedResponseIds);
         }
 
+        const error: ProgressError = {
+          code: 'ASSESSMENT_UPDATE_FAILED',
+          message: `Failed to complete assessment: ${assessmentError.message}`,
+          stage: 'completing_assessment',
+          timestamp: new Date().toISOString(),
+          recoverable: false,
+        };
+        this.progressService.reportError(assessmentId, error);
         throw new ServiceError(
           `Failed to complete assessment: ${assessmentError.message}`,
           'ASSESSMENT_UPDATE_FAILED',
@@ -160,10 +219,18 @@ export class DatabaseTransactionService {
         `ASSESSMENT_COMPLETED: status=${updatedAssessment.status}, score=${brainOMeterScore}`
       );
 
-      // Step 4: Generate report
+      // Step 4: Generate report with progress tracking
+      this.progressService.updateProgress(
+        assessmentId,
+        'generating_report',
+        60,
+        'Generating report'
+      );
+
       let report;
       try {
-        report = await this.reportsService.generateReport(
+        // Enhanced report generation will provide its own progress updates
+        report = await this.reportsService.generateReportWithProgress(
           assessmentId,
           'standard',
           practiceId
@@ -193,6 +260,14 @@ export class DatabaseTransactionService {
             .in('id', insertedResponseIds);
         }
 
+        const error: ProgressError = {
+          code: 'REPORT_GENERATION_FAILED',
+          message: `Failed to generate report: ${reportError instanceof Error ? reportError.message : 'Unknown error'}`,
+          stage: 'generating_report',
+          timestamp: new Date().toISOString(),
+          recoverable: false,
+        };
+        this.progressService.reportError(assessmentId, error);
         throw new ServiceError(
           `Failed to generate report: ${reportError instanceof Error ? reportError.message : 'Unknown error'}`,
           'REPORT_GENERATION_FAILED',
@@ -200,36 +275,65 @@ export class DatabaseTransactionService {
         );
       }
 
-      const duration = Date.now() - context.startTime.getTime();
-      console.log(
-        `✅ Assessment submission transaction completed: ${context.transactionId} (Duration: ${duration}ms, Operations: ${context.operations.length})`
+      // Step 5: Finalize transaction
+      this.progressService.updateProgress(
+        assessmentId,
+        'finalizing',
+        95,
+        'Finalizing submission'
       );
 
-      return {
-        assessmentId: updatedAssessment.id,
+      const result: AssessmentSubmissionResult = {
+        assessmentId,
         reportId: report.id,
         status: updatedAssessment.status,
-        brainOMeterScore: updatedAssessment.brain_o_meter_score!,
-        completedAt: updatedAssessment.completed_at!,
-        reportGeneratedAt: report.generated_at,
+        brainOMeterScore: updatedAssessment.brain_o_meter_score,
+        completedAt: updatedAssessment.completed_at,
+        reportGeneratedAt: report.generated_at || new Date().toISOString(),
         responsesCount: insertedResponses?.length || 0,
       };
-    } catch (error) {
-      const duration = Date.now() - context.startTime.getTime();
-      console.error(
-        `❌ Assessment submission transaction failed: ${context.transactionId} (Duration: ${duration}ms)`,
-        error
+
+      // Complete progress tracking
+      this.progressService.completeProgress(assessmentId, result);
+
+      console.log(
+        `✅ Assessment submission transaction completed successfully: ${context.transactionId}`
+      );
+      console.log(`📊 Operations performed: ${context.operations.join(' → ')}`);
+      console.log(
+        `⏱️ Total duration: ${Date.now() - context.startTime.getTime()}ms`
       );
 
-      // Re-throw the original error
-      if (error instanceof ServiceError) {
-        throw error;
+      return result;
+    } catch (error) {
+      // Ensure progress is marked as error if not already done
+      if (
+        error instanceof ServiceError &&
+        error.code !== 'ASSESSMENT_NOT_FOUND' &&
+        error.code !== 'ASSESSMENT_ALREADY_COMPLETED'
+      ) {
+        const progressError: ProgressError = {
+          code: error.code || 'UNKNOWN_ERROR',
+          message: error.message,
+          stage: 'error',
+          timestamp: new Date().toISOString(),
+          recoverable: false,
+        };
+        this.progressService.reportError(assessmentId, progressError);
       }
-      throw new ServiceError(
-        `Assessment submission failed: ${error instanceof Error ? error.message : 'Unknown error'}`,
-        'ASSESSMENT_SUBMISSION_FAILED',
+
+      console.error(
+        `❌ Assessment submission transaction failed: ${context.transactionId}`,
         error
       );
+      console.error(
+        `📊 Operations completed: ${context.operations.join(' → ')}`
+      );
+      console.error(
+        `⏱️ Failed after: ${Date.now() - context.startTime.getTime()}ms`
+      );
+
+      throw error;
     }
   }
 

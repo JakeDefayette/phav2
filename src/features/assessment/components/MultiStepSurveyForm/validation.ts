@@ -57,10 +57,14 @@ export const step3ValidationSchema = Yup.object({
   phone: Yup.string()
     .trim()
     .nullable()
-    .matches(
-      /^(\+?1[-.\s]?)?\(?([0-9]{3})\)?[-.\s]?([0-9]{3})[-.\s]?([0-9]{4})$/,
-      'Please enter a valid phone number'
-    ),
+    .test('phone-format', 'Please enter a valid phone number', function(value) {
+      // If value is empty or undefined, it's valid (optional field)
+      if (!value || value.length === 0) {
+        return true;
+      }
+      // If value exists, validate format
+      return /^(\+?1[-.\s]?)?\(?([0-9]{3})\)?[-.\s]?([0-9]{3})[-.\s]?([0-9]{4})$/.test(value);
+    }),
 
   privacyPolicyAcknowledged: Yup.boolean()
     .required('You must acknowledge the privacy policy')
