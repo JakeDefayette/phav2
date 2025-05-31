@@ -13,7 +13,7 @@ export async function GET(
     const pdfService = PDFService.getInstance();
 
     console.log(`🔍 Looking up share token: ${token.substring(0, 8)}...`);
-    
+
     // Validate share token and get report details with proper joins
     const { data: shareData, error: shareError } = await supabase
       .from('report_shares')
@@ -51,7 +51,7 @@ export async function GET(
       found: !!shareData,
       error: shareError?.message,
       errorCode: shareError?.code,
-      tokenLength: token.length
+      tokenLength: token.length,
     });
 
     if (shareError || !shareData) {

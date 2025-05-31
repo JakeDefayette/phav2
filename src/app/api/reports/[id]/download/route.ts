@@ -5,7 +5,10 @@ import { supabaseServer } from '@/shared/services/supabase-server';
 import { PDFService } from '@/features/reports/services/pdf';
 import { ServiceError } from '@/shared/services/base';
 import type { Database } from '@/shared/types/database';
-import type { GeneratedReport, GeneratedReportContent } from '@/features/reports/types';
+import type {
+  GeneratedReport,
+  GeneratedReportContent,
+} from '@/features/reports/types';
 
 export async function GET(
   request: NextRequest,
@@ -47,19 +50,24 @@ export async function GET(
       console.log('🔐 Checking user authorization...');
       const { data: assessment, error: assessmentError } = await supabaseServer
         .from('assessments')
-        .select(`
+        .select(
+          `
           id,
           child_id,
           children!inner (
             id,
             parent_id
           )
-        `)
+        `
+        )
         .eq('id', report.assessment_id)
         .single();
 
       if (assessmentError || !assessment) {
-        console.error('❌ Assessment not found for authorization check:', assessmentError);
+        console.error(
+          '❌ Assessment not found for authorization check:',
+          assessmentError
+        );
         return NextResponse.json(
           { error: 'Assessment not found' },
           { status: 404 }
@@ -83,11 +91,13 @@ export async function GET(
 
     // Generate the full report content using server-side database operations
     console.log('📊 Generating report content using server-side operations...');
-    
+
     // Get assessment data
-    const { data: assessmentData, error: assessmentDataError } = await supabaseServer
-      .from('assessments')
-      .select(`
+    const { data: assessmentData, error: assessmentDataError } =
+      await supabaseServer
+        .from('assessments')
+        .select(
+          `
         *,
         children (
           id,
@@ -96,9 +106,10 @@ export async function GET(
           date_of_birth,
           gender
         )
-      `)
-      .eq('id', report.assessment_id)
-      .single();
+      `
+        )
+        .eq('id', report.assessment_id)
+        .single();
 
     if (assessmentDataError || !assessmentData) {
       console.error('❌ Assessment data not found:', assessmentDataError);
@@ -109,11 +120,12 @@ export async function GET(
     }
 
     // Get survey responses
-    const { data: surveyResponses, error: responsesError } = await supabaseServer
-      .from('survey_responses')
-      .select('*')
-      .eq('assessment_id', report.assessment_id)
-      .order('question_id');
+    const { data: surveyResponses, error: responsesError } =
+      await supabaseServer
+        .from('survey_responses')
+        .select('*')
+        .eq('assessment_id', report.assessment_id)
+        .order('question_id');
 
     if (responsesError) {
       console.error('❌ Error fetching survey responses:', responsesError);
@@ -141,8 +153,14 @@ export async function GET(
           assessmentData.children && (assessmentData.children as any).first_name
             ? `${(assessmentData.children as any).first_name} ${(assessmentData.children as any).last_name || ''}`.trim()
             : 'Unknown Child',
-        age: calculateAge(assessmentData.children ? (assessmentData.children as any).date_of_birth : null),
-        gender: assessmentData.children ? (assessmentData.children as any).gender : undefined,
+        age: calculateAge(
+          assessmentData.children
+            ? (assessmentData.children as any).date_of_birth
+            : null
+        ),
+        gender: assessmentData.children
+          ? (assessmentData.children as any).gender
+          : undefined,
       },
       assessment: {
         id: assessmentData.id,
@@ -184,16 +202,17 @@ export async function GET(
       detailed_analysis: {
         // Example: Populated with deeper analysis of responses
       },
-      rawResponses: surveyResponses?.map(response => ({
-        question_id: response.question_id,
-        response_value: response.response_value,
-        // Add other response details if available in surveyResponses
-      })) || [],
+      rawResponses:
+        surveyResponses?.map(response => ({
+          question_id: response.question_id,
+          response_value: response.response_value,
+          // Add other response details if available in surveyResponses
+        })) || [],
       key_insights: [
-         // Top insights, could be derived from 'insights'
+        // Top insights, could be derived from 'insights'
       ],
       categoryScores: {
-         // Scores per category, potentially from 'overallStatistics'
+        // Scores per category, potentially from 'overallStatistics'
       },
       dataQuality: {
         // Assessment of data quality, e.g., completion rate
@@ -223,7 +242,7 @@ export async function GET(
     // Generate PDF
     console.log('📄 Generating PDF...');
     const pdfService = PDFService.getInstance();
-    
+
     // Validate report data before PDF generation
     if (!pdfService.validateReportData(generatedReport)) {
       console.error('❌ Invalid report data for PDF generation');
@@ -234,7 +253,11 @@ export async function GET(
     }
 
     const pdfBuffer = await pdfService.generatePDFBuffer(generatedReport);
-    console.log('✅ PDF generated successfully, size:', pdfBuffer.length, 'bytes');
+    console.log(
+      '✅ PDF generated successfully, size:',
+      pdfBuffer.length,
+      'bytes'
+    );
 
     // Create a safe filename
     const safeFilename = filename.replace(/[^a-zA-Z0-9._-]/g, '_');
@@ -253,7 +276,6 @@ export async function GET(
         Expires: '0',
       },
     });
-
   } catch (error) {
     console.error('PDF download error:', error);
 
@@ -266,7 +288,9 @@ export async function GET(
     }
 
     return NextResponse.json(
-      { error: `Failed to generate PDF: ${error instanceof Error ? error.message : 'Unknown error'}` },
+      {
+        error: `Failed to generate PDF: ${error instanceof Error ? error.message : 'Unknown error'}`,
+      },
       { status: 500 }
     );
   }

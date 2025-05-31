@@ -11,7 +11,10 @@ import { cn } from '@/shared/utils/cn';
 
 // Import types and data
 import { SurveyFormData, INITIAL_VALUES, FORM_STEPS } from './types';
-import { getValidationSchemaForStep, completeValidationSchema } from './validation';
+import {
+  getValidationSchemaForStep,
+  completeValidationSchema,
+} from './validation';
 import {
   LIFESTYLE_STRESSOR_OPTIONS,
   SYMPTOM_OPTIONS,
@@ -34,21 +37,38 @@ export const MultiStepSurveyForm: React.FC<MultiStepSurveyFormProps> = ({
     values: SurveyFormData,
     { setFieldTouched, validateForm }: FormikHelpers<SurveyFormData>
   ) => {
-    console.log('🔄 [MultiStepSurveyForm] handleNext called for step:', currentStep);
+    console.log(
+      '🔄 [MultiStepSurveyForm] handleNext called for step:',
+      currentStep
+    );
     console.log('📝 [MultiStepSurveyForm] Values being validated:', values);
-    console.log('⚠️ [MultiStepSurveyForm] WARNING: handleNext was called instead of proceeding to final submission!');
-    
+    console.log(
+      '⚠️ [MultiStepSurveyForm] WARNING: handleNext was called instead of proceeding to final submission!'
+    );
+
     // Validate current step
     const currentStepSchema = getValidationSchemaForStep(currentStep);
-    console.log('🔍 [MultiStepSurveyForm] Using validation schema for step:', currentStep);
-    
+    console.log(
+      '🔍 [MultiStepSurveyForm] Using validation schema for step:',
+      currentStep
+    );
+
     try {
       await currentStepSchema.validate(values, { abortEarly: false });
-      console.log('✅ [MultiStepSurveyForm] Validation successful for step:', currentStep);
-      console.log('➡️ [MultiStepSurveyForm] Moving to next step:', currentStep + 1);
+      console.log(
+        '✅ [MultiStepSurveyForm] Validation successful for step:',
+        currentStep
+      );
+      console.log(
+        '➡️ [MultiStepSurveyForm] Moving to next step:',
+        currentStep + 1
+      );
       setCurrentStep(currentStep + 1);
     } catch (error) {
-      console.error('❌ [MultiStepSurveyForm] Validation failed for step:', currentStep);
+      console.error(
+        '❌ [MultiStepSurveyForm] Validation failed for step:',
+        currentStep
+      );
       console.error('📋 [MultiStepSurveyForm] Validation errors:', error);
       // Mark fields as touched to show validation errors
       if (currentStep === 1) {
@@ -85,65 +105,89 @@ export const MultiStepSurveyForm: React.FC<MultiStepSurveyFormProps> = ({
     helpers: FormikHelpers<SurveyFormData>
   ) => {
     console.log('🔥 === MULTISTEP FORM SUBMISSION TRIGGERED ===');
-    console.log('[MultiStepSurveyForm] handleSubmit called. Current step:', currentStep, 'Total steps:', FORM_STEPS.length);
+    console.log(
+      '[MultiStepSurveyForm] handleSubmit called. Current step:',
+      currentStep,
+      'Total steps:',
+      FORM_STEPS.length
+    );
     console.log('[MultiStepSurveyForm] Form values:', values);
-    console.log('[MultiStepSurveyForm] Button state - isSubmitting:', isSubmitting);
+    console.log(
+      '[MultiStepSurveyForm] Button state - isSubmitting:',
+      isSubmitting
+    );
     console.log('[MultiStepSurveyForm] Step comparison:', {
       currentStep,
       totalSteps: FORM_STEPS.length,
       isLastStep: currentStep === FORM_STEPS.length,
-      condition: currentStep < FORM_STEPS.length
+      condition: currentStep < FORM_STEPS.length,
     });
-    
+
     // ENHANCED DEBUG: Add detailed button and form state information
     console.log('[MultiStepSurveyForm] 🔍 DETAILED STATE DEBUG:', {
       currentStepIs: currentStep,
       FORM_STEPS_length: FORM_STEPS.length,
-      buttonText: currentStep === FORM_STEPS.length ? 'Generate Report' : 'Next',
+      buttonText:
+        currentStep === FORM_STEPS.length ? 'Generate Report' : 'Next',
       isLastStepCalculation: `${currentStep} === ${FORM_STEPS.length} = ${currentStep === FORM_STEPS.length}`,
       willCallHandleNext: currentStep < FORM_STEPS.length,
       willCallOnSubmit: currentStep >= FORM_STEPS.length,
     });
-    
+
     // ENHANCED DEBUG: Let's check form validation status
-    console.log('[MultiStepSurveyForm] 🔍 ENHANCED DEBUG - Current form state:', {
-      values: {
-        lifestyleStressors: values.lifestyleStressors?.length || 0,
-        symptoms: values.symptoms?.length || 0,
-        parentFirstName: !!values.parentFirstName,
-        parentLastName: !!values.parentLastName,
-        childFirstName: !!values.childFirstName,
-        childLastName: !!values.childLastName,
-        childAge: !!values.childAge,
-        childGender: !!values.childGender,
-        email: !!values.email,
-        privacyPolicyAcknowledged: values.privacyPolicyAcknowledged,
-        medicalDisclaimerAcknowledged: values.medicalDisclaimerAcknowledged,
+    console.log(
+      '[MultiStepSurveyForm] 🔍 ENHANCED DEBUG - Current form state:',
+      {
+        values: {
+          lifestyleStressors: values.lifestyleStressors?.length || 0,
+          symptoms: values.symptoms?.length || 0,
+          parentFirstName: !!values.parentFirstName,
+          parentLastName: !!values.parentLastName,
+          childFirstName: !!values.childFirstName,
+          childLastName: !!values.childLastName,
+          childAge: !!values.childAge,
+          childGender: !!values.childGender,
+          email: !!values.email,
+          privacyPolicyAcknowledged: values.privacyPolicyAcknowledged,
+          medicalDisclaimerAcknowledged: values.medicalDisclaimerAcknowledged,
+        },
       }
-    });
-    
+    );
+
     if (currentStep < FORM_STEPS.length) {
-      console.log('[MultiStepSurveyForm] ❌ Not the last step, calling handleNext.');
+      console.log(
+        '[MultiStepSurveyForm] ❌ Not the last step, calling handleNext.'
+      );
       await handleNext(values, helpers);
     } else {
-      console.log('[MultiStepSurveyForm] ✅ Last step detected, calling onSubmit prop.');
-      
+      console.log(
+        '[MultiStepSurveyForm] ✅ Last step detected, calling onSubmit prop.'
+      );
+
       // Validate the final step before proceeding
       const finalStepSchema = getValidationSchemaForStep(currentStep);
-      console.log('[MultiStepSurveyForm] 🔍 About to validate final step with schema for step:', currentStep);
-      
+      console.log(
+        '[MultiStepSurveyForm] 🔍 About to validate final step with schema for step:',
+        currentStep
+      );
+
       try {
         await finalStepSchema.validate(values, { abortEarly: false });
-        console.log('[MultiStepSurveyForm] ✅ Final step validation PASSED - proceeding to onSubmit');
+        console.log(
+          '[MultiStepSurveyForm] ✅ Final step validation PASSED - proceeding to onSubmit'
+        );
       } catch (validationError: any) {
-        console.error('[MultiStepSurveyForm] ❌ Final step validation FAILED:', validationError);
+        console.error(
+          '[MultiStepSurveyForm] ❌ Final step validation FAILED:',
+          validationError
+        );
         console.error('[MultiStepSurveyForm] 📋 Validation error details:', {
           errors: validationError?.errors || [],
           inner: validationError?.inner || [],
           message: validationError?.message,
-          path: validationError?.path
+          path: validationError?.path,
         });
-        
+
         // Mark all fields as touched to show validation errors
         const step3Fields = [
           'parentFirstName',
@@ -158,20 +202,31 @@ export const MultiStepSurveyForm: React.FC<MultiStepSurveyFormProps> = ({
         ];
         step3Fields.forEach(field => helpers.setFieldTouched(field, true));
         await helpers.validateForm();
-        console.log('[MultiStepSurveyForm] ⚠️ Validation failed - NOT calling onSubmit, returning early');
+        console.log(
+          '[MultiStepSurveyForm] ⚠️ Validation failed - NOT calling onSubmit, returning early'
+        );
         return; // Don't proceed with submission
       }
-      
-      console.log('[MultiStepSurveyForm] 🚀 All validations passed, setting isSubmitting=true and calling onSubmit...');
+
+      console.log(
+        '[MultiStepSurveyForm] 🚀 All validations passed, setting isSubmitting=true and calling onSubmit...'
+      );
       setIsSubmitting(true);
       try {
         await onSubmit(values);
-        console.log('[MultiStepSurveyForm] ✅ onSubmit prop finished successfully.');
+        console.log(
+          '[MultiStepSurveyForm] ✅ onSubmit prop finished successfully.'
+        );
       } catch (error) {
-        console.error('[MultiStepSurveyForm] ❌ Error during onSubmit prop execution:', error);
+        console.error(
+          '[MultiStepSurveyForm] ❌ Error during onSubmit prop execution:',
+          error
+        );
       } finally {
         setIsSubmitting(false);
-        console.log('[MultiStepSurveyForm] 🔄 setIsSubmitting(false) in finally block.');
+        console.log(
+          '[MultiStepSurveyForm] 🔄 setIsSubmitting(false) in finally block.'
+        );
       }
     }
   };
@@ -242,7 +297,9 @@ export const MultiStepSurveyForm: React.FC<MultiStepSurveyFormProps> = ({
                       {...field}
                       label='Parent/Guardian First Name'
                       required
-                      error={meta.touched && meta.error ? meta.error : undefined}
+                      error={
+                        meta.touched && meta.error ? meta.error : undefined
+                      }
                     />
                   )}
                 </Field>
@@ -252,7 +309,9 @@ export const MultiStepSurveyForm: React.FC<MultiStepSurveyFormProps> = ({
                       {...field}
                       label='Parent/Guardian Last Name'
                       required
-                      error={meta.touched && meta.error ? meta.error : undefined}
+                      error={
+                        meta.touched && meta.error ? meta.error : undefined
+                      }
                     />
                   )}
                 </Field>
@@ -271,7 +330,9 @@ export const MultiStepSurveyForm: React.FC<MultiStepSurveyFormProps> = ({
                       {...field}
                       label="Child's First Name"
                       required
-                      error={meta.touched && meta.error ? meta.error : undefined}
+                      error={
+                        meta.touched && meta.error ? meta.error : undefined
+                      }
                     />
                   )}
                 </Field>
@@ -281,7 +342,9 @@ export const MultiStepSurveyForm: React.FC<MultiStepSurveyFormProps> = ({
                       {...field}
                       label="Child's Last Name"
                       required
-                      error={meta.touched && meta.error ? meta.error : undefined}
+                      error={
+                        meta.touched && meta.error ? meta.error : undefined
+                      }
                     />
                   )}
                 </Field>
@@ -296,7 +359,9 @@ export const MultiStepSurveyForm: React.FC<MultiStepSurveyFormProps> = ({
                       min='0'
                       max='18'
                       required
-                      error={meta.touched && meta.error ? meta.error : undefined}
+                      error={
+                        meta.touched && meta.error ? meta.error : undefined
+                      }
                     />
                   )}
                 </Field>
@@ -324,7 +389,9 @@ export const MultiStepSurveyForm: React.FC<MultiStepSurveyFormProps> = ({
                       type='email'
                       placeholder='your@email.com'
                       required
-                      error={meta.touched && meta.error ? meta.error : undefined}
+                      error={
+                        meta.touched && meta.error ? meta.error : undefined
+                      }
                     />
                   )}
                 </Field>
@@ -335,7 +402,9 @@ export const MultiStepSurveyForm: React.FC<MultiStepSurveyFormProps> = ({
                       label='Mobile Phone Number (Optional)'
                       type='tel'
                       placeholder='(123) 456-7890'
-                      error={meta.touched && meta.error ? meta.error : undefined}
+                      error={
+                        meta.touched && meta.error ? meta.error : undefined
+                      }
                     />
                   )}
                 </Field>
@@ -416,14 +485,21 @@ export const MultiStepSurveyForm: React.FC<MultiStepSurveyFormProps> = ({
     <div className={cn('max-w-4xl mx-auto p-6', className)}>
       <Formik
         initialValues={INITIAL_VALUES}
-        validationSchema={currentStep === FORM_STEPS.length ? 
-          completeValidationSchema : 
-          getValidationSchemaForStep(currentStep)
+        validationSchema={
+          currentStep === FORM_STEPS.length
+            ? completeValidationSchema
+            : getValidationSchemaForStep(currentStep)
         }
         onSubmit={handleSubmit}
         enableReinitialize
       >
-        {({ values, isValid, handleSubmit: formikHandleSubmit, errors, touched }) => {
+        {({
+          values,
+          isValid,
+          handleSubmit: formikHandleSubmit,
+          errors,
+          touched,
+        }) => {
           console.log('🔄 [FORMIK RENDER] Component re-rendering with state:', {
             currentStep,
             isValid,
@@ -431,94 +507,117 @@ export const MultiStepSurveyForm: React.FC<MultiStepSurveyFormProps> = ({
             formikHandleSubmit: typeof formikHandleSubmit,
             errors: Object.keys(errors),
             touchedFields: Object.keys(touched),
-            hasErrors: Object.keys(errors).length > 0
+            hasErrors: Object.keys(errors).length > 0,
           });
-          
+
           return (
-          <Form className='space-y-8'>
-            {/* Step Indicator */}
-            <StepIndicator
-              steps={FORM_STEPS}
-              currentStep={currentStep}
-              className='mb-8'
-            />
+            <Form className='space-y-8'>
+              {/* Step Indicator */}
+              <StepIndicator
+                steps={FORM_STEPS}
+                currentStep={currentStep}
+                className='mb-8'
+              />
 
-            {/* Step Content */}
-            <div className='min-h-[400px]'>{renderStepContent(values)}</div>
+              {/* Step Content */}
+              <div className='min-h-[400px]'>{renderStepContent(values)}</div>
 
-            {/* Navigation Buttons */}
-            <div className='flex justify-between pt-6 border-t border-gray-200'>
-              <Button
-                type='button'
-                variant='outline'
-                onClick={handleBack}
-                disabled={currentStep === 1}
-              >
-                Back
-              </Button>
-
-              <div className="flex gap-2">
+              {/* Navigation Buttons */}
+              <div className='flex justify-between pt-6 border-t border-gray-200'>
                 <Button
-                  type='submit'
-                  disabled={isSubmitting}
-                  className='min-w-[120px]'
-                  onClick={(e) => {
-                    console.log('🟡 [BUTTON DEBUG] Generate Report button clicked!');
-                    console.log('🟡 [BUTTON DEBUG] Current step:', currentStep);
-                    console.log('🟡 [BUTTON DEBUG] Button text should be:', currentStep === FORM_STEPS.length ? 'Generate Report' : 'Next');
-                    console.log('🟡 [BUTTON DEBUG] isSubmitting:', isSubmitting);
-                    console.log('🟡 [BUTTON DEBUG] Form validation state:', {
-                      isValid,
-                      hasErrors: Object.keys(errors).length > 0,
-                      errors: errors,
-                      actualValues: {
-                        parentFirstName: values.parentFirstName,
-                        parentLastName: values.parentLastName,
-                        childFirstName: values.childFirstName,
-                        childLastName: values.childLastName,
-                        childAge: values.childAge,
-                        childGender: values.childGender,
-                        email: values.email,
-                        phone: values.phone,
-                        privacyPolicy: values.privacyPolicyAcknowledged,
-                        medicalDisclaimer: values.medicalDisclaimerAcknowledged,
-                        lifestyleStressors: values.lifestyleStressors,
-                        symptoms: values.symptoms
-                      }
-                    });
-                    console.log('🟡 [BUTTON DEBUG] Event:', e);
-                    // Don't prevent default - let form submission happen naturally
-                  }}
+                  type='button'
+                  variant='outline'
+                  onClick={handleBack}
+                  disabled={currentStep === 1}
                 >
-                  {isSubmitting
-                    ? 'Generating...'
-                    : currentStep === FORM_STEPS.length
-                      ? 'Generate Report'
-                      : 'Next'}
+                  Back
                 </Button>
-                
-                {currentStep === FORM_STEPS.length && (
+
+                <div className='flex gap-2'>
                   <Button
-                    type='button'
-                    variant='outline'
-                    onClick={async () => {
-                      console.log('🔧 [DIRECT SUBMIT DEBUG] Direct submit button clicked!');
-                      console.log('🔧 [DIRECT SUBMIT DEBUG] Calling formikHandleSubmit directly...');
-                      try {
-                        await formikHandleSubmit();
-                        console.log('🔧 [DIRECT SUBMIT DEBUG] formikHandleSubmit completed');
-                      } catch (error) {
-                        console.error('🔧 [DIRECT SUBMIT DEBUG] Error in formikHandleSubmit:', error);
-                      }
-                    }}
+                    type='submit'
+                    disabled={isSubmitting}
                     className='min-w-[120px]'
+                    onClick={e => {
+                      console.log(
+                        '🟡 [BUTTON DEBUG] Generate Report button clicked!'
+                      );
+                      console.log(
+                        '🟡 [BUTTON DEBUG] Current step:',
+                        currentStep
+                      );
+                      console.log(
+                        '🟡 [BUTTON DEBUG] Button text should be:',
+                        currentStep === FORM_STEPS.length
+                          ? 'Generate Report'
+                          : 'Next'
+                      );
+                      console.log(
+                        '🟡 [BUTTON DEBUG] isSubmitting:',
+                        isSubmitting
+                      );
+                      console.log('🟡 [BUTTON DEBUG] Form validation state:', {
+                        isValid,
+                        hasErrors: Object.keys(errors).length > 0,
+                        errors: errors,
+                        actualValues: {
+                          parentFirstName: values.parentFirstName,
+                          parentLastName: values.parentLastName,
+                          childFirstName: values.childFirstName,
+                          childLastName: values.childLastName,
+                          childAge: values.childAge,
+                          childGender: values.childGender,
+                          email: values.email,
+                          phone: values.phone,
+                          privacyPolicy: values.privacyPolicyAcknowledged,
+                          medicalDisclaimer:
+                            values.medicalDisclaimerAcknowledged,
+                          lifestyleStressors: values.lifestyleStressors,
+                          symptoms: values.symptoms,
+                        },
+                      });
+                      console.log('🟡 [BUTTON DEBUG] Event:', e);
+                      // Don't prevent default - let form submission happen naturally
+                    }}
                   >
-                    Debug Submit
+                    {isSubmitting
+                      ? 'Generating...'
+                      : currentStep === FORM_STEPS.length
+                        ? 'Generate Report'
+                        : 'Next'}
                   </Button>
-                )}
+
+                  {currentStep === FORM_STEPS.length && (
+                    <Button
+                      type='button'
+                      variant='outline'
+                      onClick={async () => {
+                        console.log(
+                          '🔧 [DIRECT SUBMIT DEBUG] Direct submit button clicked!'
+                        );
+                        console.log(
+                          '🔧 [DIRECT SUBMIT DEBUG] Calling formikHandleSubmit directly...'
+                        );
+                        try {
+                          await formikHandleSubmit();
+                          console.log(
+                            '🔧 [DIRECT SUBMIT DEBUG] formikHandleSubmit completed'
+                          );
+                        } catch (error) {
+                          console.error(
+                            '🔧 [DIRECT SUBMIT DEBUG] Error in formikHandleSubmit:',
+                            error
+                          );
+                        }
+                      }}
+                      className='min-w-[120px]'
+                    >
+                      Debug Submit
+                    </Button>
+                  )}
+                </div>
               </div>
-            </div>
-          </Form>
+            </Form>
           );
         }}
       </Formik>

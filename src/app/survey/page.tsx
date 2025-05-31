@@ -73,8 +73,12 @@ export default function SurveyPage() {
         }),
       });
 
-      console.log('📥 Start response status:', startResponse.status, startResponse.statusText);
-      
+      console.log(
+        '📥 Start response status:',
+        startResponse.status,
+        startResponse.statusText
+      );
+
       if (!startResponse.ok) {
         const errorText = await startResponse.text();
         console.error('❌ Start response failed:', errorText);
@@ -85,7 +89,7 @@ export default function SurveyPage() {
 
       const startResult = await startResponse.json();
       console.log('✅ Assessment started successfully:', startResult);
-      
+
       const assessmentId = startResult.data.assessmentId;
       console.log('🆔 Assessment ID:', assessmentId);
 
@@ -110,7 +114,7 @@ export default function SurveyPage() {
         practiceId: null, // For anonymous assessments
       };
       console.log('📤 Submit payload:', submitPayload);
-      
+
       // Step 4: Submit the assessment
       const submitResponse = await fetch(
         `/api/assessment/${assessmentId}/submit`,
@@ -122,8 +126,12 @@ export default function SurveyPage() {
           body: JSON.stringify(submitPayload),
         }
       );
-      
-      console.log('📥 Submit response status:', submitResponse.status, submitResponse.statusText);
+
+      console.log(
+        '📥 Submit response status:',
+        submitResponse.status,
+        submitResponse.statusText
+      );
 
       if (!submitResponse.ok) {
         const errorText = await submitResponse.text();
@@ -143,7 +151,7 @@ export default function SurveyPage() {
         const reportUrl = `/reports/view/${submitResult.data.shareToken}`;
         console.log('🌐 Redirecting to web report view:', reportUrl);
         console.log('🔗 Full URL will be:', window.location.origin + reportUrl);
-        
+
         // Add a small delay to ensure logging is visible
         setTimeout(() => {
           console.log('🚀 Executing redirect to web view now...');
@@ -154,23 +162,32 @@ export default function SurveyPage() {
         const reportUrl = `/reports/${submitResult.data.reportId}`;
         console.log('🌐 Redirecting to authenticated report page:', reportUrl);
         console.log('🔗 Full URL will be:', window.location.origin + reportUrl);
-        
+
         // Add a small delay to ensure logging is visible
         setTimeout(() => {
           console.log('🚀 Executing redirect now...');
           window.location.href = reportUrl;
         }, 100);
       } else {
-        console.error('❌ No report ID or share token in response:', submitResult);
-        throw new Error('No report generated - missing reportId and shareToken in response');
+        console.error(
+          '❌ No report ID or share token in response:',
+          submitResult
+        );
+        throw new Error(
+          'No report generated - missing reportId and shareToken in response'
+        );
       }
     } catch (error) {
       console.error('💥 === FORM SUBMISSION FAILED ===');
       console.error('❌ Assessment submission error:', error);
-      console.error('📍 Error stack:', error instanceof Error ? error.stack : 'No stack trace');
-      
+      console.error(
+        '📍 Error stack:',
+        error instanceof Error ? error.stack : 'No stack trace'
+      );
+
       // Show user-friendly error message
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
+      const errorMessage =
+        error instanceof Error ? error.message : 'Unknown error occurred';
       alert(`Assessment submission failed: ${errorMessage}`);
       throw error; // Re-throw so workflow can handle it
     }

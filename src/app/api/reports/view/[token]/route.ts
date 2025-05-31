@@ -9,8 +9,10 @@ export async function GET(
     const { token } = await params;
     const supabase = supabaseServer;
 
-    console.log(`🔍 [API] Fetching report data for token: ${token?.substring(0, 8)}...`);
-    
+    console.log(
+      `🔍 [API] Fetching report data for token: ${token?.substring(0, 8)}...`
+    );
+
     // Validate share token and get report details with proper joins
     const { data: shareData, error: shareError } = await supabase
       .from('report_shares')
@@ -54,9 +56,9 @@ export async function GET(
     if (shareError || !shareData) {
       console.error('❌ [API] Share token not found:', shareError);
       return NextResponse.json(
-        { 
+        {
           success: false,
-          error: 'Invalid or expired report link' 
+          error: 'Invalid or expired report link',
         },
         { status: 404 }
       );
@@ -102,7 +104,8 @@ export async function GET(
           status: 'completed',
         },
         summary: {
-          overview: `Health assessment completed for ${child.first_name} ${child.last_name || ''}`.trim(),
+          overview:
+            `Health assessment completed for ${child.first_name} ${child.last_name || ''}`.trim(),
           key_findings: [
             'Assessment completed successfully',
             `Brain-O-Meter score: ${assessment.brain_o_meter_score}/100`,
@@ -111,17 +114,20 @@ export async function GET(
         recommendations: [
           {
             title: 'Regular Health Monitoring',
-            description: 'Continue regular health monitoring to track your child\'s progress over time.',
+            description:
+              "Continue regular health monitoring to track your child's progress over time.",
             priority: 'medium' as const,
           },
           {
             title: 'Healthy Lifestyle Habits',
-            description: 'Maintain healthy lifestyle habits including proper nutrition, regular exercise, and adequate sleep.',
+            description:
+              'Maintain healthy lifestyle habits including proper nutrition, regular exercise, and adequate sleep.',
             priority: 'medium' as const,
           },
           {
             title: 'Healthcare Provider Follow-up',
-            description: 'Follow up with your healthcare provider as recommended for continued care and any concerns.',
+            description:
+              'Follow up with your healthcare provider as recommended for continued care and any concerns.',
             priority: 'low' as const,
           },
         ],
@@ -160,20 +166,19 @@ export async function GET(
       data: formattedReportData,
     };
 
-    return NextResponse.json(responseData, { 
+    return NextResponse.json(responseData, {
       status: 200,
       headers: {
         'Cache-Control': 'public, max-age=300', // Cache for 5 minutes
       },
     });
-    
   } catch (error) {
     console.error('❌ [API] Report view error:', error);
 
     return NextResponse.json(
-      { 
+      {
         success: false,
-        error: 'Failed to load report data' 
+        error: 'Failed to load report data',
       },
       { status: 500 }
     );

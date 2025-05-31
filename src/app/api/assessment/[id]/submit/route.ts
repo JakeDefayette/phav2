@@ -40,11 +40,12 @@ export async function POST(
 
     // Step 1: Verify assessment exists and is in correct state using server client
     console.log('📋 Validating assessment...');
-    const { data: assessment, error: assessmentFindError } = await supabaseServer
-      .from('assessments')
-      .select('id, status, brain_o_meter_score, completed_at, child_id')
-      .eq('id', assessmentId)
-      .single();
+    const { data: assessment, error: assessmentFindError } =
+      await supabaseServer
+        .from('assessments')
+        .select('id, status, brain_o_meter_score, completed_at, child_id')
+        .eq('id', assessmentId)
+        .single();
 
     if (assessmentFindError || !assessment) {
       console.error('❌ Assessment not found:', assessmentFindError);
@@ -73,10 +74,11 @@ export async function POST(
       response_value: response.response_value,
     }));
 
-    const { data: insertedResponses, error: responsesError } = await supabaseServer
-      .from('survey_responses')
-      .insert(responseData)
-      .select();
+    const { data: insertedResponses, error: responsesError } =
+      await supabaseServer
+        .from('survey_responses')
+        .insert(responseData)
+        .select();
 
     if (responsesError) {
       console.error('❌ Failed to insert survey responses:', responsesError);
@@ -86,25 +88,28 @@ export async function POST(
       );
     }
 
-    console.log(`✅ Inserted ${insertedResponses?.length || 0} survey responses`);
+    console.log(
+      `✅ Inserted ${insertedResponses?.length || 0} survey responses`
+    );
 
     // Step 3: Complete assessment with brain-o-meter score using server client
     console.log('🏁 Completing assessment...');
     const completedAt = new Date().toISOString();
-    const { data: updatedAssessment, error: assessmentError } = await supabaseServer
-      .from('assessments')
-      .update({
-        status: 'completed',
-        brain_o_meter_score: brainOMeterScore,
-        completed_at: completedAt,
-      })
-      .eq('id', assessmentId)
-      .select()
-      .single();
+    const { data: updatedAssessment, error: assessmentError } =
+      await supabaseServer
+        .from('assessments')
+        .update({
+          status: 'completed',
+          brain_o_meter_score: brainOMeterScore,
+          completed_at: completedAt,
+        })
+        .eq('id', assessmentId)
+        .select()
+        .single();
 
     if (assessmentError) {
       console.error('❌ Failed to complete assessment:', assessmentError);
-      
+
       // Rollback: Delete inserted responses
       console.log('🔄 Rolling back survey responses...');
       if (insertedResponses && insertedResponses.length > 0) {
@@ -136,14 +141,18 @@ export async function POST(
     };
 
     // Fetch child data associated with the assessment for report content
-    const { data: childDataForReport, error: childDataError } = await supabaseServer
-      .from('children')
-      .select('first_name, last_name, date_of_birth, gender')
-      .eq('id', assessment.child_id) // assessment.child_id from validation step
-      .single();
+    const { data: childDataForReport, error: childDataError } =
+      await supabaseServer
+        .from('children')
+        .select('first_name, last_name, date_of_birth, gender')
+        .eq('id', assessment.child_id) // assessment.child_id from validation step
+        .single();
 
     if (childDataError) {
-      console.error('❌ Failed to fetch child data for report content:', childDataError);
+      console.error(
+        '❌ Failed to fetch child data for report content:',
+        childDataError
+      );
       // Handle error appropriately, maybe return 500 or attempt rollback
       // For now, we'll log and continue with potentially missing child info in content
     }
@@ -151,10 +160,9 @@ export async function POST(
     // Construct initial report content
     const initialReportContent: GeneratedReportContent = {
       child: {
-        name:
-          childDataForReport?.first_name
-            ? `${childDataForReport.first_name} ${childDataForReport.last_name || ''}`.trim()
-            : 'Unknown Child',
+        name: childDataForReport?.first_name
+          ? `${childDataForReport.first_name} ${childDataForReport.last_name || ''}`.trim()
+          : 'Unknown Child',
         age: calculateAge(childDataForReport?.date_of_birth || null),
         gender: childDataForReport?.gender || undefined,
       },
@@ -175,25 +183,10 @@ export async function POST(
       visualData: {},
       insights: [],
       charts: [],
-      recommendations: [
-        {
-          title: 'Regular Health Monitoring',
-          description: 'Continue regular health monitoring to track your child\'s progress.',
-          priority: 'medium' as const,
-        },
-        {
-          title: 'Healthy Lifestyle Habits',
-          description: 'Maintain healthy lifestyle habits including proper nutrition and exercise.',
-          priority: 'medium' as const,
-        },
-        {
-          title: 'Healthcare Provider Follow-up',
-          description: 'Follow up with healthcare provider as recommended for continued care.',
-          priority: 'low' as const,
-        },
-      ],
+      recommendations: [],
       detailed_analysis: {},
-      rawResponses: responses.map((r: any) => ({ // Assuming responses is an array of { question_id, response_value }
+      rawResponses: responses.map((r: any) => ({
+        // Assuming responses is an array of { question_id, response_value }
         question_id: r.question_id,
         response_value: r.response_value,
       })),
@@ -213,13 +206,13 @@ export async function POST(
       contentType: typeof initialReportContent,
       contentKeys: Object.keys(initialReportContent),
     });
-    
+
     // Try to create report - first attempt with content column
-    let reportInsertData: any = {
+    const reportInsertData: any = {
       assessment_id: assessmentId,
       practice_id: practiceId || null,
     };
-    
+
     // Try with content first
     let { data: report, error: reportError } = await supabaseServer
       .from('reports')
@@ -229,18 +222,22 @@ export async function POST(
       })
       .select()
       .single();
-    
+
     // If content column doesn't exist, try without it
     if (reportError && reportError.message?.includes('content')) {
       console.log('🔄 Content column not found, trying without it...');
-      const { data: reportFallback, error: reportFallbackError } = await supabaseServer
-        .from('reports')
-        .insert(reportInsertData)
-        .select()
-        .single();
-        
+      const { data: reportFallback, error: reportFallbackError } =
+        await supabaseServer
+          .from('reports')
+          .insert(reportInsertData)
+          .select()
+          .single();
+
       if (reportFallbackError) {
-        console.error('❌ Fallback report creation also failed:', reportFallbackError);
+        console.error(
+          '❌ Fallback report creation also failed:',
+          reportFallbackError
+        );
         // Continue with original error handling
       } else {
         console.log('✅ Report created without content column');
@@ -249,7 +246,7 @@ export async function POST(
         reportError = null;
       }
     }
-    
+
     if (reportError) {
       console.error('🚨 Detailed report creation error:', {
         message: reportError.message,
@@ -261,10 +258,10 @@ export async function POST(
 
     if (reportError) {
       console.error('❌ Failed to generate report:', reportError);
-      
+
       // Rollback: Restore assessment status and delete responses
       console.log('🔄 Rolling back assessment and responses...');
-      
+
       // Restore assessment
       await supabaseServer
         .from('assessments')
@@ -294,20 +291,21 @@ export async function POST(
 
     // Step 5: Create a share token for anonymous access
     console.log('🔗 Creating share token for anonymous access...');
-    
+
     // Generate a secure random token
     const crypto = require('crypto');
     const shareToken = crypto.randomBytes(32).toString('hex');
-    
+
     // Set expiration to 30 days from now
     const expiresAt = new Date();
     expiresAt.setDate(expiresAt.getDate() + 30);
-    
+
     // First, let's get the parent email from the responses to satisfy the check_recipient constraint
-    const parentEmailResponse = responses.find(r => 
-      r.question_id === '550e8400-e29b-41d4-a716-446655440033' // Email Address
+    const parentEmailResponse = responses.find(
+      r => r.question_id === '550e8400-e29b-41d4-a716-446655440033' // Email Address
     );
-    const parentEmail = parentEmailResponse?.response_text || 'anonymous@example.com';
+    const parentEmail =
+      parentEmailResponse?.response_text || 'anonymous@example.com';
 
     const { data: shareData, error: shareError } = await supabaseServer
       .from('report_shares')
@@ -329,7 +327,7 @@ export async function POST(
         details: shareError.details,
         code: shareError.code,
         parentEmail,
-        shareToken: shareToken.substring(0, 8) + '...' // Log partial token for debugging
+        shareToken: shareToken.substring(0, 8) + '...', // Log partial token for debugging
       });
       // Continue without share token - user can still access via authenticated route if they log in
     } else {
@@ -353,7 +351,6 @@ export async function POST(
 
     console.log('🎉 Assessment submission completed successfully');
     return NextResponse.json(result, { status: 200 });
-
   } catch (error) {
     console.error('Assessment submit error:', error);
 

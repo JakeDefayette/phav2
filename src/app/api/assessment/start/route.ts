@@ -50,18 +50,19 @@ export async function POST(request: NextRequest) {
           } else {
             // Create anonymous auth user first, which will auto-create the profile
             console.log('Creating anonymous auth user for:', parentData.email);
-            
-            const { data: authUser, error: authError } = await supabaseServer.auth.admin.createUser({
-              email: parentData.email,
-              password: randomUUID(), // Random password for anonymous user
-              email_confirm: true, // Skip email confirmation for anonymous users
-              user_metadata: {
-                first_name: parentData.firstName,
-                last_name: parentData.lastName,
-                role: 'parent',
-                is_anonymous: true,
-              }
-            });
+
+            const { data: authUser, error: authError } =
+              await supabaseServer.auth.admin.createUser({
+                email: parentData.email,
+                password: randomUUID(), // Random password for anonymous user
+                email_confirm: true, // Skip email confirmation for anonymous users
+                user_metadata: {
+                  first_name: parentData.firstName,
+                  last_name: parentData.lastName,
+                  role: 'parent',
+                  is_anonymous: true,
+                },
+              });
 
             if (authError) {
               console.error('Failed to create anonymous auth user:', authError);
@@ -76,25 +77,29 @@ export async function POST(request: NextRequest) {
             console.log('Anonymous auth user created:', authUser.user.id);
 
             // Update the auto-created profile with additional information
-            const { data: updatedProfile, error: updateError } = await supabaseServer
-              .from('user_profiles')
-              .update({
-                first_name: parentData.firstName,
-                last_name: parentData.lastName,
-                phone: parentData.phone,
-                role: 'parent',
-                updatedAt: new Date().toISOString(),
-              })
-              .eq('id', authUser.user.id)
-              .select()
-              .single();
+            const { data: updatedProfile, error: updateError } =
+              await supabaseServer
+                .from('user_profiles')
+                .update({
+                  first_name: parentData.firstName,
+                  last_name: parentData.lastName,
+                  phone: parentData.phone,
+                  role: 'parent',
+                  updatedAt: new Date().toISOString(),
+                })
+                .eq('id', authUser.user.id)
+                .select()
+                .single();
 
             if (updateError) {
-              console.error('Failed to update anonymous user profile:', updateError);
-              
+              console.error(
+                'Failed to update anonymous user profile:',
+                updateError
+              );
+
               // Clean up the auth user if profile update fails
               await supabaseServer.auth.admin.deleteUser(authUser.user.id);
-              
+
               return NextResponse.json(
                 {
                   error: `Failed to update user profile for anonymous assessment: ${updateError.message}`,
@@ -105,7 +110,10 @@ export async function POST(request: NextRequest) {
 
             parentUserId = authUser.user.id;
             createdAnonymousUser = true;
-            console.log('Anonymous user profile updated successfully:', updatedProfile.id);
+            console.log(
+              'Anonymous user profile updated successfully:',
+              updatedProfile.id
+            );
           }
         } catch (error) {
           console.error('Error handling anonymous user:', error);
@@ -120,7 +128,7 @@ export async function POST(request: NextRequest) {
       if (parentUserId) {
         try {
           console.log('Creating child record for parent:', parentUserId);
-          
+
           // Create child record directly using server client with correct column names
           const { data: newChild, error: childError } = await supabaseServer
             .from('children')
@@ -143,7 +151,9 @@ export async function POST(request: NextRequest) {
             // If we created an anonymous user but failed to create child, clean up
             if (createdAnonymousUser && parentUserId) {
               await supabaseServer.auth.admin.deleteUser(parentUserId);
-              console.log('Cleaned up anonymous user after child creation failure');
+              console.log(
+                'Cleaned up anonymous user after child creation failure'
+              );
             }
 
             return NextResponse.json(
@@ -160,7 +170,9 @@ export async function POST(request: NextRequest) {
           // If we created an anonymous user but failed to create child, clean up
           if (createdAnonymousUser && parentUserId) {
             await supabaseServer.auth.admin.deleteUser(parentUserId);
-            console.log('Cleaned up anonymous user after child creation failure');
+            console.log(
+              'Cleaned up anonymous user after child creation failure'
+            );
           }
 
           return NextResponse.json(
@@ -199,20 +211,20 @@ export async function POST(request: NextRequest) {
 
     // Start the assessment
     console.log('Starting assessment for child:', finalChildId);
-    
+
     // Get parent email - either from parentData (anonymous) or from authenticated user
     let parentEmail = parentData?.email;
     if (!parentEmail && user?.email) {
       parentEmail = user.email;
     }
-    
+
     if (!parentEmail) {
       return NextResponse.json(
         { error: 'Parent email is required for assessment creation' },
         { status: 400 }
       );
     }
-    
+
     // Create assessment directly using supabaseServer to avoid client-side permission issues
     const assessmentData: any = {
       child_id: finalChildId!,
@@ -220,7 +232,7 @@ export async function POST(request: NextRequest) {
       status: 'draft' as const,
       created_at: new Date().toISOString(),
     };
-    
+
     // Add practice_id - use provided one or default to first available practice
     if (practiceId) {
       assessmentData.practice_id = practiceId;

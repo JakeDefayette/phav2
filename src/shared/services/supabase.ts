@@ -111,8 +111,11 @@ export async function checkConnection(force = false): Promise<boolean> {
   try {
     // Simple connection test using a public table or basic auth check
     // Use auth session check instead of querying a protected table
-    const { data: { session }, error } = await supabase.auth.getSession();
-    
+    const {
+      data: { session },
+      error,
+    } = await supabase.auth.getSession();
+
     // For anonymous users, consider connection as working if no network error occurs
     connectionState = 'connected';
     return true;
@@ -216,7 +219,7 @@ if (typeof window !== 'undefined') {
       }
     });
   });
-  
+
   window.addEventListener('offline', () => {
     connectionState = 'disconnected';
   });
