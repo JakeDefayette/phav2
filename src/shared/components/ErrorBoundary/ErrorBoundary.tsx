@@ -4,14 +4,14 @@ import React, { Component, ErrorInfo } from 'react';
 import { Alert } from '../molecules/Alert';
 import { Button } from '../atoms/Button';
 
-interface ErrorBoundaryState {
+export interface ErrorBoundaryState {
   hasError: boolean;
   error?: Error;
   errorInfo?: ErrorInfo;
   errorId?: string;
 }
 
-interface ErrorBoundaryProps {
+export interface ErrorBoundaryProps {
   children: React.ReactNode;
   fallback?: React.ComponentType<{
     error?: Error;
@@ -145,7 +145,7 @@ export class ErrorBoundary extends Component<
 
       return (
         <div className='error-boundary-container p-6 max-w-2xl mx-auto'>
-          <Alert variant='destructive' className='mb-6'>
+          <Alert variant='error' className='mb-6'>
             <h2 className='text-lg font-semibold mb-2'>Something went wrong</h2>
             <p className='text-sm text-gray-600 mb-4'>
               We encountered an unexpected error. This has been reported to our

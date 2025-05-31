@@ -113,6 +113,29 @@ export function useAssessmentProgress({
     [onError]
   );
 
+  // Unsubscribe from progress updates
+  const unsubscribe = useCallback(() => {
+    if (!isSubscribed || !subscriptionIdRef.current) {
+      return;
+    }
+
+    try {
+      const success = progressServiceRef.current.unsubscribe(
+        subscriptionIdRef.current
+      );
+      if (success) {
+        console.log(
+          `📊 Unsubscribed from progress: ${subscriptionIdRef.current}`
+        );
+      }
+    } catch (error) {
+      console.error('Failed to unsubscribe from progress updates:', error);
+    } finally {
+      subscriptionIdRef.current = null;
+      setIsSubscribed(false);
+    }
+  }, [isSubscribed]);
+
   // Handle completion
   const handleComplete = useCallback(
     (result: AssessmentCompletionResult) => {
@@ -160,29 +183,6 @@ export function useAssessmentProgress({
     handleError,
     handleComplete,
   ]);
-
-  // Unsubscribe from progress updates
-  const unsubscribe = useCallback(() => {
-    if (!isSubscribed || !subscriptionIdRef.current) {
-      return;
-    }
-
-    try {
-      const success = progressServiceRef.current.unsubscribe(
-        subscriptionIdRef.current
-      );
-      if (success) {
-        console.log(
-          `📊 Unsubscribed from progress: ${subscriptionIdRef.current}`
-        );
-      }
-    } catch (error) {
-      console.error('Failed to unsubscribe from progress updates:', error);
-    } finally {
-      subscriptionIdRef.current = null;
-      setIsSubscribed(false);
-    }
-  }, [isSubscribed]);
 
   // Reset progress state
   const resetProgress = useCallback(() => {

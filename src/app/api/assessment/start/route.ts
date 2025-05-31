@@ -118,7 +118,9 @@ export async function POST(request: NextRequest) {
         } catch (error) {
           console.error('Error handling anonymous user:', error);
           return NextResponse.json(
-            { error: `Failed to process anonymous user: ${error instanceof Error ? error.message : 'Unknown error'}` },
+            {
+              error: `Failed to process anonymous user: ${error instanceof Error ? error.message : 'Unknown error'}`,
+            },
             { status: 500 }
           );
         }
@@ -176,7 +178,9 @@ export async function POST(request: NextRequest) {
           }
 
           return NextResponse.json(
-            { error: `Failed to create child record: ${error instanceof Error ? error.message : 'Unknown error'}` },
+            {
+              error: `Failed to create child record: ${error instanceof Error ? error.message : 'Unknown error'}`,
+            },
             { status: 500 }
           );
         }
@@ -281,7 +285,9 @@ export async function POST(request: NextRequest) {
     }
 
     return NextResponse.json(
-      { error: `Failed to start assessment: ${error instanceof Error ? error.message : 'Unknown error'}` },
+      {
+        error: `Failed to start assessment: ${error instanceof Error ? error.message : 'Unknown error'}`,
+      },
       { status: 500 }
     );
   }

@@ -284,13 +284,18 @@ function ReportPageContent({ reportId }: ReportPageContentProps) {
             {/* Recommendations */}
             {report.content?.recommendations && (
               <Recommendations
-                recommendations={Array.isArray(report.content.recommendations) 
-                  ? report.content.recommendations.map((rec, index) => 
-                      typeof rec === 'string' 
-                        ? { title: `Recommendation ${index + 1}`, description: rec, priority: 'medium' as const }
-                        : rec
-                    )
-                  : []
+                recommendations={
+                  Array.isArray(report.content.recommendations)
+                    ? report.content.recommendations.map((rec, index) =>
+                        typeof rec === 'string'
+                          ? {
+                              title: `Recommendation ${index + 1}`,
+                              description: rec,
+                              priority: 'medium' as const,
+                            }
+                          : rec
+                      )
+                    : []
                 }
               />
             )}

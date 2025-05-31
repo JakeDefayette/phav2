@@ -1,4 +1,4 @@
-export { Toast } from './Toast';
+export { Toast, type ToastProps } from './Toast';
 export { ToastContainer, type ToastPosition } from './ToastContainer';
 export { ToastProvider, useToast } from './ToastProvider';
 export type {

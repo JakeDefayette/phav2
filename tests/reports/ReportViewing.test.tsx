@@ -1,12 +1,12 @@
 import React from 'react';
 import { render, screen, waitFor, fireEvent } from '@testing-library/react';
 import { jest } from '@jest/globals';
-import { BrowserRouter } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import ReportPage from '@/app/reports/[id]/page';
 import { useAuth } from '@/shared/hooks';
 import { useReportAccess } from '@/features/reports/hooks';
 import { useBrandingContext } from '@/shared/components/BrandingProvider';
+import type { LoginCredentials } from '@/shared/types/auth';
 
 // Mock the hooks
 jest.mock('@/shared/hooks');
@@ -29,8 +29,7 @@ const mockUseBrandingContext = useBrandingContext as jest.MockedFunction<
 >;
 
 // Mock fetch globally
-global.fetch = jest.fn();
-const mockFetch = fetch as jest.MockedFunction<typeof fetch>;
+global.fetch = jest.fn() as jest.MockedFunction<typeof fetch>;
 
 // Mock navigator.share and clipboard
 Object.assign(navigator, {
@@ -42,6 +41,23 @@ Object.assign(navigator, {
 
 describe('Report Viewing Interface', () => {
   let queryClient: QueryClient;
+
+  const mockDownloadReport = jest.fn() as jest.MockedFunction<
+    () => Promise<void>
+  >;
+  const mockRefetch = jest.fn() as jest.MockedFunction<() => Promise<void>>;
+  const mockSetDownloading = jest.fn();
+  const mockLogin = jest.fn() as jest.MockedFunction<
+    (credentials: LoginCredentials) => Promise<void>
+  >;
+  const mockRegister = jest.fn() as jest.MockedFunction<
+    (credentials: any) => Promise<void>
+  >;
+  const mockLogout = jest.fn() as jest.MockedFunction<() => Promise<void>>;
+  const mockClearError = jest.fn();
+  const mockRefreshBranding = jest.fn() as jest.MockedFunction<
+    () => Promise<void>
+  >;
 
   beforeEach(() => {
     queryClient = new QueryClient({
@@ -59,25 +75,40 @@ describe('Report Viewing Interface', () => {
       user: {
         id: 'test-user-id',
         email: 'test@example.com',
+        role: 'chiropractor',
+        createdAt: '2024-01-01T00:00:00Z',
+        updatedAt: '2024-01-01T00:00:00Z',
       },
       loading: false,
-      login: jest.fn(),
-      logout: jest.fn(),
+      error: null,
+      login: mockLogin,
+      register: mockRegister,
+      logout: mockLogout,
+      clearError: mockClearError,
     });
 
     // Default branding mock
     mockUseBrandingContext.mockReturnValue({
       branding: {
+        id: 'test-branding-id',
+        practice_id: 'test-practice-id',
         primary_color: '#2B5797',
         secondary_color: '#FF8C00',
+        accent_color: '#FF6B35',
         practice_name: 'Test Practice',
         email: 'contact@testpractice.com',
+        logo_url: '',
+        website: '',
+        phone: '',
+        address: '',
+        created_at: '2024-01-01T00:00:00Z',
+        updated_at: '2024-01-01T00:00:00Z',
       },
       loading: false,
       error: null,
       cssVariables: {},
       tailwindClasses: {},
-      refreshBranding: jest.fn(),
+      refreshBranding: mockRefreshBranding,
     });
 
     // Default report access mock
@@ -109,27 +140,37 @@ describe('Report Viewing Interface', () => {
       },
       charts: [
         {
-          id: 'test-chart-1',
-          type: 'bar',
+          chartType: 'bar',
           title: 'Assessment Results',
-          data: [{ label: 'Test', value: 100 }],
+          chartData: {
+            labels: ['Test'],
+            datasets: [
+              {
+                label: 'Test Data',
+                data: [100],
+                backgroundColor: '#2B5797',
+              },
+            ],
+          },
+          chartOptions: {
+            responsive: true,
+            maintainAspectRatio: false,
+          },
         },
       ],
       loading: false,
       error: null,
       isDownloading: false,
-      downloadReport: jest.fn(),
-      refetch: jest.fn(),
-      setDownloading: jest.fn(),
+      downloadReport: mockDownloadReport,
+      refetch: mockRefetch,
+      setDownloading: mockSetDownloading,
     });
   });
 
   const renderReportPage = () => {
     return render(
       <QueryClientProvider client={queryClient}>
-        <BrowserRouter>
-          <ReportPage />
-        </BrowserRouter>
+        <ReportPage />
       </QueryClientProvider>
     );
   };
@@ -139,8 +180,11 @@ describe('Report Viewing Interface', () => {
       mockUseAuth.mockReturnValue({
         user: null,
         loading: true,
-        login: jest.fn(),
-        logout: jest.fn(),
+        error: null,
+        login: mockLogin,
+        register: mockRegister,
+        logout: mockLogout,
+        clearError: mockClearError,
       });
 
       renderReportPage();
@@ -152,8 +196,11 @@ describe('Report Viewing Interface', () => {
       mockUseAuth.mockReturnValue({
         user: null,
         loading: false,
-        login: jest.fn(),
-        logout: jest.fn(),
+        error: null,
+        login: mockLogin,
+        register: mockRegister,
+        logout: mockLogout,
+        clearError: mockClearError,
       });
 
       renderReportPage();
@@ -246,10 +293,62 @@ describe('Report Viewing Interface', () => {
     });
 
     it('calls downloadReport when download button is clicked', async () => {
-      const mockDownloadReport = jest.fn();
+      const testMockDownloadReport = jest.fn() as jest.MockedFunction<
+        () => Promise<void>
+      >;
+
       mockUseReportAccess.mockReturnValue({
-        ...mockUseReportAccess(),
-        downloadReport: mockDownloadReport,
+        report: {
+          id: 'test-report-id',
+          assessment_id: 'test-assessment-id',
+          practice_id: 'test-practice-id',
+          report_type: 'standard',
+          content: {
+            child: {
+              name: 'Test Child',
+              age: 8,
+              gender: 'Male',
+            },
+            assessment: {
+              id: 'test-assessment-id',
+              brain_o_meter_score: 75,
+              completed_at: '2024-01-15T10:00:00Z',
+            },
+            visualData: {
+              affectedRegions: ['cervical', 'lumbar'],
+            },
+            recommendations: ['Regular exercise', 'Proper posture'],
+          },
+          generated_at: '2024-01-15T10:00:00Z',
+          created_at: '2024-01-15T10:00:00Z',
+          updated_at: '2024-01-15T10:00:00Z',
+        },
+        charts: [
+          {
+            chartType: 'bar',
+            title: 'Assessment Results',
+            chartData: {
+              labels: ['Test'],
+              datasets: [
+                {
+                  label: 'Test Data',
+                  data: [100],
+                  backgroundColor: '#2B5797',
+                },
+              ],
+            },
+            chartOptions: {
+              responsive: true,
+              maintainAspectRatio: false,
+            },
+          },
+        ],
+        loading: false,
+        error: null,
+        isDownloading: false,
+        downloadReport: testMockDownloadReport,
+        refetch: mockRefetch,
+        setDownloading: mockSetDownloading,
       });
 
       renderReportPage();
@@ -257,13 +356,62 @@ describe('Report Viewing Interface', () => {
       const downloadButton = screen.getAllByText(/Download PDF/)[0];
       fireEvent.click(downloadButton);
 
-      expect(mockDownloadReport).toHaveBeenCalled();
+      expect(testMockDownloadReport).toHaveBeenCalled();
     });
 
     it('shows downloading state when download is in progress', () => {
       mockUseReportAccess.mockReturnValue({
-        ...mockUseReportAccess(),
+        report: {
+          id: 'test-report-id',
+          assessment_id: 'test-assessment-id',
+          practice_id: 'test-practice-id',
+          report_type: 'standard',
+          content: {
+            child: {
+              name: 'Test Child',
+              age: 8,
+              gender: 'Male',
+            },
+            assessment: {
+              id: 'test-assessment-id',
+              brain_o_meter_score: 75,
+              completed_at: '2024-01-15T10:00:00Z',
+            },
+            visualData: {
+              affectedRegions: ['cervical', 'lumbar'],
+            },
+            recommendations: ['Regular exercise', 'Proper posture'],
+          },
+          generated_at: '2024-01-15T10:00:00Z',
+          created_at: '2024-01-15T10:00:00Z',
+          updated_at: '2024-01-15T10:00:00Z',
+        },
+        charts: [
+          {
+            chartType: 'bar',
+            title: 'Assessment Results',
+            chartData: {
+              labels: ['Test'],
+              datasets: [
+                {
+                  label: 'Test Data',
+                  data: [100],
+                  backgroundColor: '#2B5797',
+                },
+              ],
+            },
+            chartOptions: {
+              responsive: true,
+              maintainAspectRatio: false,
+            },
+          },
+        ],
+        loading: false,
+        error: null,
         isDownloading: true,
+        downloadReport: mockDownloadReport,
+        refetch: mockRefetch,
+        setDownloading: mockSetDownloading,
       });
 
       renderReportPage();
@@ -273,8 +421,57 @@ describe('Report Viewing Interface', () => {
 
     it('disables download button during download', () => {
       mockUseReportAccess.mockReturnValue({
-        ...mockUseReportAccess(),
+        report: {
+          id: 'test-report-id',
+          assessment_id: 'test-assessment-id',
+          practice_id: 'test-practice-id',
+          report_type: 'standard',
+          content: {
+            child: {
+              name: 'Test Child',
+              age: 8,
+              gender: 'Male',
+            },
+            assessment: {
+              id: 'test-assessment-id',
+              brain_o_meter_score: 75,
+              completed_at: '2024-01-15T10:00:00Z',
+            },
+            visualData: {
+              affectedRegions: ['cervical', 'lumbar'],
+            },
+            recommendations: ['Regular exercise', 'Proper posture'],
+          },
+          generated_at: '2024-01-15T10:00:00Z',
+          created_at: '2024-01-15T10:00:00Z',
+          updated_at: '2024-01-15T10:00:00Z',
+        },
+        charts: [
+          {
+            chartType: 'bar',
+            title: 'Assessment Results',
+            chartData: {
+              labels: ['Test'],
+              datasets: [
+                {
+                  label: 'Test Data',
+                  data: [100],
+                  backgroundColor: '#2B5797',
+                },
+              ],
+            },
+            chartOptions: {
+              responsive: true,
+              maintainAspectRatio: false,
+            },
+          },
+        ],
+        loading: false,
+        error: null,
         isDownloading: true,
+        downloadReport: mockDownloadReport,
+        refetch: mockRefetch,
+        setDownloading: mockSetDownloading,
       });
 
       renderReportPage();
@@ -286,8 +483,11 @@ describe('Report Viewing Interface', () => {
 
   describe('Sharing Functionality', () => {
     it('uses navigator.share when available', async () => {
-      const mockShare = jest.fn().mockResolvedValue(undefined);
-      (navigator.share as jest.Mock) = mockShare;
+      const mockShare = jest.fn().mockImplementation(() => Promise.resolve());
+      Object.defineProperty(navigator, 'share', {
+        writable: true,
+        value: mockShare,
+      });
 
       renderReportPage();
 
@@ -306,8 +506,13 @@ describe('Report Viewing Interface', () => {
     it('falls back to clipboard when navigator.share is not available', async () => {
       // Remove navigator.share
       delete (navigator as any).share;
-      const mockWriteText = jest.fn().mockResolvedValue(undefined);
-      (navigator.clipboard.writeText as jest.Mock) = mockWriteText;
+      const mockWriteText = jest
+        .fn()
+        .mockImplementation(() => Promise.resolve());
+      Object.defineProperty(navigator.clipboard, 'writeText', {
+        writable: true,
+        value: mockWriteText,
+      });
 
       renderReportPage();
 
@@ -323,10 +528,14 @@ describe('Report Viewing Interface', () => {
   describe('Error Handling', () => {
     it('displays error message when report loading fails', () => {
       mockUseReportAccess.mockReturnValue({
-        ...mockUseReportAccess(),
         report: null,
-        error: 'Report not found',
+        charts: [],
         loading: false,
+        error: 'Report not found',
+        isDownloading: false,
+        downloadReport: mockDownloadReport,
+        refetch: mockRefetch,
+        setDownloading: mockSetDownloading,
       });
 
       renderReportPage();
@@ -337,10 +546,14 @@ describe('Report Viewing Interface', () => {
 
     it('provides navigation options on error', () => {
       mockUseReportAccess.mockReturnValue({
-        ...mockUseReportAccess(),
         report: null,
-        error: 'Report not found',
+        charts: [],
         loading: false,
+        error: 'Report not found',
+        isDownloading: false,
+        downloadReport: mockDownloadReport,
+        refetch: mockRefetch,
+        setDownloading: mockSetDownloading,
       });
 
       renderReportPage();
@@ -351,10 +564,14 @@ describe('Report Viewing Interface', () => {
 
     it('displays not found message when report is null without error', () => {
       mockUseReportAccess.mockReturnValue({
-        ...mockUseReportAccess(),
         report: null,
-        error: null,
+        charts: [],
         loading: false,
+        error: null,
+        isDownloading: false,
+        downloadReport: mockDownloadReport,
+        refetch: mockRefetch,
+        setDownloading: mockSetDownloading,
       });
 
       renderReportPage();

@@ -312,7 +312,11 @@ export function useWorkflowState(
         state
       );
       if (!state || !state.formData) return {};
-      return state.formData[step] || {};
+
+      // Since formData is a single object containing all form data,
+      // we return the entire formData object for any step
+      // The specific step logic should be handled by the consuming component
+      return state.formData;
     },
     [state]
   );

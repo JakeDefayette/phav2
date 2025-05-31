@@ -72,7 +72,7 @@ export function AssessmentProgressIndicator({
   showStageDetails = true,
   compact = false,
   className = '',
-}: AssessmentProgressIndicatorProps): JSX.Element | null {
+}: AssessmentProgressIndicatorProps): React.ReactElement | null {
   if (!progress) {
     return null;
   }

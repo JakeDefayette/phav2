@@ -213,50 +213,12 @@ export const MultiStepSurveyFormWithWorkflow: React.FC<
 
         // Show progress feedback
         const stepName =
-          FORM_STEPS[currentStep - 1]?.label || `Step ${currentStep}`;
+          FORM_STEPS[currentStep - 1]?.title || `Step ${currentStep}`;
         showSuccess('Progress saved', `${stepName} completed successfully!`);
       },
       {
         loadingMessage: 'Saving progress...',
-        successMessage: null, // We handle this manually above
-        errorHandler: async error => {
-          // Report validation error to workflow
-          if (enableWorkflowPersistence) {
-            await reportError({
-              code: 'FORM_VALIDATION_ERROR',
-              message: 'Form validation failed',
-              stage: `step_${currentStep}`,
-              recoverable: true,
-            });
-          }
-
-          // Mark fields as touched to show validation errors
-          if (currentStep === 1) {
-            setFieldTouched('lifestyleStressors', true);
-          } else if (currentStep === 2) {
-            setFieldTouched('symptoms', true);
-          } else if (currentStep === 3) {
-            // Mark all step 3 fields as touched
-            const step3Fields = [
-              'parentFirstName',
-              'parentLastName',
-              'childFirstName',
-              'childLastName',
-              'childAge',
-              'childGender',
-              'email',
-              'privacyPolicyAcknowledged',
-              'medicalDisclaimerAcknowledged',
-            ];
-            step3Fields.forEach(field => setFieldTouched(field, true));
-          }
-          await validateForm();
-
-          showValidationError(
-            'Please check the form',
-            'Some fields need your attention before continuing.'
-          );
-        },
+        successMessage: undefined, // We handle this manually above
       }
     );
   };
@@ -303,20 +265,7 @@ export const MultiStepSurveyFormWithWorkflow: React.FC<
         },
         {
           loadingMessage: 'Generating your personalized report...',
-          successMessage: null, // We handle this manually above
-          errorHandler: async error => {
-            // Report submission error
-            if (enableWorkflowPersistence) {
-              await reportError({
-                code: 'FORM_SUBMISSION_ERROR',
-                message:
-                  error instanceof Error ? error.message : 'Submission failed',
-                stage: 'submission',
-                recoverable: true,
-              });
-            }
-            throw error;
-          },
+          successMessage: undefined, // We handle this manually above
         }
       ).finally(() => {
         setIsSubmitting(false);
@@ -341,40 +290,32 @@ export const MultiStepSurveyFormWithWorkflow: React.FC<
       {
         loadingMessage: 'Resuming session...',
         successMessage: 'Session resumed successfully!',
-        errorHandler: async error => {
-          // eslint-disable-next-line no-console
-          console.error('Failed to resume session:', error);
-          // eslint-disable-next-line no-console
-          console.log('Starting fresh after failed resume...');
-          await handleStartFresh(); // Start fresh if resume fails
-          showError(
-            'Failed to resume session',
-            'Failed to resume session. Starting fresh.'
-          );
-        },
       }
     );
   };
 
-  const handleRecovery = async (options: any) => {
-    return withFeedback(
-      async () => {
-        // eslint-disable-next-line no-console
-        console.log('Attempting data recovery with options:', options);
-        await recoverFromErrors(options);
-        setShowRecovery(false);
-        showSuccess('Recovery successful', 'Your session has been restored.');
-      },
-      {
-        loadingMessage: 'Recovering data...',
-        successMessage: 'Data recovery successful!',
-        errorHandler: async error => {
+  const handleRecovery = async (options: any): Promise<boolean> => {
+    try {
+      await withFeedback(
+        async () => {
           // eslint-disable-next-line no-console
-          console.error('Data recovery failed:', error);
-          showError('Data recovery failed', 'Please try starting fresh.');
+          console.log('Attempting data recovery with options:', options);
+          await recoverFromErrors(options);
+          setShowRecovery(false);
+          showSuccess('Recovery successful', 'Your session has been restored.');
         },
-      }
-    );
+        {
+          loadingMessage: 'Recovering data...',
+          successMessage: 'Data recovery successful!',
+        }
+      );
+      return true;
+    } catch (error) {
+      // eslint-disable-next-line no-console
+      console.error('Data recovery failed:', error);
+      showError('Data recovery failed', 'Please try starting fresh.');
+      return false;
+    }
   };
 
   const handleStartFresh = async () => {
@@ -390,14 +331,6 @@ export const MultiStepSurveyFormWithWorkflow: React.FC<
       {
         loadingMessage: 'Starting fresh session...',
         successMessage: 'New session started!',
-        errorHandler: error => {
-          // eslint-disable-next-line no-console
-          console.error('Failed to start fresh session:', error);
-          showError(
-            'Failed to start new session',
-            'Failed to start new session. Please try again.'
-          );
-        },
       }
     );
   };
@@ -416,11 +349,6 @@ export const MultiStepSurveyFormWithWorkflow: React.FC<
       {
         loadingMessage: 'Clearing state...',
         successMessage: 'All workflow data cleared!',
-        errorHandler: error => {
-          // eslint-disable-next-line no-console
-          console.error('Failed to clear state:', error);
-          showError('Failed to clear state', 'Please try again.');
-        },
       }
     );
   };

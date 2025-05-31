@@ -41,7 +41,7 @@ interface RecoveryOption {
   description: string;
   icon: React.ReactNode;
   action: () => Promise<void>;
-  variant: 'primary' | 'secondary' | 'danger';
+  variant: 'primary' | 'secondary' | 'destructive';
   recoveryOptions?: WorkflowRecoveryOptions;
 }
 
@@ -56,7 +56,7 @@ export function WorkflowRecovery({
   onStartFresh,
   onClearAll,
   className,
-}: WorkflowRecoveryProps): JSX.Element {
+}: WorkflowRecoveryProps): React.JSX.Element {
   const [selectedOption, setSelectedOption] = useState<string | null>(null);
   const [isRecovering, setIsRecovering] = useState(false);
 
@@ -212,7 +212,7 @@ export function WorkflowRecovery({
             setSelectedOption(null);
           }
         },
-        variant: 'danger',
+        variant: 'destructive',
       });
     }
 

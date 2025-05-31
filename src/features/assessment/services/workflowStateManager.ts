@@ -267,9 +267,10 @@ export class WorkflowStateManager {
         ];
         const preservedData: Partial<SurveyFormData> = {};
         essentialFields.forEach(field => {
-          if (this.state!.formData[field as keyof SurveyFormData]) {
-            preservedData[field as keyof SurveyFormData] =
-              this.state!.formData[field as keyof SurveyFormData];
+          const key = field as keyof SurveyFormData;
+          const value = this.state!.formData[key];
+          if (value !== undefined) {
+            (preservedData as any)[key] = value;
           }
         });
         this.state.formData = preservedData;

@@ -19,11 +19,11 @@ function withLazyLoading<T extends React.ComponentType<any>>(
 
   const WrappedComponent = (props: React.ComponentProps<T>) => (
     <ErrorBoundary
-      fallback={(error, retry) => (
+      fallback={({ error, resetError }) => (
         <div className='p-8 text-center'>
           <p className='text-red-600 mb-4'>Failed to load {displayName}</p>
           <button
-            onClick={retry}
+            onClick={resetError}
             className='px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700'
           >
             Try Again

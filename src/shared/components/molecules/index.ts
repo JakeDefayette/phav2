@@ -7,10 +7,7 @@ export {
   type CheckboxOption,
 } from './CheckboxGroup';
 export { FormField, type FormFieldProps } from './FormField';
-export {
-  AssessmentProgressIndicator,
-  type ProgressIndicatorProps,
-} from './ProgressIndicator';
+export { AssessmentProgressIndicator } from './ProgressIndicator';
 export {
   RadioGroup,
   type RadioGroupProps,
