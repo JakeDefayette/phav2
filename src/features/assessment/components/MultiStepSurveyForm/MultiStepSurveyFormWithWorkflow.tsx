@@ -137,7 +137,7 @@ export const MultiStepSurveyFormWithWorkflow: React.FC<
     onError: error => {
       // eslint-disable-next-line no-console
       console.error('🚨 Workflow error:', error);
-      showNetworkError('Failed to save progress', error.message);
+      showNetworkError('Failed to save progress');
     },
   });
 
