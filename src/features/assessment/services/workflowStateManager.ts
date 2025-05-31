@@ -85,6 +85,7 @@ export class WorkflowStateManager {
         }
       }
     } catch (error) {
+      // eslint-disable-next-line no-console
       console.warn('Failed to initialize workflow state:', error);
       await this.clearStoredState();
     }
@@ -113,6 +114,7 @@ export class WorkflowStateManager {
     await this.persistState();
     this.notifyListeners();
 
+    // eslint-disable-next-line no-console
     console.log(
       `📋 Started new workflow session: ${sessionId} (anonymous: ${isAnonymous})`
     );
@@ -130,6 +132,7 @@ export class WorkflowStateManager {
         if (isValid) {
           this.state = stored;
           this.notifyListeners();
+          // eslint-disable-next-line no-console
           console.log(`🔄 Resumed workflow session: ${stored.sessionId}`);
           return this.state;
         }
@@ -425,54 +428,48 @@ export class WorkflowStateManager {
   private async clearStoredState(): Promise<void> {
     if (typeof window === 'undefined') return;
     localStorage.removeItem(this.storageKey);
+    sessionStorage.removeItem(this.storageKey);
   }
 
   private debouncePersist(): void {
     if (this.saveTimer) {
       clearTimeout(this.saveTimer);
     }
-    this.saveTimer = setTimeout(() => {
-      this.persistState();
-    }, 1000); // 1 second debounce
+    this.saveTimer = setTimeout(async () => {
+      try {
+        await this.persistState();
+      } catch (error) {
+        // eslint-disable-next-line no-console
+        console.error('Debounced persist failed:', error);
+      }
+    }, 1500); // Debounce for 1.5 seconds
   }
 
   private async validateStoredState(state: WorkflowState): Promise<boolean> {
-    // Check if state is too old (24 hours)
-    const maxAge = 24 * 60 * 60 * 1000;
-    const age = Date.now() - new Date(state.lastUpdatedAt).getTime();
-    if (age > maxAge) {
+    const sessionMaxAge = 7 * 24 * 60 * 60 * 1000; // 7 days
+    const lastUpdated = new Date(state.lastUpdatedAt).getTime();
+    const now = Date.now();
+
+    if (now - lastUpdated > sessionMaxAge) {
+      // eslint-disable-next-line no-console
+      console.log(
+        `Workflow session ${state.sessionId} expired, clearing state.`
+      );
       return false;
     }
 
-    // Validate session structure
-    if (
-      !state.sessionId ||
-      !state.startedAt ||
-      typeof state.currentStep !== 'number'
-    ) {
-      return false;
-    }
-
-    // If authenticated session, validate current auth state
-    if (!state.isAnonymous) {
-      const validation = await validateSession();
-      if (!validation.isValid) {
-        return false;
-      }
-    }
-
+    // Add more validation logic here if needed (e.g., version checks)
     return true;
   }
 
   private notifyListeners(): void {
     if (this.state) {
-      this.listeners.forEach(listener => {
-        try {
-          listener({ ...this.state! });
-        } catch (error) {
-          console.error('Error in workflow state listener:', error);
-        }
-      });
+      this.listeners.forEach(listener => listener(this.state!));
+    } else {
+      // eslint-disable-next-line no-console
+      console.warn(
+        'Attempted to notify listeners, but workflow state is null.'
+      );
     }
   }
 

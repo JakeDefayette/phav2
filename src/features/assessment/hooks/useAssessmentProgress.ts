@@ -126,7 +126,7 @@ export function useAssessmentProgress({
         unsubscribe();
       }
     },
-    [onComplete, autoUnsubscribe]
+    [onComplete, autoUnsubscribe, unsubscribe]
   );
 
   // Subscribe to progress updates

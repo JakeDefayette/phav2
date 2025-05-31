@@ -36,6 +36,41 @@ export interface MultiStepSurveyFormWithWorkflowProps {
   showRecoveryOnStart?: boolean;
 }
 
+const FormikValuesChangeObserver: React.FC<{
+  values: SurveyFormData;
+  formValues: SurveyFormData;
+  currentStep: number;
+  enableWorkflowPersistence: boolean;
+  setFormValues: (values: SurveyFormData) => void;
+  saveFormData: (step: number, values: SurveyFormData) => void;
+}> = ({
+  values,
+  formValues,
+  currentStep,
+  enableWorkflowPersistence,
+  setFormValues,
+  saveFormData,
+}) => {
+  React.useEffect(() => {
+    if (
+      enableWorkflowPersistence &&
+      JSON.stringify(values) !== JSON.stringify(formValues)
+    ) {
+      setFormValues(values);
+      saveFormData(currentStep, values);
+    }
+  }, [
+    values,
+    currentStep,
+    formValues,
+    saveFormData,
+    enableWorkflowPersistence,
+    setFormValues,
+  ]);
+
+  return null; // This component doesn't render anything itself
+};
+
 export const MultiStepSurveyFormWithWorkflow: React.FC<
   MultiStepSurveyFormWithWorkflowProps
 > = ({
@@ -86,6 +121,7 @@ export const MultiStepSurveyFormWithWorkflow: React.FC<
     autoStart: enableWorkflowPersistence,
     anonymous: true,
     onStateChange: state => {
+      // eslint-disable-next-line no-console
       console.log('📊 Workflow state changed:', state);
 
       // Update form step based on workflow state
@@ -99,6 +135,7 @@ export const MultiStepSurveyFormWithWorkflow: React.FC<
       }
     },
     onError: error => {
+      // eslint-disable-next-line no-console
       console.error('🚨 Workflow error:', error);
       showNetworkError('Failed to save progress', error.message);
     },
@@ -122,6 +159,7 @@ export const MultiStepSurveyFormWithWorkflow: React.FC<
         try {
           await updateFormData(step, values, false); // Use debounced save
         } catch (error) {
+          // eslint-disable-next-line no-console
           console.warn('Failed to save form data:', error);
           showWarning(
             'Auto-save failed',
@@ -290,19 +328,30 @@ export const MultiStepSurveyFormWithWorkflow: React.FC<
   const handleResume = async () => {
     return withFeedback(
       async () => {
-        const resumed = await resumeSession();
-        if (resumed) {
-          setShowRecovery(false);
-          showSuccess(
-            'Session resumed',
-            'Welcome back! Continuing from where you left off.'
-          );
-        }
-        return resumed;
+        // eslint-disable-next-line no-console
+        console.log('Attempting to resume session...');
+        await resumeSession();
+        const resumedStep = workflowState?.currentStep || 1;
+        setShowRecovery(false);
+        showSuccess(
+          'Session resumed',
+          'Welcome back! Continuing from where you left off.'
+        );
       },
       {
-        loadingMessage: 'Resuming your session...',
-        errorMessage: 'Failed to resume session',
+        loadingMessage: 'Resuming session...',
+        successMessage: 'Session resumed successfully!',
+        errorHandler: async error => {
+          // eslint-disable-next-line no-console
+          console.error('Failed to resume session:', error);
+          // eslint-disable-next-line no-console
+          console.log('Starting fresh after failed resume...');
+          await handleStartFresh(); // Start fresh if resume fails
+          showError(
+            'Failed to resume session',
+            'Failed to resume session. Starting fresh.'
+          );
+        },
       }
     );
   };
@@ -310,16 +359,20 @@ export const MultiStepSurveyFormWithWorkflow: React.FC<
   const handleRecovery = async (options: any) => {
     return withFeedback(
       async () => {
-        const recovered = await recoverFromErrors(options);
-        if (recovered) {
-          setShowRecovery(false);
-          showSuccess('Recovery successful', 'Your session has been restored.');
-        }
-        return recovered;
+        // eslint-disable-next-line no-console
+        console.log('Attempting data recovery with options:', options);
+        await recoverFromErrors(options);
+        setShowRecovery(false);
+        showSuccess('Recovery successful', 'Your session has been restored.');
       },
       {
-        loadingMessage: 'Recovering your session...',
-        errorMessage: 'Failed to recover session',
+        loadingMessage: 'Recovering data...',
+        successMessage: 'Data recovery successful!',
+        errorHandler: async error => {
+          // eslint-disable-next-line no-console
+          console.error('Data recovery failed:', error);
+          showError('Data recovery failed', 'Please try starting fresh.');
+        },
       }
     );
   };
@@ -327,15 +380,24 @@ export const MultiStepSurveyFormWithWorkflow: React.FC<
   const handleStartFresh = async () => {
     return withFeedback(
       async () => {
-        await startSession(true);
-        setCurrentStep(1);
+        // eslint-disable-next-line no-console
+        console.log('Starting a fresh session...');
+        await startSession();
         setFormValues(INITIAL_VALUES);
         setShowRecovery(false);
         showInfo('Starting fresh', 'New assessment session started.');
       },
       {
-        loadingMessage: 'Starting new session...',
-        errorMessage: 'Failed to start new session',
+        loadingMessage: 'Starting fresh session...',
+        successMessage: 'New session started!',
+        errorHandler: error => {
+          // eslint-disable-next-line no-console
+          console.error('Failed to start fresh session:', error);
+          showError(
+            'Failed to start new session',
+            'Failed to start new session. Please try again.'
+          );
+        },
       }
     );
   };
@@ -343,15 +405,22 @@ export const MultiStepSurveyFormWithWorkflow: React.FC<
   const handleClearAll = async () => {
     return withFeedback(
       async () => {
+        // eslint-disable-next-line no-console
+        console.log('Clearing all workflow state...');
         await clearState();
-        setCurrentStep(1);
         setFormValues(INITIAL_VALUES);
+        setCurrentStep(1);
         setShowRecovery(false);
         showInfo('Session cleared', 'All data has been removed.');
       },
       {
-        loadingMessage: 'Clearing session data...',
-        errorMessage: 'Failed to clear session',
+        loadingMessage: 'Clearing state...',
+        successMessage: 'All workflow data cleared!',
+        errorHandler: error => {
+          // eslint-disable-next-line no-console
+          console.error('Failed to clear state:', error);
+          showError('Failed to clear state', 'Please try again.');
+        },
       }
     );
   };
@@ -651,25 +720,17 @@ export const MultiStepSurveyFormWithWorkflow: React.FC<
         enableReinitialize
       >
         {({ values, isValid, setValues, errors, touched }) => {
-          // Auto-save on value changes (debounced)
-          React.useEffect(() => {
-            if (
-              enableWorkflowPersistence &&
-              JSON.stringify(values) !== JSON.stringify(formValues)
-            ) {
-              setFormValues(values);
-              saveFormData(currentStep, values);
-            }
-          }, [
-            values,
-            currentStep,
-            formValues,
-            saveFormData,
-            enableWorkflowPersistence,
-          ]);
-
           return (
             <Form className='space-y-8'>
+              <FormikValuesChangeObserver
+                values={values}
+                formValues={formValues}
+                currentStep={currentStep}
+                enableWorkflowPersistence={enableWorkflowPersistence}
+                setFormValues={setFormValues}
+                saveFormData={saveFormData}
+              />
+
               {/* Workflow State Indicator */}
               {enableWorkflowPersistence && workflowState && (
                 <Alert

@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useParams } from 'next/navigation';
 
 interface ReportData {
@@ -42,17 +42,7 @@ export default function ReportViewPage({}: ReportViewPageProps) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    if (!token) {
-      setError('Invalid report link');
-      setLoading(false);
-      return;
-    }
-
-    fetchReportData();
-  }, [token]);
-
-  const fetchReportData = async () => {
+  const fetchReportData = useCallback(async () => {
     try {
       setLoading(true);
       console.log(
@@ -83,7 +73,17 @@ export default function ReportViewPage({}: ReportViewPageProps) {
     } finally {
       setLoading(false);
     }
-  };
+  }, [token]);
+
+  useEffect(() => {
+    if (!token) {
+      setError('Invalid report link');
+      setLoading(false);
+      return;
+    }
+
+    fetchReportData();
+  }, [token, fetchReportData]);
 
   const handleDownloadPDF = () => {
     console.log('📥 Starting PDF download...');

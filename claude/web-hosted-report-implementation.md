@@ -22,6 +22,7 @@ Converting the PHA-v2 system from auto-download PDF reports to web-hosted report
 ## Technical Architecture
 
 ### Route Structure
+
 ```
 Current:
 /reports/download/[token] → Auto-downloads PDF
@@ -32,6 +33,7 @@ Planned:
 ```
 
 ### Component Architecture
+
 ```
 ReportViewer (main container)
 ├── ReportHeader (child info, branding)
@@ -43,6 +45,7 @@ ReportViewer (main container)
 ```
 
 ### Data Flow
+
 1. **Survey completion** → Generate report + share token
 2. **Redirect to** → `/reports/view/[token]` (instead of download)
 3. **Web page loads** → Fetch report data via API
@@ -52,6 +55,7 @@ ReportViewer (main container)
 ## Implementation Plan
 
 ### Phase 1: Core Web Display 🚧
+
 - [ ] Create `/reports/view/[token]/page.tsx` route
 - [ ] Build `ReportViewer` component
 - [ ] Implement token-based data fetching
@@ -59,6 +63,7 @@ ReportViewer (main container)
 - [ ] Add download button
 
 ### Phase 2: Enhanced Layout 📋
+
 - [ ] Design professional report layout
 - [ ] Add responsive styling
 - [ ] Implement chart visualizations
@@ -66,12 +71,14 @@ ReportViewer (main container)
 - [ ] Add print-friendly CSS
 
 ### Phase 3: Sharing & Branding 🎨
+
 - [ ] Add social sharing buttons
 - [ ] Implement practice branding
 - [ ] Add email sharing functionality
 - [ ] Create shareable link generation
 
 ### Phase 4: Advanced Features ⚡
+
 - [ ] SEO optimization
 - [ ] Analytics integration
 - [ ] Performance optimization
@@ -80,18 +87,21 @@ ReportViewer (main container)
 ## Benefits
 
 ### User Experience
+
 - ✅ **Immediate viewing** - No download wait time
 - ✅ **Cross-platform** - Works on any device/browser
 - ✅ **Shareable** - Easy URL sharing
 - ✅ **Professional** - Better than PDF viewing
 
 ### Business Impact
+
 - ✅ **Viral potential** - Social media friendly
 - ✅ **Lead generation** - Practice contact integration
 - ✅ **Branding control** - Full visual customization
 - ✅ **Analytics** - View tracking and insights
 
 ### Technical Advantages
+
 - ✅ **Performance** - Faster than PDF loading
 - ✅ **Mobile optimization** - Native responsive design
 - ✅ **Accessibility** - Screen reader compatible
@@ -100,6 +110,7 @@ ReportViewer (main container)
 ## Implementation Progress
 
 ### ✅ Completed
+
 - Form submission debugging and fixes
 - Token-based access system
 - PDF generation pipeline
@@ -114,9 +125,11 @@ ReportViewer (main container)
   - ✅ Added error handling and loading states
 
 ### 🚧 In Progress
+
 - Testing Phase 1 implementation
 
 ### 📋 Next Steps
+
 - Test complete web-hosted report flow
 - Phase 2: Enhanced layout and visualizations
 - Phase 3: Sharing and branding features
@@ -124,21 +137,24 @@ ReportViewer (main container)
 ## Technical Notes
 
 ### Token Security
+
 - Share tokens remain the same security model
 - No changes to authentication required
 - Existing RLS policies apply
 
 ### Performance Considerations
+
 - Report data fetched via API on page load
 - Consider caching for repeat visits
 - Optimize for mobile bandwidth
 
 ### Compatibility
+
 - Maintain existing PDF download functionality
 - Ensure backward compatibility with shared links
 - Progressive enhancement approach
 
 ---
 
-*Last updated: [Current Date]*
-*Status: Planning Phase*
+_Last updated: [Current Date]_
+_Status: Planning Phase_

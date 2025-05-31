@@ -36,9 +36,11 @@ export async function POST(
       );
     }
 
+    // eslint-disable-next-line no-console
     console.log('🔄 Starting assessment submission for:', assessmentId);
 
     // Step 1: Verify assessment exists and is in correct state using server client
+    // eslint-disable-next-line no-console
     console.log('📋 Validating assessment...');
     const { data: assessment, error: assessmentFindError } =
       await supabaseServer
@@ -48,6 +50,7 @@ export async function POST(
         .single();
 
     if (assessmentFindError || !assessment) {
+      // eslint-disable-next-line no-console
       console.error('❌ Assessment not found:', assessmentFindError);
       return NextResponse.json(
         { error: 'Assessment not found' },
@@ -56,6 +59,7 @@ export async function POST(
     }
 
     if (assessment.status === 'completed') {
+      // eslint-disable-next-line no-console
       console.error('❌ Assessment already completed');
       return NextResponse.json(
         { error: 'Assessment already completed' },
@@ -67,6 +71,7 @@ export async function POST(
     // In the future, we could check if the user owns the child associated with this assessment
 
     // Step 2: Insert survey responses using server client
+    // eslint-disable-next-line no-console
     console.log('💾 Saving survey responses...');
     const responseData = responses.map(response => ({
       assessment_id: assessmentId,
@@ -81,6 +86,7 @@ export async function POST(
         .select();
 
     if (responsesError) {
+      // eslint-disable-next-line no-console
       console.error('❌ Failed to insert survey responses:', responsesError);
       return NextResponse.json(
         { error: `Failed to save survey responses: ${responsesError.message}` },
@@ -88,11 +94,13 @@ export async function POST(
       );
     }
 
+    // eslint-disable-next-line no-console
     console.log(
       `✅ Inserted ${insertedResponses?.length || 0} survey responses`
     );
 
     // Step 3: Complete assessment with brain-o-meter score using server client
+    // eslint-disable-next-line no-console
     console.log('🏁 Completing assessment...');
     const completedAt = new Date().toISOString();
     const { data: updatedAssessment, error: assessmentError } =
@@ -108,9 +116,11 @@ export async function POST(
         .single();
 
     if (assessmentError) {
+      // eslint-disable-next-line no-console
       console.error('❌ Failed to complete assessment:', assessmentError);
 
       // Rollback: Delete inserted responses
+      // eslint-disable-next-line no-console
       console.log('🔄 Rolling back survey responses...');
       if (insertedResponses && insertedResponses.length > 0) {
         const insertedResponseIds = insertedResponses.map(r => r.id);
@@ -126,9 +136,11 @@ export async function POST(
       );
     }
 
+    // eslint-disable-next-line no-console
     console.log(`✅ Assessment completed with score: ${brainOMeterScore}`);
 
     // Step 4: Generate report using server client
+    // eslint-disable-next-line no-console
     console.log('📊 Generating report...');
 
     // Helper function to calculate age (if not already available in this scope)
@@ -149,6 +161,7 @@ export async function POST(
         .single();
 
     if (childDataError) {
+      // eslint-disable-next-line no-console
       console.error(
         '❌ Failed to fetch child data for report content:',
         childDataError
@@ -200,6 +213,7 @@ export async function POST(
     };
 
     // Create a basic report record using only fields that exist in the reports table
+    // eslint-disable-next-line no-console
     console.log('🔍 Attempting to create report with data:', {
       assessment_id: assessmentId,
       practice_id: practiceId || null,
@@ -225,6 +239,7 @@ export async function POST(
 
     // If content column doesn't exist, try without it
     if (reportError && reportError.message?.includes('content')) {
+      // eslint-disable-next-line no-console
       console.log('🔄 Content column not found, trying without it...');
       const { data: reportFallback, error: reportFallbackError } =
         await supabaseServer
@@ -234,12 +249,14 @@ export async function POST(
           .single();
 
       if (reportFallbackError) {
+        // eslint-disable-next-line no-console
         console.error(
           '❌ Fallback report creation also failed:',
           reportFallbackError
         );
         // Continue with original error handling
       } else {
+        // eslint-disable-next-line no-console
         console.log('✅ Report created without content column');
         // Update the variables for the rest of the function
         report = reportFallback;
@@ -248,6 +265,7 @@ export async function POST(
     }
 
     if (reportError) {
+      // eslint-disable-next-line no-console
       console.error('🚨 Detailed report creation error:', {
         message: reportError.message,
         details: reportError.details,
@@ -257,9 +275,11 @@ export async function POST(
     }
 
     if (reportError) {
+      // eslint-disable-next-line no-console
       console.error('❌ Failed to generate report:', reportError);
 
       // Rollback: Restore assessment status and delete responses
+      // eslint-disable-next-line no-console
       console.log('🔄 Rolling back assessment and responses...');
 
       // Restore assessment
@@ -287,9 +307,11 @@ export async function POST(
       );
     }
 
+    // eslint-disable-next-line no-console
     console.log(`✅ Report generated with ID: ${report.id}`);
 
     // Step 5: Create a share token for anonymous access
+    // eslint-disable-next-line no-console
     console.log('🔗 Creating share token for anonymous access...');
 
     // Generate a secure random token
@@ -321,6 +343,7 @@ export async function POST(
       .single();
 
     if (shareError) {
+      // eslint-disable-next-line no-console
       console.error('❌ Failed to create share token:', {
         error: shareError,
         message: shareError.message,
@@ -331,6 +354,7 @@ export async function POST(
       });
       // Continue without share token - user can still access via authenticated route if they log in
     } else {
+      // eslint-disable-next-line no-console
       console.log(`✅ Share token created: ${shareToken.substring(0, 8)}...`);
     }
 
@@ -349,10 +373,16 @@ export async function POST(
       },
     };
 
+    // eslint-disable-next-line no-console
     console.log('🎉 Assessment submission completed successfully');
     return NextResponse.json(result, { status: 200 });
   } catch (error) {
-    console.error('Assessment submit error:', error);
+    let errorMessage = 'An unexpected error occurred.';
+    if (error instanceof Error) {
+      errorMessage = error.message;
+    }
+    // eslint-disable-next-line no-console
+    console.error('🚨 Unhandled error during assessment submission:', error);
 
     if (error instanceof ServiceError) {
       const statusCode =
@@ -365,15 +395,9 @@ export async function POST(
               : error.code === 'VALIDATION_ERROR'
                 ? 400
                 : 500;
-      return NextResponse.json(
-        { error: error.message },
-        { status: statusCode }
-      );
+      return NextResponse.json({ error: errorMessage }, { status: statusCode });
     }
 
-    return NextResponse.json(
-      { error: 'Failed to submit assessment' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: errorMessage }, { status: 500 });
   }
 }

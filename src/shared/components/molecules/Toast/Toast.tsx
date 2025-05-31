@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { CheckCircle, AlertCircle, AlertTriangle, Info, X } from 'lucide-react';
 import { cn } from '@/shared/utils/cn';
 import { Toast as ToastType, ToastVariant } from './types';
@@ -40,6 +40,13 @@ export const Toast: React.FC<ToastProps> = ({ toast, onRemove }) => {
   const variant = toastVariants[toast.variant];
   const IconComponent = toast.icon || variant.icon;
 
+  const handleRemove = useCallback(() => {
+    setIsExiting(true);
+    setTimeout(() => {
+      onRemove(toast.id);
+    }, 200);
+  }, [onRemove, toast.id]);
+
   // Auto-dismiss timer
   useEffect(() => {
     if (toast.duration && toast.duration > 0) {
@@ -48,7 +55,7 @@ export const Toast: React.FC<ToastProps> = ({ toast, onRemove }) => {
       }, toast.duration);
       return () => clearTimeout(timer);
     }
-  }, [toast.duration]);
+  }, [toast.duration, handleRemove]);
 
   // Entrance animation
   useEffect(() => {
@@ -57,13 +64,6 @@ export const Toast: React.FC<ToastProps> = ({ toast, onRemove }) => {
     }, 10);
     return () => clearTimeout(timer);
   }, []);
-
-  const handleRemove = () => {
-    setIsExiting(true);
-    setTimeout(() => {
-      onRemove(toast.id);
-    }, 200);
-  };
 
   return (
     <div

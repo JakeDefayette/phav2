@@ -121,15 +121,15 @@ export function useMemoizedObject<T extends Record<string, any>>(
   object: T,
   dependencies: React.DependencyList
 ): T {
-  return React.useMemo(() => object, dependencies);
+  return React.useMemo(() => object, [...dependencies, object]);
 }
 
 /**
  * Memoize component props to prevent unnecessary re-renders
  */
 export function useMemoizedProps<T extends Record<string, any>>(props: T): T {
-  const dependencies = Object.values(props);
-  return React.useMemo(() => props, dependencies);
+  const depValues = Object.values(props);
+  return React.useMemo(() => props, [...depValues, props]);
 }
 
 /**
@@ -269,23 +269,26 @@ export function useLazyComponent<T extends React.ComponentType<any>>(
     if ((isIntersecting || hasBeenVisible) && !Component && !loading) {
       setLoading(true);
       setError(null);
-
       componentLoader()
         .then(module => {
           setComponent(() => module.default);
+          setLoading(false);
         })
         .catch(err => {
-          setError(
-            err instanceof Error ? err : new Error('Failed to load component')
-          );
-        })
-        .finally(() => {
+          console.error('Failed to load component:', err);
+          setError(err);
           setLoading(false);
         });
     }
   }, [isIntersecting, hasBeenVisible, Component, loading, componentLoader]);
 
-  return { Component, loading, error };
+  if (error) {
+    // Optionally render a fallback UI or re-throw
+    console.error('Lazy component load error:', error);
+    // return <p>Error loading component.</p>;
+  }
+
+  return Component;
 }
 
 /**
@@ -312,7 +315,7 @@ export function usePerformanceMeasure(
         console.warn(`Slow operation [${name}]: ${duration.toFixed(2)}ms`);
       }
     };
-  }, dependencies);
+  }, [...dependencies, name]);
 }
 
 /**

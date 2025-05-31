@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 // TODO: Install shadcn/ui components
 // import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 // import { Button } from '@/components/ui/button';
@@ -113,7 +113,7 @@ export function PerformanceDashboard() {
   const reportCacheService = reportCache;
   const chartService = ChartService.getInstance();
 
-  const fetchPerformanceData = async () => {
+  const fetchPerformanceData = useCallback(async () => {
     setIsLoading(true);
     try {
       // Get performance metrics
@@ -134,18 +134,18 @@ export function PerformanceDashboard() {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [performanceMonitor, reportCacheService, chartService]);
 
-  const clearAllCaches = () => {
+  const clearAllCaches = useCallback(() => {
     reportCacheService.clear();
     chartService.clearCaches();
     fetchPerformanceData();
-  };
+  }, [reportCacheService, chartService, fetchPerformanceData]);
 
-  const resetPerformanceMetrics = () => {
+  const resetPerformanceMetrics = useCallback(() => {
     performanceMonitor.reset();
     fetchPerformanceData();
-  };
+  }, [performanceMonitor, fetchPerformanceData]);
 
   useEffect(() => {
     fetchPerformanceData();
@@ -153,7 +153,7 @@ export function PerformanceDashboard() {
     // Auto-refresh every 30 seconds
     const interval = setInterval(fetchPerformanceData, 30000);
     return () => clearInterval(interval);
-  }, []);
+  }, [fetchPerformanceData]);
 
   const getMetricStatus = (
     value: number,

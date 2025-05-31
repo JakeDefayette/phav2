@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '@/shared/hooks';
 import type { GeneratedReport } from '../types';
 import type { TransformedChartData } from '@/shared/components/molecules/Charts/types';
@@ -36,7 +36,7 @@ export function useReportAccess(reportId: string): UseReportAccessReturn {
   const [isDownloading, setIsDownloading] = useState(false);
 
   // Fetch report data
-  const fetchReport = async () => {
+  const fetchReport = useCallback(async () => {
     if (authLoading) return;
 
     try {
@@ -103,10 +103,10 @@ export function useReportAccess(reportId: string): UseReportAccessReturn {
     } finally {
       setLoading(false);
     }
-  };
+  }, [reportId, authLoading]);
 
   // Download report PDF
-  const downloadReport = async () => {
+  const downloadReport = useCallback(async () => {
     try {
       setIsDownloading(true);
       setError(null);
@@ -164,14 +164,14 @@ export function useReportAccess(reportId: string): UseReportAccessReturn {
     } finally {
       setIsDownloading(false);
     }
-  };
+  }, [reportId]);
 
   // Effect to fetch report data
   useEffect(() => {
     if (reportId) {
       fetchReport();
     }
-  }, [reportId, authLoading]);
+  }, [reportId, authLoading, fetchReport]);
 
   return {
     // State

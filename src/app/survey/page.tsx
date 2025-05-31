@@ -6,6 +6,7 @@ import {
   SurveyFormData,
 } from '@/shared/components/organisms';
 import { ErrorBoundary } from '@/shared/components/ErrorBoundary';
+import Link from 'next/link';
 
 // Temporary disable RealtimeScheduler to isolate the issue
 // const getRealtimeScheduler = () => {
@@ -247,12 +248,12 @@ export default function SurveyPage() {
                     Reload Page
                   </button>
 
-                  <a
+                  <Link
                     href='/'
                     className='block w-full bg-gray-200 text-gray-800 py-2 px-4 rounded hover:bg-gray-300 transition-colors'
                   >
                     Return Home
-                  </a>
+                  </Link>
                 </div>
 
                 {errorId && (

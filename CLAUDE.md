@@ -28,9 +28,11 @@ npm run db:seed            # Seed survey questions
 ## Architecture Overview
 
 ### Feature-Based Structure
+
 The codebase follows a feature-based architecture:
+
 - `src/features/assessment/` - Multi-step survey workflow with progress tracking
-- `src/features/dashboard/` - Practice and child management 
+- `src/features/dashboard/` - Practice and child management
 - `src/features/reports/` - Report generation, visualization, and viral sharing
 - `src/shared/` - Shared components, services, and utilities using atomic design
 
@@ -49,8 +51,9 @@ The codebase follows a feature-based architecture:
 ## Database Architecture
 
 The application uses Supabase with a 13-table schema featuring:
+
 - UUID primary keys for scalability
-- JSONB storage for flexible survey responses  
+- JSONB storage for flexible survey responses
 - 11 custom enums for data integrity
 - Comprehensive RLS policies for data isolation
 - 3-phase migration system (enums → tables → functions)
@@ -60,16 +63,19 @@ The application uses Supabase with a 13-table schema featuring:
 ## Development Workflow
 
 ### Error Handling Standards
+
 - Use `ServiceError` class for consistent API error responses
 - Implement validation at API boundaries with type checking
 - Include error boundaries in React components for fault tolerance
 
 ### Testing Requirements
+
 - Coverage goals: Statements >90%, Branches >85%, Functions >90%
 - Use test utilities in `tests/utils/database.ts` for data generation
 - Include accessibility testing with jest-axe for component tests
 
 ### Component Development
+
 - Follow atomic design principles with clear prop interfaces
 - Implement loading states and user feedback patterns
 - Use composition over inheritance for component reusability
@@ -77,6 +83,7 @@ The application uses Supabase with a 13-table schema featuring:
 ## Configuration
 
 Environment variables are validated through `src/shared/config/index.ts` with Zod schemas:
+
 - `NEXT_PUBLIC_SUPABASE_URL` / `NEXT_PUBLIC_SUPABASE_ANON_KEY` - Supabase connection
 - `SUPABASE_SERVICE_ROLE_KEY` - Admin operations
 - `RESEND_API_KEY` - Email functionality

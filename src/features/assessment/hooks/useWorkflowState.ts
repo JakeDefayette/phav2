@@ -304,26 +304,15 @@ export function useWorkflowState(
   // Utilities
   const getFormDataForStep = useCallback(
     (step: number): Partial<SurveyFormData> => {
-      if (!state) return {};
-
-      // Return form data relevant to the specific step
-      const { formData } = state;
-
-      switch (step) {
-        case 1:
-          return {
-            lifestyleStressors: formData.lifestyleStressors || [],
-          };
-        case 2:
-          return {
-            lifestyleStressors: formData.lifestyleStressors || [],
-            symptoms: formData.symptoms || [],
-          };
-        case 3:
-          return formData; // All data for final step
-        default:
-          return formData;
-      }
+      // eslint-disable-next-line no-console
+      console.log(
+        '[useWorkflowState] getFormDataForStep called for step:',
+        step,
+        'Current state:',
+        state
+      );
+      if (!state || !state.formData) return {};
+      return state.formData[step] || {};
     },
     [state]
   );
@@ -332,15 +321,23 @@ export function useWorkflowState(
     if (!state) return false;
 
     const currentData = JSON.stringify(state.formData);
+    // eslint-disable-next-line no-console
+    console.log('[useWorkflowState] hasUnsavedChanges check:', {
+      current: currentData.substring(0, 50),
+      lastSaved: lastSavedDataRef.current.substring(0, 50),
+      areDifferent: currentData !== lastSavedDataRef.current,
+    });
     return currentData !== lastSavedDataRef.current;
   }, [state]);
 
-  const getRecentErrors = useCallback((): WorkflowState['errors'] => {
+  const getRecentErrors = useCallback(() => {
     if (!state) return [];
-
-    // Return errors from the last hour
-    const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000);
-    return state.errors.filter(error => new Date(error.timestamp) > oneHourAgo);
+    // eslint-disable-next-line no-console
+    console.log(
+      '[useWorkflowState] getRecentErrors called, returning:',
+      state.errors
+    );
+    return state.errors;
   }, [state]);
 
   return {

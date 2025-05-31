@@ -9,6 +9,7 @@ export async function GET(
     const { token } = await params;
     const supabase = supabaseServer;
 
+    // eslint-disable-next-line no-console
     console.log(
       `🔍 [API] Fetching report data for token: ${token?.substring(0, 8)}...`
     );
@@ -47,6 +48,7 @@ export async function GET(
       .eq('share_token', token)
       .single();
 
+    // eslint-disable-next-line no-console
     console.log('🔍 [API] Share token lookup result:', {
       found: !!shareData,
       error: shareError?.message,
@@ -54,6 +56,7 @@ export async function GET(
     });
 
     if (shareError || !shareData) {
+      // eslint-disable-next-line no-console
       console.error('❌ [API] Share token not found:', shareError);
       return NextResponse.json(
         {
@@ -64,6 +67,7 @@ export async function GET(
       );
     }
 
+    // eslint-disable-next-line no-console
     console.log('✅ [API] Share token found, processing report data...');
 
     // Extract report data and format it properly - handle nested structure
@@ -137,6 +141,7 @@ export async function GET(
       updatedAt: reportData.updated_at,
     };
 
+    // eslint-disable-next-line no-console
     console.log('✅ [API] Report data formatted successfully');
 
     // Log the access for analytics
@@ -156,8 +161,10 @@ export async function GET(
         accessed_at: new Date().toISOString(),
       });
 
+      // eslint-disable-next-line no-console
       console.log('📊 [API] Access logged for analytics');
     } catch (logError) {
+      // eslint-disable-next-line no-console
       console.error('⚠️ [API] Failed to log access (non-critical):', logError);
     }
 
@@ -173,6 +180,7 @@ export async function GET(
       },
     });
   } catch (error) {
+    // eslint-disable-next-line no-console
     console.error('❌ [API] Report view error:', error);
 
     return NextResponse.json(
