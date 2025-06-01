@@ -19,33 +19,6 @@ export const supabase = createClient(
     global: {
       headers: {
         'X-Client-Info': 'pha-v2-web',
-        'X-Requested-With': 'XMLHttpRequest',
-      },
-      // Enhanced fetch configuration
-      fetch: (url: RequestInfo | URL, options: RequestInit = {}) => {
-        const enhancedOptions: RequestInit = {
-          ...options,
-          headers: {
-            ...options.headers,
-            'Cache-Control': 'no-cache',
-            Pragma: 'no-cache',
-          },
-          // Add timeout for all requests
-          signal: options.signal || AbortSignal.timeout(30000),
-        };
-
-        return fetch(url, enhancedOptions).catch(error => {
-          // Enhanced error handling
-          if (error.name === 'AbortError') {
-            throw new Error('Request timeout - please check your connection');
-          }
-          if (error.name === 'NetworkError') {
-            throw new Error(
-              'Network error - please check your internet connection'
-            );
-          }
-          throw error;
-        });
       },
     },
     db: {
@@ -111,10 +84,7 @@ export async function checkConnection(force = false): Promise<boolean> {
   try {
     // Simple connection test using a public table or basic auth check
     // Use auth session check instead of querying a protected table
-    const {
-      data: { session },
-      error,
-    } = await supabase.auth.getSession();
+    await supabase.auth.getSession();
 
     // For anonymous users, consider connection as working if no network error occurs
     connectionState = 'connected';

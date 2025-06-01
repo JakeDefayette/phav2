@@ -48,6 +48,18 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
     const initializeAuth = async () => {
       try {
+        // Try to refresh the session first to ensure we have the latest token
+        const {
+          data: { session },
+          error: refreshError,
+        } = await supabase.auth.refreshSession();
+
+        if (refreshError) {
+          console.log('Session refresh failed:', refreshError.message);
+        } else if (session) {
+          console.log('Session refreshed successfully');
+        }
+
         const user = await getCurrentUser();
         if (mounted) {
           setState({
@@ -57,13 +69,14 @@ export function AuthProvider({ children }: AuthProviderProps) {
           });
         }
       } catch (error) {
+        console.error('Auth initialization error:', error);
         if (mounted) {
-          setState(prev => ({
+          setState({
             user: null,
             loading: false,
             error:
               error instanceof Error ? error.message : 'Authentication error',
-          }));
+          });
         }
       }
     };

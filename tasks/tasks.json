@@ -502,7 +502,7 @@
       "id": 8,
       "title": "Implement PDF Generation, Dynamic Report Viewing, and UX Enhancements for Survey Reports",
       "description": "Integrate client-side PDF export, dynamic report viewing, and user experience improvements into the survey report system, focusing on performance and sharing capabilities within the new feature-based architecture.",
-      "status": "pending",
+      "status": "done",
       "dependencies": [
         6,
         7
@@ -517,7 +517,7 @@
           "description": "Integrate a robust PDF generation library to handle dynamic report creation",
           "dependencies": [],
           "details": "Research and implement a PDF generation library that supports dynamic content, charts, and tables. Ensure the library can handle various data formats and maintain consistent styling across generated documents.",
-          "status": "pending"
+          "status": "done"
         },
         {
           "id": 2,
@@ -527,7 +527,7 @@
             1
           ],
           "details": "Design and implement customizable report templates that can dynamically incorporate analytics data, charts, and metrics. Include options for different layouts, data visualization styles, and content sections based on user needs.",
-          "status": "pending"
+          "status": "done"
         },
         {
           "id": 3,
@@ -537,7 +537,7 @@
             2
           ],
           "details": "Create user-friendly interfaces for selecting report parameters, choosing data to include, previewing reports, and initiating the generation process. Implement progress indicators and clear feedback mechanisms during PDF creation.",
-          "status": "pending"
+          "status": "done"
         },
         {
           "id": 4,
@@ -547,7 +547,7 @@
             3
           ],
           "details": "Implement caching strategies, background processing, and resource management techniques to ensure PDF generation remains responsive even with large datasets or complex reports. Monitor and optimize memory usage during the generation process.",
-          "status": "pending"
+          "status": "done"
         },
         {
           "id": 5,
@@ -557,7 +557,7 @@
             4
           ],
           "details": "Develop and execute test cases covering various report types, data volumes, user interactions, and edge cases. Test across different browsers and devices to ensure consistent functionality and appearance of generated PDFs.",
-          "status": "pending"
+          "status": "done"
         }
       ]
     },
@@ -573,7 +573,81 @@
       "priority": "medium",
       "details": "Create dashboard layout with reusable components in src/features/dashboard/components/. Implement practice branding, contact management, and video upload. Use Next.js App Router for routing in src/app/dashboard/. Support customization of email templates and assessment questions. Place shared components in src/shared/components/ following atomic design principles.",
       "testStrategy": "Test dashboard navigation, customization features, and data display in src/features/dashboard/__tests__/.",
-      "subtasks": []
+      "subtasks": [
+        {
+          "id": 1,
+          "title": "Design Dashboard Layout and Navigation Structure",
+          "description": "Create the overall layout and navigation structure for the chiropractor dashboard, ensuring user-centric design and mobile responsiveness.",
+          "dependencies": [],
+          "details": "Define the main dashboard sections (overview, contacts, videos, templates, assessments, settings). Establish a responsive grid and sidebar/topbar navigation using Next.js App Router.\n<info added on 2025-05-31T23:20:18.565Z>\nBased on the initial analysis, update the dashboard implementation plan:\n\n1. Create a DashboardLayout component in /src/features/dashboard/components/ to serve as a shell for all dashboard pages.\n2. Design and implement a persistent sidebar navigation component with main dashboard sections.\n3. Enhance the existing top navigation bar to integrate with the new sidebar.\n4. Implement a responsive grid system within the DashboardLayout to ensure proper content organization on various screen sizes.\n5. Develop dashboard-specific atomic and molecular components for consistent UI across dashboard features.\n6. Refactor the current /src/app/dashboard/page.tsx to use the new DashboardLayout and components.\n7. Implement navigation state management to handle active states and user interactions.\n8. Ensure the new layout maintains compatibility with existing RoleGuard components for permission-based rendering.\n9. Optimize the responsive design for enhanced mobile user experience.\n10. Update the dashboard sections (overview, contacts, videos, templates, assessments, settings) to fit within the new layout structure.\n</info added on 2025-05-31T23:20:18.565Z>\n<info added on 2025-05-31T23:23:26.731Z>\nImplementation Progress Update:\n\nThe dashboard layout structure has been successfully created with the following key components and features:\n\n1. DashboardLayout Component (/src/features/dashboard/components/DashboardLayout/DashboardLayout.tsx):\n   - Full-height responsive layout with sidebar and main content area\n   - Persistent sidebar with navigation items for all dashboard sections\n   - Mobile-responsive design with hamburger menu and overlay\n   - Role-based navigation items using RoleGuard components\n   - User info display in sidebar footer\n   - Clean top navigation with search placeholder and logout button\n   - Proper z-index management for mobile overlay\n\n2. DashboardContent Component (/src/features/dashboard/components/DashboardContent/DashboardContent.tsx):\n   - Enhanced welcome section with user greeting and role display\n   - Redesigned feature cards with improved visual hierarchy\n   - Icon-based cards with hover effects\n   - Role-based feature visibility\n   - Development-only permissions debug panel\n   - Responsive grid layout\n\n3. Updated Dashboard Page (/src/app/dashboard/page.tsx):\n   - Simplified to use new layout components\n   - Maintains authentication guards\n   - Clean separation of concerns\n\nNavigation structure implemented includes: Overview, Practice Management, Contacts, Videos, Templates, Assessments, My Children, Reports, and Settings, with role-based access control.\n\nKey features of the implementation:\n- Fully responsive design with mobile-first approach\n- Proper TypeScript interfaces\n- Role-based access control integration\n- Modern UI using Tailwind CSS\n- Hover effects and transitions\n- Accessible navigation structure\n- Clean component architecture following atomic design\n\nNext steps include testing the layout in browser, refining mobile responsiveness, adding active state detection for navigation, and considering search functionality implementation.\n</info added on 2025-05-31T23:23:26.731Z>",
+          "status": "done"
+        },
+        {
+          "id": 2,
+          "title": "Develop Reusable Atomic Components",
+          "description": "Build atomic, reusable UI components (atoms, molecules, organisms) to be used throughout the dashboard, following atomic design principles.",
+          "dependencies": [
+            1
+          ],
+          "details": "Implement basic UI elements (buttons, inputs, cards, modals) and compose them into larger, reusable structures for dashboard features.\n<info added on 2025-06-01T02:28:45.131Z>\nImplement a feature-based architecture with shared components following atomic design principles:\n\n1. Create src/shared/components/ directory with subdirectories for atoms, molecules, and organisms.\n\n2. Develop atomic components:\n   - Atoms: Enhanced buttons, form inputs, typography components, loading spinners, and badges\n   - Molecules: Form fields, card variations, modals, toast notifications, and data tables\n   - Organisms: Navigation components, header/footer layouts, complex forms, and data visualization containers\n\n3. Ensure all shared components are reusable across features and follow consistent styling and behavior.\n\n4. Implement feature-specific components in src/features/dashboard/components/ for dashboard-exclusive UI elements.\n\n5. Establish clear documentation and usage guidelines for the component library to facilitate adoption across all feature modules.\n\n6. Set up a testing strategy for shared components, including unit tests and storybook integration for visual testing.\n\n7. Create a theming system that allows for easy customization of shared components across different features.\n\n8. Implement accessibility standards (WCAG) in all shared components to ensure inclusivity.\n\n9. Optimize shared components for performance, considering lazy loading and code splitting where appropriate.\n\n10. Set up a versioning system for the shared component library to manage updates and backwards compatibility.\n</info added on 2025-06-01T02:28:45.131Z>",
+          "status": "pending"
+        },
+        {
+          "id": 3,
+          "title": "Integrate Practice Branding and Customization",
+          "description": "Enable integration of practice-specific branding, including logo, color schemes, and typography, across the dashboard.",
+          "dependencies": [
+            2
+          ],
+          "details": "Provide settings for uploading logos and selecting color palettes. Ensure all components reflect branding choices dynamically.",
+          "status": "pending"
+        },
+        {
+          "id": 4,
+          "title": "Implement Contact Management Functionality",
+          "description": "Develop features for managing patient and contact information, including viewing, adding, editing, and deleting contacts.",
+          "dependencies": [
+            2
+          ],
+          "details": "Create contact list and detail views, integrate forms for CRUD operations, and ensure secure handling of sensitive data.",
+          "status": "pending"
+        },
+        {
+          "id": 5,
+          "title": "Add Video Upload and Management Features",
+          "description": "Implement functionality for uploading, storing, and managing educational or promotional videos within the dashboard.",
+          "dependencies": [
+            2
+          ],
+          "details": "Develop video upload forms, video library display, and playback components. Ensure file validation and storage integration.",
+          "status": "pending"
+        },
+        {
+          "id": 6,
+          "title": "Customize Email Templates and Assessment Questions",
+          "description": "Provide interfaces for customizing email templates and assessment questions used in patient communications and evaluations.",
+          "dependencies": [
+            2
+          ],
+          "details": "Allow users to edit template content, insert dynamic fields, and manage assessment question sets. Ensure changes are reflected in communications.",
+          "status": "pending"
+        },
+        {
+          "id": 7,
+          "title": "Configure Routing and Shared Component Placement",
+          "description": "Set up Next.js App Router for all dashboard sections and ensure shared components are properly organized according to atomic design.",
+          "dependencies": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ],
+          "details": "Define routes for each dashboard feature, implement route guards if needed, and structure shared components for maintainability and reuse.",
+          "status": "pending"
+        }
+      ]
     },
     {
       "id": 10,
@@ -717,7 +791,7 @@
       "id": 17,
       "title": "Implement Complete End-to-End User Workflow",
       "description": "Integrate all foundational features into a seamless, production-ready user workflow that enables users to complete the pediatric health assessment, receive a personalized PDF report, and experience the platform's full value proposition. This task focuses on orchestrating and connecting existing systems developed in Tasks 1-6 to create a cohesive end-to-end experience.",
-      "status": "pending",
+      "status": "done",
       "dependencies": [
         1,
         2,

@@ -132,8 +132,7 @@ export async function registerUser(
 
     // Transform the profile data to match the expected UserProfile type
     // Map database role values back to frontend role values
-    const frontendRole =
-      profileData.role === 'Chiropractor' ? 'chiropractor' : 'parent';
+    const frontendRole = profileData.role;
 
     const userProfile: UserProfile = {
       id: profileData.id,
@@ -196,9 +195,9 @@ export async function loginUser(
     const userMetadata = authData.user.user_metadata;
 
     // Transform the profile data to match the expected UserProfile type
-    // Map database role values back to frontend role values
-    const frontendRole =
-      profileData.role === 'Chiropractor' ? 'chiropractor' : 'parent';
+    // Use role directly from database (practitioner, parent, admin)
+    console.log('User role from database during login:', profileData.role);
+    const frontendRole = profileData.role;
 
     const userProfile: UserProfile = {
       id: profileData.id,
@@ -248,14 +247,30 @@ export async function getCurrentUser(): Promise<UserProfile | null> {
     } = await supabase.auth.getSession();
 
     if (sessionError) {
+      console.error('Session error:', sessionError.message);
       throw new AuthError(sessionError.message);
     }
 
     if (!session?.user) {
+      console.log('No active session found');
       return null;
     }
 
-    // Fetch user profile
+    console.log('Session found for user:', session.user.id);
+    console.log('JWT token present:', !!session.access_token);
+    console.log(
+      'Token expires at:',
+      new Date(session.expires_at! * 1000).toISOString()
+    );
+
+    // Check if token is expired
+    const now = Math.floor(Date.now() / 1000);
+    if (session.expires_at && session.expires_at < now) {
+      console.error('JWT token is expired');
+      throw new AuthError('Session expired. Please log in again.');
+    }
+
+    // Fetch user profile with better error handling
     const { data: profileData, error: profileError } = await supabase
       .from('user_profiles')
       .select('*')
@@ -263,17 +278,37 @@ export async function getCurrentUser(): Promise<UserProfile | null> {
       .single();
 
     if (profileError) {
-      // If profile doesn't exist, return null (user might need to complete registration)
+      // Log the specific error for debugging
+      console.error('Profile fetch error:', {
+        message: profileError.message,
+        details: profileError.details,
+        hint: profileError.hint,
+        code: profileError.code,
+        userId: session.user.id,
+      });
+
+      // If it's an API key error, throw it to surface the real issue
+      if (
+        profileError.message.includes('API key') ||
+        profileError.message.includes('Unauthorized')
+      ) {
+        throw new AuthError(
+          `Failed to fetch user profile: ${profileError.message}`
+        );
+      }
+
+      // For other errors, return null (user might need to complete registration)
       return null;
     }
+
+    console.log('Profile fetched successfully for user:', session.user.id);
 
     // Get the user metadata for additional info
     const userMetadata = session.user.user_metadata;
 
     // Transform the profile data to match the expected UserProfile type
-    // Map database role values back to frontend role values
-    const frontendRole =
-      profileData.role === 'Chiropractor' ? 'chiropractor' : 'parent';
+    // Use role directly from database (practitioner, parent, admin)
+    const frontendRole = profileData.role;
 
     const userProfile: UserProfile = {
       id: profileData.id,

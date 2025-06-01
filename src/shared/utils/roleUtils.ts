@@ -23,10 +23,17 @@ export function hasAnyRole(
 }
 
 /**
- * Check if a user is a chiropractor
+ * Check if a user is a chiropractor/practitioner
  */
 export function isChiropractor(user: UserProfile | null): boolean {
-  return hasRole(user, 'chiropractor');
+  return hasRole(user, 'practitioner');
+}
+
+/**
+ * Check if a user is a practitioner
+ */
+export function isPractitioner(user: UserProfile | null): boolean {
+  return hasRole(user, 'practitioner');
 }
 
 /**
@@ -41,10 +48,12 @@ export function isParent(user: UserProfile | null): boolean {
  */
 export function getRoleDisplayName(role: UserRole): string {
   switch (role) {
-    case 'chiropractor':
+    case 'practitioner':
       return 'Chiropractor';
     case 'parent':
       return 'Parent/Guardian';
+    case 'admin':
+      return 'Administrator';
     default:
       return 'Unknown Role';
   }
@@ -54,7 +63,7 @@ export function getRoleDisplayName(role: UserRole): string {
  * Check if a role requires a practice ID
  */
 export function roleRequiresPracticeId(role: UserRole): boolean {
-  return role === 'chiropractor';
+  return role === 'practitioner';
 }
 
 /**
@@ -73,7 +82,7 @@ export interface RolePermissions {
  */
 export function getRolePermissions(role: UserRole): RolePermissions {
   switch (role) {
-    case 'chiropractor':
+    case 'practitioner':
       return {
         canCreateAssessments: true,
         canViewAllAssessments: true,
@@ -86,6 +95,14 @@ export function getRolePermissions(role: UserRole): RolePermissions {
         canCreateAssessments: false,
         canViewAllAssessments: false,
         canManagePractice: false,
+        canViewReports: true,
+        canManageChildren: true,
+      };
+    case 'admin':
+      return {
+        canCreateAssessments: true,
+        canViewAllAssessments: true,
+        canManagePractice: true,
         canViewReports: true,
         canManageChildren: true,
       };

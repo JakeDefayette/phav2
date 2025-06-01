@@ -1,4 +1,4 @@
-export type UserRole = 'chiropractor' | 'parent';
+export type UserRole = 'practitioner' | 'parent' | 'admin';
 
 export interface UserProfile {
   id: string;
@@ -28,3 +28,7 @@ export interface RegisterCredentials extends LoginCredentials {
   role: UserRole;
   practiceId?: string;
 }
+
+// Legacy type alias for backward compatibility
+export type ChiropractorRole = 'practitioner';
+export const CHIROPRACTOR_ROLE: ChiropractorRole = 'practitioner';

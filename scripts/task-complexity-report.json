@@ -1,6 +1,6 @@
 {
   "meta": {
-    "generatedAt": "2025-05-29T00:06:44.227Z",
+    "generatedAt": "2025-05-31T23:09:00.018Z",
     "tasksAnalyzed": 1,
     "totalTasks": 16,
     "analysisCount": 15,
@@ -66,14 +66,6 @@
       "reasoning": "This module requires real-time data aggregation, metric computation, advanced visualization, and integration with other modules, making it complex and necessitating multiple focused subtasks."
     },
     {
-      "taskId": 9,
-      "taskTitle": "Implement Social Media Sharing and Viral Tracking",
-      "complexityScore": 6,
-      "recommendedSubtasks": 5,
-      "expansionPrompt": "Expand this task into subtasks for API integration (Facebook, Twitter, LinkedIn), event tracking, viral coefficient calculation, landing page setup, and testing.",
-      "reasoning": "Integrating multiple APIs and tracking viral metrics involves several moving parts but is less complex than analytics or report generation, though still requires careful coordination."
-    },
-    {
       "taskId": 10,
       "taskTitle": "Build Content Library and Template Engine",
       "complexityScore": 8,
@@ -128,6 +120,14 @@
       "recommendedSubtasks": 10,
       "expansionPrompt": "Break down the end-to-end user workflow implementation into granular subtasks. Include: homepage CTA integration, multi-step survey form with validation, Supabase database connectivity, PDF report generation and storage, report viewing page, cross-browser PDF download, user experience enhancements (loading states, transitions, messaging), error handling for all steps, Supabase Auth integration, and responsive/accessibility improvements. Each subtask should be actionable and testable.",
       "reasoning": "This task requires integrating multiple foundational features into a seamless, production-ready workflow, involving complex user flows, data validation, real-time database operations, dynamic PDF generation, authentication, responsive design, accessibility, and robust error handling. The breadth of technical domains, cross-cutting concerns, and the need for high reliability and maintainability elevate the complexity. Breaking it into at least 10 subtasks aligns with best practices for managing high-complexity software initiatives and ensures each critical component receives focused attention, reducing risk and improving quality.[1][4][5]"
+    },
+    {
+      "taskId": 9,
+      "taskTitle": "Build Chiropractor Dashboard",
+      "complexityScore": 8,
+      "recommendedSubtasks": 7,
+      "expansionPrompt": "Break down the 'Build Chiropractor Dashboard' task into subtasks covering dashboard layout creation, reusable component development, practice branding integration, contact management, video upload functionality, routing setup with Next.js App Router, email template customization, assessment question customization, and placement of shared components following atomic design principles.",
+      "reasoning": "This task involves developing a feature-rich dashboard with multiple distinct functionalities (branding, contact management, video upload, customization of templates and questions), integration with a feature-based architecture, and adherence to atomic design principles. The need for reusable components, routing, and shared resources increases both architectural and implementation complexity. Testing requirements for navigation, customization, and data display further add to the scope. Given the breadth and depth of requirements, the task is best decomposed into at least 7 focused subtasks to ensure clarity, maintainability, and testability."
     }
   ]
 }
