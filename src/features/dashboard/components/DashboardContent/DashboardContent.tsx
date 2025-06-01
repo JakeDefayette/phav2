@@ -36,7 +36,7 @@ export function DashboardContent() {
       {/* Main Feature Cards */}
       <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6'>
         {/* Chiropractor-only features */}
-        <RoleGuard requiredRole='chiropractor'>
+        <RoleGuard requiredRole='practitioner'>
           <div className='bg-white overflow-hidden shadow rounded-lg hover:shadow-md transition-shadow duration-200'>
             <div className='px-4 py-5 sm:p-6'>
               <div className='flex items-center'>

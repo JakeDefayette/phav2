@@ -48,8 +48,10 @@ export default function UnauthorizedPage() {
                   You don't have permission to access this page. Your current
                   role (
                   <span className='font-medium text-gray-900'>
-                    {user.role === 'chiropractor'
-                      ? 'Chiropractor'
+                    {user.role === 'practitioner'
+                      ? 'Practitioner'
+                      : user.role === 'admin'
+                      ? 'Administrator'
                       : 'Parent/Guardian'}
                   </span>
                   ) doesn't allow access to this resource.

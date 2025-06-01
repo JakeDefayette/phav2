@@ -10,11 +10,11 @@ const authRoutes = ['/auth/login', '/auth/register'];
 
 // Define role-based route restrictions
 const roleBasedRoutes = {
-  chiropractor: ['/dashboard/practice', '/dashboard/assessments/create'],
+  practitioner: ['/dashboard/practice', '/dashboard/assessments/create'],
   parent: ['/dashboard/children', '/dashboard/assessments/view'],
 } as const;
 
-type UserRole = 'chiropractor' | 'parent';
+type UserRole = 'practitioner' | 'parent';
 
 export async function middleware(request: NextRequest) {
   let response = NextResponse.next({
@@ -157,7 +157,7 @@ export async function middleware(request: NextRequest) {
       if (profileData) {
         // Map database role to frontend role
         const userRole: UserRole =
-          profileData.role === 'Chiropractor' ? 'chiropractor' : 'parent';
+          profileData.role === 'Chiropractor' ? 'practitioner' : 'parent';
 
         // Check if user is trying to access a role-restricted route
         for (const [role, routes] of Object.entries(roleBasedRoutes)) {

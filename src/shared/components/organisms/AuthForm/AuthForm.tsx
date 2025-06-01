@@ -63,8 +63,8 @@ export const AuthForm: React.FC<AuthFormProps> = ({
       if (!formData.lastName.trim()) {
         errors.lastName = 'Last name is required';
       }
-      if (formData.role === 'chiropractor' && !formData.practiceId?.trim()) {
-        errors.practiceId = 'Practice ID is required for chiropractors';
+      if (formData.role === 'practitioner' && !formData.practiceId?.trim()) {
+        errors.practiceId = 'Practice ID is required for practitioners';
       }
     }
 
@@ -156,18 +156,18 @@ export const AuthForm: React.FC<AuthFormProps> = ({
                 <input
                   type='radio'
                   name='role'
-                  value='chiropractor'
-                  checked={formData.role === 'chiropractor'}
+                  value='practitioner'
+                  checked={formData.role === 'practitioner'}
                   onChange={handleInputChange('role')}
                   className='mr-2'
                   disabled={loading}
                 />
-                Chiropractor
+                Practitioner
               </label>
             </div>
           </div>
 
-          {formData.role === 'chiropractor' && (
+          {formData.role === 'practitioner' && (
             <FormField
               label='Practice ID'
               type='text'

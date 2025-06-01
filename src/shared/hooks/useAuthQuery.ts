@@ -208,7 +208,7 @@ export function useUserRole() {
   const { data: user } = useCurrentUser();
   return {
     role: user?.role,
-    isChiropractor: user?.role === 'chiropractor',
+    isChiropractor: user?.role === 'practitioner',
     isParent: user?.role === 'parent',
   };
 }
