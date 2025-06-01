@@ -18,7 +18,8 @@ export const VideoCard: React.FC<VideoCardProps> = ({
     return VideoService.formatDuration(seconds);
   };
 
-  const formatFileSize = (bytes: number): string => {
+  const formatFileSize = (bytes?: number): string => {
+    if (!bytes) return '--';
     return VideoService.formatFileSize(bytes);
   };
 
@@ -53,7 +54,7 @@ export const VideoCard: React.FC<VideoCardProps> = ({
     return colors[status] || colors.ready;
   };
 
-  const getVisibilityIcon = (visibility: string): JSX.Element => {
+  const getVisibilityIcon = (visibility: string): React.ReactElement => {
     switch (visibility) {
       case 'private':
         return (
@@ -264,7 +265,7 @@ export const VideoCard: React.FC<VideoCardProps> = ({
 
           {onDelete && (
             <Button
-              variant='danger'
+              variant='destructive'
               size='sm'
               onClick={() => onDelete(video)}
               className='px-3'

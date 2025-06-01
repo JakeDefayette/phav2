@@ -35,10 +35,14 @@ export class ContactService {
           id,
           first_name,
           last_name,
+          preferred_name,
           email,
           phone,
           role,
           status,
+          date_of_birth,
+          tags,
+          last_contact_date,
           created_at,
           updated_at,
           assessments(count)
@@ -80,12 +84,18 @@ export class ContactService {
       // Transform data to ContactSummary format
       const contacts: ContactSummary[] = (data || []).map(contact => ({
         id: contact.id,
+        first_name: contact.first_name,
+        last_name: contact.last_name,
         full_name: `${contact.first_name} ${contact.last_name}`,
         email: contact.email,
         phone: contact.phone,
         role: contact.role,
         status: contact.status,
         total_assessments: contact.assessments?.[0]?.count || 0,
+        preferred_name: contact.preferred_name,
+        date_of_birth: contact.date_of_birth,
+        tags: contact.tags || [],
+        last_contact_date: contact.last_contact_date,
       }));
 
       return {
@@ -352,10 +362,14 @@ export class ContactService {
           id,
           first_name,
           last_name,
+          preferred_name,
           email,
           phone,
           role,
           status,
+          date_of_birth,
+          tags,
+          last_contact_date,
           assessments(count)
         `
         )
@@ -370,12 +384,18 @@ export class ContactService {
 
       return (data || []).map(contact => ({
         id: contact.id,
+        first_name: contact.first_name,
+        last_name: contact.last_name,
         full_name: `${contact.first_name} ${contact.last_name}`,
         email: contact.email,
         phone: contact.phone,
         role: contact.role,
         status: contact.status,
         total_assessments: contact.assessments?.[0]?.count || 0,
+        preferred_name: contact.preferred_name,
+        date_of_birth: contact.date_of_birth,
+        tags: contact.tags || [],
+        last_contact_date: contact.last_contact_date,
       }));
     } catch (error) {
       console.error('Error searching contacts:', error);

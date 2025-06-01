@@ -9,21 +9,23 @@ import {
   ContactForm,
   useContact,
   useContactMutations,
+  type ContactFormData,
 } from '@/features/contacts';
 import { RoleGuard } from '@/shared/components/atoms/RoleGuard';
 import { Loading } from '@/shared/components/atoms/Loading';
-import type { ContactFormData } from '@/features/contacts';
 
 interface EditContactPageProps {
   params: Promise<{ id: string }>;
 }
 
-export default async function EditContactPage({ params }: EditContactPageProps) {
+export default async function EditContactPage({
+  params,
+}: EditContactPageProps) {
   const { id } = await params;
-  
+
   return (
     <DashboardLayout>
-      <div className="p-6">
+      <div className='p-6'>
         <EditContactPageClient contactId={id} />
       </div>
     </DashboardLayout>
@@ -33,8 +35,8 @@ export default async function EditContactPage({ params }: EditContactPageProps) 
 function EditContactPageClient({ contactId }: { contactId: string }) {
   const router = useRouter();
   const { user, loading: authLoading } = useAuth();
-  const { contact, loading: contactLoading, error } = useContact(contactId);
-  const { updateContact, loading: updateLoading } = useContactMutations();
+  const { contact, isLoading: contactLoading, error } = useContact(contactId);
+  const { updateContact, isUpdating } = useContactMutations();
 
   // Handle auth loading
   if (authLoading) {
@@ -116,7 +118,7 @@ function EditContactPageClient({ contactId }: { contactId: string }) {
                 <div>
                   <h1 className='text-2xl font-bold text-gray-900'>
                     {contact
-                      ? `Edit ${contact.firstName} ${contact.lastName}`
+                      ? `Edit ${contact.first_name} ${contact.last_name}`
                       : 'Edit Contact'}
                   </h1>
                   <p className='mt-1 text-sm text-gray-500'>
@@ -161,7 +163,7 @@ function EditContactPageClient({ contactId }: { contactId: string }) {
                       Error Loading Contact
                     </h3>
                     <p className='text-gray-500 mb-4'>
-                      {error || 'Unable to load contact for editing'}
+                      {error?.message || 'Unable to load contact for editing'}
                     </p>
                     <div className='space-x-3'>
                       <Button
@@ -186,7 +188,7 @@ function EditContactPageClient({ contactId }: { contactId: string }) {
                       initialData={contact}
                       onSubmit={handleSubmit}
                       onCancel={handleCancel}
-                      loading={updateLoading}
+                      loading={isUpdating}
                       mode='edit'
                     />
                   </div>

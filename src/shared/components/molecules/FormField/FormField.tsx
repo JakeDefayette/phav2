@@ -8,6 +8,9 @@ export interface FormFieldProps extends Omit<InputProps, 'label'> {
   required?: boolean;
   error?: string;
   helperText?: string;
+  type?: string;
+  rows?: number;
+  options?: Array<{ value: string; label: string }>;
 }
 
 export const FormField: React.FC<FormFieldProps> = ({

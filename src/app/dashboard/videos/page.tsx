@@ -4,8 +4,18 @@ import React, { useState, useCallback } from 'react';
 import { useAuth } from '@/shared/hooks';
 import { DashboardLayout } from '@/features/dashboard/components/DashboardLayout';
 import { RoleGuard } from '@/shared/components/atoms/RoleGuard/RoleGuard';
-import { VideoLibrary, VideoUploader, useVideos, useVideoMutations } from '@/features/videos';
-import { VideoSummary, VideoSearchFilters } from '@/features/videos/types';
+import {
+  VideoLibrary,
+  VideoUploader,
+  useVideos,
+  useVideoMutations,
+} from '@/features/videos';
+import {
+  Video,
+  VideoSearchFilters,
+  VideoCategory,
+  VideoVisibility,
+} from '@/features/videos/types';
 import { Button } from '@/shared/components/atoms/Button/Button';
 import { FormField } from '@/shared/components/molecules/FormField/FormField';
 import { Card } from '@/shared/components/molecules/Card/Card';
@@ -23,11 +33,11 @@ export default function VideosPage() {
   // Prepare filters
   const filters: VideoSearchFilters = {
     search: searchTerm || undefined,
-    category: selectedCategory || undefined,
-    visibility: selectedVisibility || undefined,
+    category: (selectedCategory as VideoCategory) || undefined,
+    visibility: (selectedVisibility as VideoVisibility) || undefined,
   };
 
-  const { videos, loading, error, refetch, hasNextPage, loadMore } =
+  const { videos, loading, error, page, totalPages, nextPage, refresh } =
     useVideos(filters);
 
   const {
@@ -39,21 +49,21 @@ export default function VideosPage() {
   } = useVideoMutations();
 
   const handleVideoSelect = useCallback(
-    (video: VideoSummary) => {
+    (video: Video) => {
       router.push(`/dashboard/videos/${video.id}`);
     },
     [router]
   );
 
   const handleVideoEdit = useCallback(
-    (video: VideoSummary) => {
+    (video: Video) => {
       router.push(`/dashboard/videos/${video.id}/edit`);
     },
     [router]
   );
 
   const handleVideoDelete = useCallback(
-    async (video: VideoSummary) => {
+    async (video: Video) => {
       if (
         !confirm(
           `Are you sure you want to delete "${video.title}"? This action cannot be undone.`
@@ -65,12 +75,12 @@ export default function VideosPage() {
       try {
         await deleteVideo(video.id);
         setUploadSuccess(`Video "${video.title}" has been deleted.`);
-        refetch();
+        refresh();
       } catch (error) {
         console.error('Error deleting video:', error);
       }
     },
-    [deleteVideo, refetch]
+    [deleteVideo, refresh]
   );
 
   const handleUpload = useCallback(
@@ -81,12 +91,12 @@ export default function VideosPage() {
           `Video "${uploadedVideo.title}" uploaded successfully!`
         );
         setShowUploader(false);
-        refetch();
+        refresh();
       } catch (error) {
         console.error('Error uploading video:', error);
       }
     },
-    [uploadVideo, refetch]
+    [uploadVideo, refresh]
   );
 
   const clearFilters = useCallback(() => {
@@ -151,7 +161,7 @@ export default function VideosPage() {
   }
 
   return (
-    <RoleGuard allowedRoles={['admin', 'practitioner', 'staff']}>
+    <RoleGuard allowedRoles={['admin', 'practitioner']}>
       <DashboardLayout>
         <div className='space-y-6'>
           {/* Header */}
@@ -206,24 +216,42 @@ export default function VideosPage() {
                   type='text'
                   placeholder='Search videos...'
                   value={searchTerm}
-                  onChange={setSearchTerm}
+                  onChange={e => setSearchTerm(e.target.value)}
                 />
 
-                <FormField
-                  label='Category'
-                  type='select'
-                  options={categoryOptions}
-                  value={selectedCategory}
-                  onChange={setSelectedCategory}
-                />
+                <div className='space-y-1'>
+                  <label className='block text-sm font-medium text-gray-700'>
+                    Category
+                  </label>
+                  <select
+                    value={selectedCategory}
+                    onChange={e => setSelectedCategory(e.target.value)}
+                    className='block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500'
+                  >
+                    {categoryOptions.map(option => (
+                      <option key={option.value} value={option.value}>
+                        {option.label}
+                      </option>
+                    ))}
+                  </select>
+                </div>
 
-                <FormField
-                  label='Visibility'
-                  type='select'
-                  options={visibilityOptions}
-                  value={selectedVisibility}
-                  onChange={setSelectedVisibility}
-                />
+                <div className='space-y-1'>
+                  <label className='block text-sm font-medium text-gray-700'>
+                    Visibility
+                  </label>
+                  <select
+                    value={selectedVisibility}
+                    onChange={e => setSelectedVisibility(e.target.value)}
+                    className='block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500'
+                  >
+                    {visibilityOptions.map(option => (
+                      <option key={option.value} value={option.value}>
+                        {option.label}
+                      </option>
+                    ))}
+                  </select>
+                </div>
 
                 <div className='flex items-end'>
                   <Button
@@ -249,9 +277,9 @@ export default function VideosPage() {
           />
 
           {/* Load More Button */}
-          {hasNextPage && (
+          {page < totalPages && (
             <div className='flex justify-center pt-6'>
-              <Button variant='secondary' onClick={loadMore} loading={loading}>
+              <Button variant='secondary' onClick={nextPage} loading={loading}>
                 Load More Videos
               </Button>
             </div>

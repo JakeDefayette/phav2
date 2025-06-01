@@ -5,14 +5,17 @@ import { useRouter } from 'next/navigation';
 import { useAuth } from '@/shared/hooks';
 import { Button } from '@/shared/components/atoms/Button';
 import { DashboardLayout } from '@/features/dashboard/components/DashboardLayout';
-import { ContactForm, useContactMutations } from '@/features/contacts';
+import {
+  ContactForm,
+  useContactMutations,
+  type ContactFormData,
+} from '@/features/contacts';
 import { RoleGuard } from '@/shared/components/atoms/RoleGuard';
-import type { ContactFormData } from '@/features/contacts';
 
 export default function NewContactPage() {
   const router = useRouter();
   const { user, loading: authLoading } = useAuth();
-  const { createContact, loading } = useContactMutations();
+  const { createContact, isCreating } = useContactMutations();
 
   // Handle auth loading
   if (authLoading) {
@@ -119,7 +122,7 @@ export default function NewContactPage() {
                     <ContactForm
                       onSubmit={handleSubmit}
                       onCancel={handleCancel}
-                      loading={loading}
+                      loading={isCreating}
                       mode='create'
                     />
                   </div>

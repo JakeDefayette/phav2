@@ -17,9 +17,8 @@ export type {
   UseVideosReturn,
   UseVideoReturn,
   UseVideoMutationsReturn,
+  VideosAPI,
 } from './types';
-
-export { VideosAPI } from './types';
 
 // Export services
 export { VideoService } from './services';

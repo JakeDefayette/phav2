@@ -40,7 +40,7 @@ The codebase follows a feature-based architecture:
 
 **Service Layer Pattern**: All data operations go through service classes extending `BaseService` with standardized error handling and database transactions.
 
-**Atomic Design System**: Components are organized as atoms → molecules → organisms → templates → pages with clear composition patterns.
+**Feature-Based Organization**
 
 **Authentication Flow**: Supabase Auth with JWT tokens, role-based access (Chiropractor/Parent), and Row Level Security policies.
 

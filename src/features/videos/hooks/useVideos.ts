@@ -2,12 +2,12 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { VideoService } from '../services/VideoService';
-import { VideoSummary, VideoSearchFilters, UseVideosReturn } from '../types';
+import { Video, VideoSearchFilters, UseVideosReturn } from '../types';
 
 export const useVideos = (
   initialFilters: VideoSearchFilters = {}
 ): UseVideosReturn => {
-  const [videos, setVideos] = useState<VideoSummary[]>([]);
+  const [videos, setVideos] = useState<Video[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [total, setTotal] = useState(0);

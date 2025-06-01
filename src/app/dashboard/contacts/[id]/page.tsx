@@ -12,12 +12,14 @@ interface ContactDetailPageProps {
   params: Promise<{ id: string }>;
 }
 
-export default async function ContactDetailPage({ params }: ContactDetailPageProps) {
+export default async function ContactDetailPage({
+  params,
+}: ContactDetailPageProps) {
   const { id } = await params;
-  
+
   return (
     <DashboardLayout>
-      <div className="p-6">
+      <div className='p-6'>
         <ContactDetailPageClient contactId={id} />
       </div>
     </DashboardLayout>
@@ -26,7 +28,7 @@ export default async function ContactDetailPage({ params }: ContactDetailPagePro
 
 function ContactDetailPageClient({ contactId }: { contactId: string }) {
   const { user, loading: authLoading } = useAuth();
-  const { contact, loading: contactLoading, error } = useContact(contactId);
+  const { contact, isLoading: contactLoading, error } = useContact(contactId);
 
   // Handle auth loading
   if (authLoading) {
@@ -93,7 +95,7 @@ function ContactDetailPageClient({ contactId }: { contactId: string }) {
                 <div>
                   <h1 className='text-2xl font-bold text-gray-900'>
                     {contact
-                      ? `${contact.firstName} ${contact.lastName}`
+                      ? `${contact.first_name} ${contact.last_name}`
                       : 'Contact Details'}
                   </h1>
                   <p className='mt-1 text-sm text-gray-500'>
@@ -157,7 +159,7 @@ function ContactDetailPageClient({ contactId }: { contactId: string }) {
                     Error Loading Contact
                   </h3>
                   <p className='text-gray-500 mb-4'>
-                    {error || 'Unable to load contact details'}
+                    {error?.message || 'Unable to load contact details'}
                   </p>
                   <div className='space-x-3'>
                     <Button

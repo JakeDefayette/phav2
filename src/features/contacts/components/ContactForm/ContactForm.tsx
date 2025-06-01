@@ -151,10 +151,10 @@ export const ContactForm: React.FC<ContactFormProps> = ({
   };
 
   const handleAddTag = () => {
-    if (tagInput.trim() && !formData.tags.includes(tagInput.trim())) {
+    if (tagInput.trim() && !(formData.tags || []).includes(tagInput.trim())) {
       setFormData(prev => ({
         ...prev,
-        tags: [...prev.tags, tagInput.trim()],
+        tags: [...(prev.tags || []), tagInput.trim()],
       }));
       setTagInput('');
     }
@@ -163,7 +163,7 @@ export const ContactForm: React.FC<ContactFormProps> = ({
   const handleRemoveTag = (tagToRemove: string) => {
     setFormData(prev => ({
       ...prev,
-      tags: prev.tags.filter(tag => tag !== tagToRemove),
+      tags: (prev.tags || []).filter(tag => tag !== tagToRemove),
     }));
   };
 
@@ -394,9 +394,9 @@ export const ContactForm: React.FC<ContactFormProps> = ({
             </Button>
           </div>
 
-          {formData.tags.length > 0 && (
+          {(formData.tags || []).length > 0 && (
             <div className='flex flex-wrap gap-2'>
-              {formData.tags.map((tag, index) => (
+              {(formData.tags || []).map((tag, index) => (
                 <span
                   key={index}
                   className='inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-50 text-blue-700'
@@ -426,10 +426,12 @@ export const ContactForm: React.FC<ContactFormProps> = ({
             <label className='flex items-center'>
               <input
                 type='checkbox'
-                checked={formData.communication_preferences.email_marketing}
+                checked={
+                  formData.communication_preferences?.email_marketing || false
+                }
                 onChange={e =>
                   handleInputChange('communication_preferences', {
-                    ...formData.communication_preferences,
+                    ...(formData.communication_preferences || {}),
                     email_marketing: e.target.checked,
                   })
                 }
@@ -444,10 +446,12 @@ export const ContactForm: React.FC<ContactFormProps> = ({
             <label className='flex items-center'>
               <input
                 type='checkbox'
-                checked={formData.communication_preferences.sms_notifications}
+                checked={
+                  formData.communication_preferences?.sms_notifications || false
+                }
                 onChange={e =>
                   handleInputChange('communication_preferences', {
-                    ...formData.communication_preferences,
+                    ...(formData.communication_preferences || {}),
                     sms_notifications: e.target.checked,
                   })
                 }
@@ -463,11 +467,12 @@ export const ContactForm: React.FC<ContactFormProps> = ({
               <input
                 type='checkbox'
                 checked={
-                  formData.communication_preferences.appointment_reminders
+                  formData.communication_preferences?.appointment_reminders ||
+                  false
                 }
                 onChange={e =>
                   handleInputChange('communication_preferences', {
-                    ...formData.communication_preferences,
+                    ...(formData.communication_preferences || {}),
                     appointment_reminders: e.target.checked,
                   })
                 }

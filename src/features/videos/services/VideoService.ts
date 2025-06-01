@@ -88,7 +88,7 @@ export class VideoService {
       const totalPages = Math.ceil((count || 0) / limit);
 
       return {
-        videos: data as VideoSummary[],
+        videos: data as Video[],
         total: count || 0,
         page,
         totalPages,

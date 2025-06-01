@@ -4,12 +4,19 @@ export interface Video {
   title: string;
   description?: string;
   duration?: number;
-  thumbnail?: string;
-  url: string;
+  thumbnail_url?: string;
+  category: VideoCategory;
+  visibility: VideoVisibility;
+  upload_status: VideoUploadStatus;
   created_at: string;
-  updated_at: string;
-  user_id: string;
-  status: 'draft' | 'published' | 'archived';
+  file_size?: number;
+  file_url?: string;
+  filename?: string;
+  mime_type?: string;
+  tags?: string[];
+  created_by?: string;
+  practice_id?: string;
+  updated_at?: string;
 }
 
 export interface VideoSummary {
@@ -46,7 +53,10 @@ export type VideoUploadStatus = 'uploading' | 'processing' | 'ready' | 'failed';
 // Search and filter types
 export interface VideoSearchFilters {
   search?: string;
-  status?: Video['status'];
+  status?: VideoUploadStatus;
+  category?: VideoCategory;
+  visibility?: VideoVisibility;
+  tags?: string[];
   sortBy?: 'created_at' | 'updated_at' | 'title';
   sortOrder?: 'asc' | 'desc';
 }
@@ -62,7 +72,7 @@ export namespace VideosAPI {
   }
 
   export interface ListResponse {
-    videos: VideoSummary[];
+    videos: Video[];
     total: number;
     page: number;
     totalPages: number;
@@ -108,51 +118,24 @@ export namespace VideosAPI {
     total: number;
     percentage: number;
   }
-
-  export interface CreateVideoData {
-    title: string;
-    description?: string;
-    url: string;
-    thumbnail?: string;
-    duration?: number;
-    status?: Video['status'];
-  }
-
-  export interface UpdateVideoData {
-    title?: string;
-    description?: string;
-    url?: string;
-    thumbnail?: string;
-    duration?: number;
-    status?: Video['status'];
-  }
-
-  export interface VideosAPI {
-    getVideos: (filters?: VideoSearchFilters) => Promise<Video[]>;
-    getVideo: (id: string) => Promise<Video>;
-    createVideo: (data: CreateVideoData) => Promise<Video>;
-    updateVideo: (id: string, data: UpdateVideoData) => Promise<Video>;
-    deleteVideo: (id: string) => Promise<void>;
-    getVideoSummary: () => Promise<VideoSummary>;
-  }
 }
 
 // Component prop types
 export interface VideoCardProps {
-  video: VideoSummary;
-  onEdit?: (video: VideoSummary) => void;
-  onDelete?: (video: VideoSummary) => void;
-  onView?: (video: VideoSummary) => void;
+  video: Video;
+  onEdit?: (video: Video) => void;
+  onDelete?: (video: Video) => void;
+  onView?: (video: Video) => void;
   className?: string;
 }
 
 export interface VideoLibraryProps {
-  videos: VideoSummary[];
+  videos: Video[];
   loading?: boolean;
   error?: string | null;
-  onVideoSelect?: (video: VideoSummary) => void;
-  onVideoEdit?: (video: VideoSummary) => void;
-  onVideoDelete?: (video: VideoSummary) => void;
+  onVideoSelect?: (video: Video) => void;
+  onVideoEdit?: (video: Video) => void;
+  onVideoDelete?: (video: Video) => void;
   className?: string;
 }
 
@@ -192,7 +175,7 @@ export interface VideoSearchProps {
 
 // Hook return types
 export interface UseVideosReturn {
-  videos: VideoSummary[];
+  videos: Video[];
   loading: boolean;
   error: string | null;
   total: number;

@@ -11,7 +11,7 @@ export interface CheckboxOption {
 }
 
 export interface CheckboxGroupProps {
-  name: string;
+  name?: string;
   label?: string;
   options: CheckboxOption[];
   required?: boolean;
@@ -19,6 +19,10 @@ export interface CheckboxGroupProps {
   helperText?: string;
   className?: string;
   columns?: 1 | 2 | 3;
+  // Standalone mode props (when not using Formik)
+  selectedValues?: string[];
+  onChange?: (values: string[]) => void;
+  disabled?: boolean;
 }
 
 export const CheckboxGroup: React.FC<CheckboxGroupProps> = ({

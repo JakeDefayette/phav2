@@ -13,15 +13,28 @@ export interface Contact {
   id: string;
   first_name: string;
   last_name: string;
+  preferred_name?: string;
   email: string;
   phone?: string;
   date_of_birth?: string;
   gender?: 'male' | 'female' | 'other' | 'prefer_not_to_say';
-  address?: ContactAddress;
+  preferred_contact_method?: 'email' | 'phone' | 'sms';
+  address?: string;
+  city?: string;
+  state?: string;
+  zip_code?: string;
   emergency_contact?: EmergencyContact;
+  emergency_contact_name?: string;
+  emergency_contact_phone?: string;
+  communication_preferences?: {
+    email_marketing: boolean;
+    sms_notifications: boolean;
+    appointment_reminders: boolean;
+  };
   medical_history?: string;
   allergies?: string[];
   medications?: string[];
+  tags?: string[];
   practitioner_id: string;
   parent_id?: string; // For children linked to parents
   role: 'patient' | 'parent' | 'guardian';
@@ -30,6 +43,7 @@ export interface Contact {
   created_at: string;
   updated_at: string;
   last_appointment?: string;
+  last_contact_date?: string;
   total_assessments?: number;
 }
 
@@ -50,12 +64,18 @@ export interface EmergencyContact {
 
 export interface ContactSummary {
   id: string;
+  first_name: string;
+  last_name: string;
   full_name: string;
+  preferred_name?: string;
   email: string;
   phone?: string;
+  date_of_birth?: string;
   role: string;
   status: string;
+  tags?: string[];
   last_appointment?: string;
+  last_contact_date?: string;
   total_assessments: number;
 }
 
@@ -66,17 +86,31 @@ export interface ContactSummary {
 export interface ContactFormData {
   first_name: string;
   last_name: string;
+  preferred_name?: string;
   email: string;
   phone?: string;
   date_of_birth?: string;
   gender?: 'male' | 'female' | 'other' | 'prefer_not_to_say';
-  address?: Partial<ContactAddress>;
+  preferred_contact_method?: 'email' | 'phone' | 'sms';
+  address?: string;
+  city?: string;
+  state?: string;
+  zip_code?: string;
   emergency_contact?: Partial<EmergencyContact>;
+  emergency_contact_name?: string;
+  emergency_contact_phone?: string;
+  communication_preferences?: {
+    email_marketing: boolean;
+    sms_notifications: boolean;
+    appointment_reminders: boolean;
+  };
   medical_history?: string;
   allergies?: string[];
   medications?: string[];
-  role: 'patient' | 'parent' | 'guardian';
+  tags?: string[];
+  role?: 'patient' | 'parent' | 'guardian';
   parent_id?: string;
+  status?: 'active' | 'inactive' | 'archived';
   notes?: string;
 }
 
@@ -171,26 +205,30 @@ export interface ContactListProps {
 
 export interface ContactCardProps {
   contact: ContactSummary;
-  onEdit?: (contact: ContactSummary) => void;
-  onDelete?: (contact: ContactSummary) => void;
-  onView?: (contact: ContactSummary) => void;
+  variant?: 'default' | 'compact' | 'detailed';
+  onEdit?: (contactId: string) => void;
+  onDelete?: (contactId: string) => void;
+  onView?: (contactId: string) => void;
   showActions?: boolean;
   className?: string;
 }
 
 export interface ContactFormProps {
-  contact?: Contact;
+  initialData?: Contact;
   onSubmit: (data: ContactFormData) => void;
   onCancel: () => void;
-  isLoading?: boolean;
-  mode: 'create' | 'edit';
+  loading?: boolean;
+  mode?: 'create' | 'edit';
   className?: string;
 }
 
 export interface ContactDetailProps {
-  contact: Contact;
-  onEdit?: () => void;
-  onDelete?: () => void;
+  contact: Contact | null;
+  loading?: boolean;
+  onEdit?: (contactId: string) => void;
+  onDelete?: (contactId: string) => void;
+  onBack?: () => void;
+  showActions?: boolean;
   className?: string;
 }
 
