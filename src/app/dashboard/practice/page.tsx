@@ -10,7 +10,7 @@ export default function PracticePage() {
 
   return (
     <RoleGuard
-      requiredRole='chiropractor'
+      requiredRole='practitioner'
       fallback={
         <div className='min-h-screen flex items-center justify-center'>
           <div className='text-center'>
@@ -18,7 +18,7 @@ export default function PracticePage() {
               Access Denied
             </h1>
             <p className='text-gray-600 mb-4'>
-              This page is only accessible to chiropractors.
+              This page is only accessible to practitioners.
             </p>
             <Button
               variant='primary'
@@ -65,7 +65,7 @@ export default function PracticePage() {
                     Welcome, {roleInfo?.displayName}!
                   </h3>
                   <p className='text-blue-700'>
-                    This page is only accessible to users with the chiropractor
+                    This page is only accessible to users with the practitioner
                     role. You have successfully accessed a role-protected route.
                   </p>
                 </div>
