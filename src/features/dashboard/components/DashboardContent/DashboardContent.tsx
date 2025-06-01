@@ -175,6 +175,60 @@ export function DashboardContent() {
           </div>
         </RoleGuard>
 
+        {/* Email Templates - Coming Soon */}
+        <RoleGuard requiredRole='practitioner'>
+          <div className='bg-white overflow-hidden shadow rounded-lg opacity-75 hover:opacity-90 transition-opacity duration-200'>
+            <div className='px-4 py-5 sm:p-6'>
+              <div className='flex items-center'>
+                <div className='flex-shrink-0'>
+                  <div className='w-8 h-8 bg-orange-400 rounded-md flex items-center justify-center'>
+                    <svg
+                      className='w-5 h-5 text-white'
+                      fill='none'
+                      stroke='currentColor'
+                      viewBox='0 0 24 24'
+                    >
+                      <path
+                        strokeLinecap='round'
+                        strokeLinejoin='round'
+                        strokeWidth={2}
+                        d='M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z'
+                      />
+                    </svg>
+                  </div>
+                </div>
+                <div className='ml-5 w-0 flex-1'>
+                  <dl>
+                    <dt className='text-sm font-medium text-gray-500 truncate'>
+                      Email Templates
+                    </dt>
+                    <dd className='text-lg font-medium text-gray-900 flex items-center'>
+                      Customize Templates
+                      <span className='ml-2 inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-orange-100 text-orange-800'>
+                        Coming Soon
+                      </span>
+                    </dd>
+                  </dl>
+                </div>
+              </div>
+              <div className='mt-5'>
+                <p className='text-sm text-gray-600 mb-4'>
+                  Customize email templates and assessment questions for patient
+                  communications.
+                </p>
+                <Button
+                  variant='secondary'
+                  size='sm'
+                  className='w-full cursor-not-allowed'
+                  disabled
+                >
+                  Coming Soon
+                </Button>
+              </div>
+            </div>
+          </div>
+        </RoleGuard>
+
         {/* Parent-only features */}
         <RoleGuard requiredRole='parent'>
           <div className='bg-white overflow-hidden shadow rounded-lg hover:shadow-md transition-shadow duration-200'>

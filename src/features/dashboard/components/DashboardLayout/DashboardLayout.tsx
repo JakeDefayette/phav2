@@ -1,6 +1,8 @@
 'use client';
 
 import React, { useState } from 'react';
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import { useAuth, useRole } from '@/shared/hooks';
 import { Button } from '@/shared/components/atoms/Button';
 import { RoleGuard } from '@/shared/components/atoms/RoleGuard';
@@ -212,6 +214,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
   const { user, logout } = useAuth();
   const { roleInfo } = useRole();
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const pathname = usePathname();
 
   const handleLogout = async () => {
     try {
@@ -278,11 +281,10 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
   ];
 
   const renderNavigationItem = (item: NavigationItem) => {
-    const isActive =
-      typeof window !== 'undefined' && window.location.pathname === item.href;
+    const isActive = pathname === item.href;
 
     const navLink = (
-      <a
+      <Link
         href={item.href}
         className={`group flex items-center px-3 py-3 text-sm font-medium rounded-lg transition-colors duration-150 mb-1 ${
           isActive
@@ -298,7 +300,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
           }`}
         />
         <span className='truncate'>{item.name}</span>
-      </a>
+      </Link>
     );
 
     // Wrap with appropriate role guard if needed

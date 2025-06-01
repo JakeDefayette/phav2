@@ -35,6 +35,7 @@ export { PerformanceDashboard } from './admin/PerformanceDashboard';
 // ==========================================
 // FORMS & MODALS - Dashboard-specific forms
 // ==========================================
+export { BrandingSettingsPanel } from './BrandingSettingsPanel';
 // Example: export { QuickAppointmentForm } from './forms/QuickAppointmentForm';
 // Example: export { PatientNoteModal } from './modals/PatientNoteModal';
 
