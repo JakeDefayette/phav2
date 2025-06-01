@@ -51,8 +51,8 @@ export default function UnauthorizedPage() {
                     {user.role === 'practitioner'
                       ? 'Practitioner'
                       : user.role === 'admin'
-                      ? 'Administrator'
-                      : 'Parent/Guardian'}
+                        ? 'Administrator'
+                        : 'Parent/Guardian'}
                   </span>
                   ) doesn't allow access to this resource.
                 </>

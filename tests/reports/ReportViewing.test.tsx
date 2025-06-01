@@ -75,7 +75,7 @@ describe('Report Viewing Interface', () => {
       user: {
         id: 'test-user-id',
         email: 'test@example.com',
-        role: 'chiropractor',
+        role: 'practitioner',
         createdAt: '2024-01-01T00:00:00Z',
         updatedAt: '2024-01-01T00:00:00Z',
       },

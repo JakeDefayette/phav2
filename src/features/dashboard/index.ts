@@ -1,8 +1,26 @@
-// Export types
-export type * from './types';
+/**
+ * Dashboard Feature Module
+ *
+ * Main entry point for the dashboard feature.
+ * Exports all dashboard-specific components, hooks, services, and types.
+ */
 
-// Export hooks
+// ==========================================
+// COMPONENTS - Dashboard UI components
+// ==========================================
+export * from './components';
+
+// ==========================================
+// HOOKS - Dashboard custom hooks
+// ==========================================
 export * from './hooks';
 
-// Export services
+// ==========================================
+// SERVICES - Dashboard business logic
+// ==========================================
 export * from './services';
+
+// ==========================================
+// TYPES - Dashboard TypeScript definitions
+// ==========================================
+export * from './types';
