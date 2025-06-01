@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import { useAuth } from '@/shared/hooks';
 import { Button } from '@/shared/components/atoms/Button';
-import { DashboardLayout } from '@/features/dashboard/components';
+import { DashboardLayout } from '@/features/dashboard/components/DashboardLayout';
 import { ContactList, ContactSearch, useContacts } from '@/features/contacts';
 import { RoleGuard } from '@/shared/components/atoms/RoleGuard';
 import type { ContactSearchFilters } from '@/features/contacts';

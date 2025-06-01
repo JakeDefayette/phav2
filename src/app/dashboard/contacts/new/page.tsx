@@ -1,10 +1,10 @@
 'use client';
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/shared/hooks';
 import { Button } from '@/shared/components/atoms/Button';
-import { DashboardLayout } from '@/features/dashboard/components';
+import { DashboardLayout } from '@/features/dashboard/components/DashboardLayout';
 import { ContactForm, useContactMutations } from '@/features/contacts';
 import { RoleGuard } from '@/shared/components/atoms/RoleGuard';
 import type { ContactFormData } from '@/features/contacts';

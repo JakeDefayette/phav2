@@ -1,10 +1,10 @@
 'use client';
 
-import React from 'react';
-import { useRouter } from 'next/navigation';
+import React, { useEffect } from 'react';
+import { useRouter, useParams } from 'next/navigation';
 import { useAuth } from '@/shared/hooks';
 import { Button } from '@/shared/components/atoms/Button';
-import { DashboardLayout } from '@/features/dashboard/components';
+import { DashboardLayout } from '@/features/dashboard/components/DashboardLayout';
 import {
   ContactForm,
   useContact,
@@ -15,15 +15,25 @@ import { Loading } from '@/shared/components/atoms/Loading';
 import type { ContactFormData } from '@/features/contacts';
 
 interface EditContactPageProps {
-  params: {
-    id: string;
-  };
+  params: Promise<{ id: string }>;
 }
 
-export default function EditContactPage({ params }: EditContactPageProps) {
+export default async function EditContactPage({ params }: EditContactPageProps) {
+  const { id } = await params;
+  
+  return (
+    <DashboardLayout>
+      <div className="p-6">
+        <EditContactPageClient contactId={id} />
+      </div>
+    </DashboardLayout>
+  );
+}
+
+function EditContactPageClient({ contactId }: { contactId: string }) {
   const router = useRouter();
   const { user, loading: authLoading } = useAuth();
-  const { contact, loading: contactLoading, error } = useContact(params.id);
+  const { contact, loading: contactLoading, error } = useContact(contactId);
   const { updateContact, loading: updateLoading } = useContactMutations();
 
   // Handle auth loading
@@ -60,10 +70,10 @@ export default function EditContactPage({ params }: EditContactPageProps) {
 
   const handleSubmit = async (data: ContactFormData) => {
     try {
-      const updatedContact = await updateContact(params.id, data);
+      const updatedContact = await updateContact(contactId, data);
       if (updatedContact) {
         // Redirect to the contact's detail page
-        router.push(`/dashboard/contacts/${params.id}`);
+        router.push(`/dashboard/contacts/${contactId}`);
       }
     } catch (error) {
       console.error('Error updating contact:', error);
@@ -72,140 +82,94 @@ export default function EditContactPage({ params }: EditContactPageProps) {
   };
 
   const handleCancel = () => {
-    router.push(`/dashboard/contacts/${params.id}`);
+    router.push(`/dashboard/contacts/${contactId}`);
   };
 
   return (
     <RoleGuard requiredPermission='canManagePractice'>
-      <DashboardLayout>
-        <div className='flex flex-col h-full'>
-          {/* Page Header */}
-          <div className='bg-white shadow-sm border-b border-gray-200'>
-            <div className='px-4 sm:px-6 lg:px-8 py-4'>
-              <div className='flex items-center justify-between'>
-                <div className='flex items-center space-x-4'>
-                  <Button
-                    variant='ghost'
-                    onClick={handleCancel}
-                    className='text-gray-500 hover:text-gray-700'
+      <div className='flex flex-col h-full'>
+        {/* Page Header */}
+        <div className='bg-white shadow-sm border-b border-gray-200'>
+          <div className='px-4 sm:px-6 lg:px-8 py-4'>
+            <div className='flex items-center justify-between'>
+              <div className='flex items-center space-x-4'>
+                <Button
+                  variant='ghost'
+                  onClick={handleCancel}
+                  className='text-gray-500 hover:text-gray-700'
+                >
+                  <svg
+                    className='w-5 h-5 mr-2'
+                    fill='none'
+                    stroke='currentColor'
+                    viewBox='0 0 24 24'
                   >
-                    <svg
-                      className='w-5 h-5 mr-2'
-                      fill='none'
-                      stroke='currentColor'
-                      viewBox='0 0 24 24'
-                    >
-                      <path
-                        strokeLinecap='round'
-                        strokeLinejoin='round'
-                        strokeWidth={2}
-                        d='M15 19l-7-7 7-7'
-                      />
-                    </svg>
-                    Back
-                  </Button>
-                  <div>
-                    <h1 className='text-2xl font-bold text-gray-900'>
-                      {contact
-                        ? `Edit ${contact.firstName} ${contact.lastName}`
-                        : 'Edit Contact'}
-                    </h1>
-                    <p className='mt-1 text-sm text-gray-500'>
-                      Update contact information
-                    </p>
-                  </div>
+                    <path
+                      strokeLinecap='round'
+                      strokeLinejoin='round'
+                      strokeWidth={2}
+                      d='M15 19l-7-7 7-7'
+                    />
+                  </svg>
+                  Back
+                </Button>
+                <div>
+                  <h1 className='text-2xl font-bold text-gray-900'>
+                    {contact
+                      ? `Edit ${contact.firstName} ${contact.lastName}`
+                      : 'Edit Contact'}
+                  </h1>
+                  <p className='mt-1 text-sm text-gray-500'>
+                    Update contact information
+                  </p>
                 </div>
-                <div className='flex items-center space-x-2'>
-                  <div className='text-sm text-gray-500'>* Required fields</div>
-                </div>
+              </div>
+              <div className='flex items-center space-x-2'>
+                <div className='text-sm text-gray-500'>* Required fields</div>
               </div>
             </div>
           </div>
+        </div>
 
-          {/* Form Content */}
-          <div className='flex-1 overflow-hidden'>
-            <div className='h-full overflow-y-auto'>
-              <div className='max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-6'>
-                {contactLoading ? (
-                  <div className='flex items-center justify-center py-12'>
-                    <Loading size='lg' />
-                  </div>
-                ) : error ? (
-                  <div className='bg-white shadow rounded-lg p-6'>
-                    <div className='text-center'>
-                      <div className='text-red-500 mb-4'>
-                        <svg
-                          className='w-12 h-12 mx-auto'
-                          fill='none'
-                          stroke='currentColor'
-                          viewBox='0 0 24 24'
-                        >
-                          <path
-                            strokeLinecap='round'
-                            strokeLinejoin='round'
-                            strokeWidth={2}
-                            d='M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.732 15.5c-.77.833.192 2.5 1.732 2.5z'
-                          />
-                        </svg>
-                      </div>
-                      <h3 className='text-lg font-medium text-gray-900 mb-2'>
-                        Error Loading Contact
-                      </h3>
-                      <p className='text-gray-500 mb-4'>
-                        {error || 'Unable to load contact for editing'}
-                      </p>
-                      <div className='space-x-3'>
-                        <Button
-                          variant='secondary'
-                          onClick={() => window.location.reload()}
-                        >
-                          Try Again
-                        </Button>
-                        <Button
-                          variant='primary'
-                          onClick={() => router.push('/dashboard/contacts')}
-                        >
-                          Back to Contacts
-                        </Button>
-                      </div>
+        {/* Form Content */}
+        <div className='flex-1 overflow-hidden'>
+          <div className='h-full overflow-y-auto'>
+            <div className='max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-6'>
+              {contactLoading ? (
+                <div className='flex items-center justify-center py-12'>
+                  <Loading size='lg' />
+                </div>
+              ) : error ? (
+                <div className='bg-white shadow rounded-lg p-6'>
+                  <div className='text-center'>
+                    <div className='text-red-500 mb-4'>
+                      <svg
+                        className='w-12 h-12 mx-auto'
+                        fill='none'
+                        stroke='currentColor'
+                        viewBox='0 0 24 24'
+                      >
+                        <path
+                          strokeLinecap='round'
+                          strokeLinejoin='round'
+                          strokeWidth={2}
+                          d='M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.732 15.5c-.77.833.192 2.5 1.732 2.5z'
+                        />
+                      </svg>
                     </div>
-                  </div>
-                ) : contact ? (
-                  <div className='bg-white shadow rounded-lg'>
-                    <div className='px-6 py-6'>
-                      <ContactForm
-                        initialData={contact}
-                        onSubmit={handleSubmit}
-                        onCancel={handleCancel}
-                        loading={updateLoading}
-                        mode='edit'
-                      />
-                    </div>
-                  </div>
-                ) : (
-                  <div className='bg-white shadow rounded-lg p-6'>
-                    <div className='text-center'>
-                      <div className='text-gray-400 mb-4'>
-                        <svg
-                          className='w-12 h-12 mx-auto'
-                          fill='none'
-                          stroke='currentColor'
-                          viewBox='0 0 24 24'
-                        >
-                          <path
-                            strokeLinecap='round'
-                            strokeLinejoin='round'
-                            strokeWidth={2}
-                            d='M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z'
-                          />
-                        </svg>
-                      </div>
-                      <h3 className='text-lg font-medium text-gray-900 mb-2'>
-                        Contact Not Found
-                      </h3>
-                      <p className='text-gray-500 mb-4'>
-                        The requested contact could not be found.
-                      </p>
+                    <h3 className='text-lg font-medium text-gray-900 mb-2'>
+                      Error Loading Contact
+                    </h3>
+                    <p className='text-gray-500 mb-4'>
+                      {error || 'Unable to load contact for editing'}
+                    </p>
+                    <div className='space-x-3'>
+                      <Button
+                        variant='secondary'
+                        onClick={() => window.location.reload()}
+                      >
+                        Try Again
+                      </Button>
                       <Button
                         variant='primary'
                         onClick={() => router.push('/dashboard/contacts')}
@@ -214,12 +178,56 @@ export default function EditContactPage({ params }: EditContactPageProps) {
                       </Button>
                     </div>
                   </div>
-                )}
-              </div>
+                </div>
+              ) : contact ? (
+                <div className='bg-white shadow rounded-lg'>
+                  <div className='px-6 py-6'>
+                    <ContactForm
+                      initialData={contact}
+                      onSubmit={handleSubmit}
+                      onCancel={handleCancel}
+                      loading={updateLoading}
+                      mode='edit'
+                    />
+                  </div>
+                </div>
+              ) : (
+                <div className='bg-white shadow rounded-lg p-6'>
+                  <div className='text-center'>
+                    <div className='text-gray-400 mb-4'>
+                      <svg
+                        className='w-12 h-12 mx-auto'
+                        fill='none'
+                        stroke='currentColor'
+                        viewBox='0 0 24 24'
+                      >
+                        <path
+                          strokeLinecap='round'
+                          strokeLinejoin='round'
+                          strokeWidth={2}
+                          d='M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z'
+                        />
+                      </svg>
+                    </div>
+                    <h3 className='text-lg font-medium text-gray-900 mb-2'>
+                      Contact Not Found
+                    </h3>
+                    <p className='text-gray-500 mb-4'>
+                      The requested contact could not be found.
+                    </p>
+                    <Button
+                      variant='primary'
+                      onClick={() => router.push('/dashboard/contacts')}
+                    >
+                      Back to Contacts
+                    </Button>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         </div>
-      </DashboardLayout>
+      </div>
     </RoleGuard>
   );
 }

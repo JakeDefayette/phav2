@@ -3,33 +3,20 @@ export interface Video {
   id: string;
   title: string;
   description?: string;
-  filename: string;
-  file_url: string;
-  file_size: number;
-  duration?: number; // in seconds
-  thumbnail_url?: string;
-  mime_type: string;
-  tags?: string[];
-  category?: VideoCategory;
-  visibility: VideoVisibility;
-  upload_status: VideoUploadStatus;
+  duration?: number;
+  thumbnail?: string;
+  url: string;
   created_at: string;
   updated_at: string;
-  created_by: string;
-  practice_id: string;
+  user_id: string;
+  status: 'draft' | 'published' | 'archived';
 }
 
 export interface VideoSummary {
-  id: string;
-  title: string;
-  description?: string;
-  thumbnail_url?: string;
-  duration?: number;
-  category?: VideoCategory;
-  visibility: VideoVisibility;
-  upload_status: VideoUploadStatus;
-  created_at: string;
-  file_size: number;
+  total: number;
+  published: number;
+  draft: number;
+  archived: number;
 }
 
 // Form data types
@@ -59,11 +46,8 @@ export type VideoUploadStatus = 'uploading' | 'processing' | 'ready' | 'failed';
 // Search and filter types
 export interface VideoSearchFilters {
   search?: string;
-  category?: VideoCategory;
-  visibility?: VideoVisibility;
-  status?: VideoUploadStatus;
-  tags?: string[];
-  sortBy?: VideoSortOption;
+  status?: Video['status'];
+  sortBy?: 'created_at' | 'updated_at' | 'title';
   sortOrder?: 'asc' | 'desc';
 }
 
@@ -123,6 +107,33 @@ export namespace VideosAPI {
     loaded: number;
     total: number;
     percentage: number;
+  }
+
+  export interface CreateVideoData {
+    title: string;
+    description?: string;
+    url: string;
+    thumbnail?: string;
+    duration?: number;
+    status?: Video['status'];
+  }
+
+  export interface UpdateVideoData {
+    title?: string;
+    description?: string;
+    url?: string;
+    thumbnail?: string;
+    duration?: number;
+    status?: Video['status'];
+  }
+
+  export interface VideosAPI {
+    getVideos: (filters?: VideoSearchFilters) => Promise<Video[]>;
+    getVideo: (id: string) => Promise<Video>;
+    createVideo: (data: CreateVideoData) => Promise<Video>;
+    updateVideo: (id: string, data: UpdateVideoData) => Promise<Video>;
+    deleteVideo: (id: string) => Promise<void>;
+    getVideoSummary: () => Promise<VideoSummary>;
   }
 }
 

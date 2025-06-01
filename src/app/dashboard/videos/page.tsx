@@ -1,10 +1,10 @@
 'use client';
 
 import React, { useState, useCallback } from 'react';
-import { DashboardLayout } from '@/features/dashboard/components/DashboardLayout/DashboardLayout';
+import { useAuth } from '@/shared/hooks';
+import { DashboardLayout } from '@/features/dashboard/components/DashboardLayout';
 import { RoleGuard } from '@/shared/components/atoms/RoleGuard/RoleGuard';
-import { VideoLibrary, VideoUploader } from '@/features/videos';
-import { useVideos, useVideoMutations } from '@/features/videos';
+import { VideoLibrary, VideoUploader, useVideos, useVideoMutations } from '@/features/videos';
 import { VideoSummary, VideoSearchFilters } from '@/features/videos/types';
 import { Button } from '@/shared/components/atoms/Button/Button';
 import { FormField } from '@/shared/components/molecules/FormField/FormField';
