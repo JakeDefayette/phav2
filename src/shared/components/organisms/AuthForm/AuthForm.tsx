@@ -94,8 +94,24 @@ export const AuthForm: React.FC<AuthFormProps> = ({
   };
 
   const handleInputChange =
+    (field: keyof RegisterCredentials) => (value: string) => {
+      setFormData(prev => ({
+        ...prev,
+        [field]: value,
+      }));
+
+      // Clear validation error when user starts typing
+      if (validationErrors[field]) {
+        setValidationErrors(prev => ({
+          ...prev,
+          [field]: '',
+        }));
+      }
+    };
+
+  const handleRadioChange =
     (field: keyof RegisterCredentials) =>
-    (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+    (e: React.ChangeEvent<HTMLInputElement>) => {
       setFormData(prev => ({
         ...prev,
         [field]: e.target.value,
@@ -146,7 +162,7 @@ export const AuthForm: React.FC<AuthFormProps> = ({
                   name='role'
                   value='parent'
                   checked={formData.role === 'parent'}
-                  onChange={handleInputChange('role')}
+                  onChange={handleRadioChange('role')}
                   className='mr-2'
                   disabled={loading}
                 />
@@ -158,7 +174,7 @@ export const AuthForm: React.FC<AuthFormProps> = ({
                   name='role'
                   value='practitioner'
                   checked={formData.role === 'practitioner'}
-                  onChange={handleInputChange('role')}
+                  onChange={handleRadioChange('role')}
                   className='mr-2'
                   disabled={loading}
                 />
