@@ -2,7 +2,6 @@ import { supabase } from '@/shared/services/supabase';
 import { RealtimeScheduler } from '@/shared/services/realtime-scheduler';
 import { EmailService } from '@/shared/services/email';
 import { EmailTemplateType } from '@/shared/services/email/types';
-import cron from 'node-cron';
 
 // Types for scheduled email operations
 export interface ScheduleEmailOptions {
@@ -153,7 +152,7 @@ export class EmailScheduler {
   ): Promise<{ success: boolean; scheduledEmailId?: string; error?: string }> {
     try {
       // Validate cron expression
-      if (!cron.validate(options.recurrenceRule)) {
+      if (!this.validateCronExpression(options.recurrenceRule)) {
         return { success: false, error: 'Invalid cron expression' };
       }
 
@@ -498,6 +497,66 @@ export class EmailScheduler {
       }
     } catch (error) {
       console.error('Error scheduling next recurrence:', error);
+    }
+  }
+
+  /**
+   * Validate cron expression format
+   */
+  private validateCronExpression(cronExpression: string): boolean {
+    try {
+      const cronParts = cronExpression.trim().split(/\s+/);
+
+      // Must have exactly 5 parts: minute hour day month day_of_week
+      if (cronParts.length !== 5) {
+        return false;
+      }
+
+      const [minute, hour, dayOfMonth, month, dayOfWeek] = cronParts;
+
+      // Validate minute (0-59 or *)
+      if (minute !== '*') {
+        const min = parseInt(minute);
+        if (isNaN(min) || min < 0 || min > 59) {
+          return false;
+        }
+      }
+
+      // Validate hour (0-23 or *)
+      if (hour !== '*') {
+        const hr = parseInt(hour);
+        if (isNaN(hr) || hr < 0 || hr > 23) {
+          return false;
+        }
+      }
+
+      // Validate day of month (1-31 or *)
+      if (dayOfMonth !== '*') {
+        const day = parseInt(dayOfMonth);
+        if (isNaN(day) || day < 1 || day > 31) {
+          return false;
+        }
+      }
+
+      // Validate month (1-12 or *)
+      if (month !== '*') {
+        const mon = parseInt(month);
+        if (isNaN(mon) || mon < 1 || mon > 12) {
+          return false;
+        }
+      }
+
+      // Validate day of week (0-6 or *)
+      if (dayOfWeek !== '*') {
+        const dow = parseInt(dayOfWeek);
+        if (isNaN(dow) || dow < 0 || dow > 6) {
+          return false;
+        }
+      }
+
+      return true;
+    } catch (error) {
+      return false;
     }
   }
 
