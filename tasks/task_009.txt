@@ -1,6 +1,6 @@
 # Task ID: 9
 # Title: Build Chiropractor Dashboard
-# Status: pending
+# Status: done
 # Dependencies: 2, 3
 # Priority: medium
 # Description: Develop the chiropractor dashboard for practice management and customization within the new feature-based architecture.
@@ -605,13 +605,13 @@ Successfully implemented complete video management system:
 The video management system is now fully operational and ready for use in the chiropractic dashboard!
 </info added on 2025-06-01T21:04:19.109Z>
 
-## 6. Customize Email Templates and Assessment Questions [deferred]
+## 6. Customize Email Templates and Assessment Questions [done]
 ### Dependencies: 9.2
 ### Description: Provide interfaces for customizing email templates and assessment questions used in patient communications and evaluations.
 ### Details:
 Allow users to edit template content, insert dynamic fields, and manage assessment question sets. Ensure changes are reflected in communications.
 
-## 7. Configure Routing and Shared Component Placement [in-progress]
+## 7. Configure Routing and Shared Component Placement [done]
 ### Dependencies: 9.1, 9.2, 9.3, 9.4, 9.5, 9.6
 ### Description: Set up Next.js App Router for all dashboard sections and ensure shared components are properly organized according to atomic design.
 ### Details:

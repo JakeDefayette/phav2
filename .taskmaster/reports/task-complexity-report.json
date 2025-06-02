@@ -1,0 +1,29 @@
+{
+  "meta": {
+    "generatedAt": "2025-06-02T14:07:40.201Z",
+    "tasksAnalyzed": 1,
+    "totalTasks": 17,
+    "analysisCount": 2,
+    "thresholdScore": 5,
+    "projectName": "Taskmaster",
+    "usedResearch": true
+  },
+  "complexityAnalysis": [
+    {
+      "taskId": 18,
+      "taskTitle": "Implement Admin Dashboard and User Management System",
+      "complexityScore": 10,
+      "recommendedSubtasks": 18,
+      "expansionPrompt": "Break down the implementation of the Admin Dashboard and User Management System into detailed subtasks for each major module: Admin Authentication & Access Control, Practice Management, User Management, Platform Analytics, System Configuration, Database Schema Updates, UI/UX Implementation, and Integration & Testing. For each module, specify backend, frontend, database, security, and testing subtasks.",
+      "reasoning": "This task encompasses multiple high-complexity modules, including authentication, RBAC, CRUD operations, analytics, configuration management, database schema changes, UI/UX, integration, and extensive testing. Each module involves both backend and frontend work, security considerations, and compliance requirements. The breadth and depth of features, cross-cutting concerns (security, compliance, audit logging), and integration with existing systems make this a highly complex task, warranting a maximum complexity score and a high number of subtasks for effective management."
+    },
+    {
+      "taskId": 10,
+      "taskTitle": "Integrate Email Service (Resend)",
+      "complexityScore": 7,
+      "recommendedSubtasks": 8,
+      "expansionPrompt": "Break down the Resend email integration into detailed implementation tasks covering API setup, template system, scheduling mechanism, tracking implementation, error handling, testing framework, documentation, and deployment strategy",
+      "reasoning": "This task involves multiple interconnected components (API integration, templating, scheduling, tracking) with dependencies on other tasks. The cyclomatic complexity is high due to various decision paths in email delivery, scheduling logic, and template rendering. The task requires implementation across multiple files and features, suggesting significant cognitive complexity. The existing 5 subtasks cover core functionality but miss error handling, documentation, and deployment considerations."
+    }
+  ]
+}

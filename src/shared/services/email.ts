@@ -1,36 +1,28 @@
 import { supabase as supabaseClient } from '@/shared/services/supabase';
 import { config } from '@/shared/config';
+import { resendClient } from './email/resend';
+import { EmailTemplateService } from './email/templates';
+import { emailTrackingService } from './email/tracking';
+import { 
+  EmailAttachment,
+  ReportDeliveryEmailOptions,
+  ReportReadyNotificationOptions,
+  EmailResult,
+  EmailTemplateType,
+  EmailLogEntry,
+  EmailConfigurationError,
+  EmailRateLimitError,
+  EmailAuthenticationError,
+  EmailValidationError,
+  EmailDeliveryError
+} from './email/types';
 
-// TODO: Replace with actual Resend implementation in later task
-// const resend = new Resend(config.email.resend_api_key);
-
-export interface EmailAttachment {
-  filename: string;
-  content: Buffer;
-  contentType?: string;
-}
-
-export interface ReportDeliveryEmailOptions {
-  to: string;
-  childName: string;
-  assessmentDate: string;
-  downloadUrl: string;
-  pdfAttachment?: EmailAttachment;
-}
-
-export interface ReportReadyNotificationOptions {
-  to: string;
-  firstName: string;
-  reportId: string;
-  downloadUrl?: string;
-  expiresAt?: Date;
-}
-
-export interface EmailResult {
-  success: boolean;
-  messageId?: string;
-  error?: string;
-}
+// Import email scheduler types
+import type { 
+  ScheduleEmailOptions, 
+  RecurringEmailOptions,
+  ScheduledEmailRecord 
+} from '@/features/dashboard/services/emailScheduler';
 
 export class EmailService {
   private supabase = supabaseClient;
@@ -38,296 +30,361 @@ export class EmailService {
 
   /**
    * Send report delivery email with PDF attachment and download link
-   * TODO: Replace placeholder with actual Resend implementation
    */
   async sendReportDeliveryEmail(
-    options: ReportDeliveryEmailOptions
+    options: ReportDeliveryEmailOptions & { practiceId?: string }
   ): Promise<EmailResult> {
     try {
-      const subject = `Pediatric Health Assessment Report - ${options.childName}`;
+      // Check if Resend is configured
+      if (!resendClient) {
+        throw new EmailConfigurationError('Resend API not configured');
+      }
 
-      const htmlContent = this.generateReportDeliveryHTML(options);
-      const textContent = this.generateReportDeliveryText(options);
+      // Render email template using React Email
+      const templateData = {
+        childName: options.childName,
+        assessmentDate: options.assessmentDate,
+        downloadUrl: options.downloadUrl,
+        hasAttachment: !!options.pdfAttachment,
+        practiceInfo: {
+          name: config.practice?.name,
+          logo: config.practice?.logo,
+          address: config.practice?.address,
+          phone: config.practice?.phone,
+          website: config.practice?.website,
+        },
+      };
 
-      // PLACEHOLDER: Log what would be sent instead of actually sending
-      // Would send report delivery email with attachment and download link
+      const { html: htmlContent, text: textContent, subject } = 
+        await EmailTemplateService.renderReportDelivery(templateData);
 
-      // Generate a mock message ID for tracking
-      const mockMessageId = `mock_${Date.now()}_${Math.random().toString(36).substring(2, 11)}`;
+      // Add tracking to email content if practice ID is available
+      let finalHtmlContent = htmlContent;
+      if (options.practiceId) {
+        try {
+          const trackingResult = await emailTrackingService.addTrackingToEmail({
+            practiceId: options.practiceId,
+            htmlContent,
+            recipientEmail: options.to,
+          });
+          finalHtmlContent = trackingResult.html;
+        } catch (trackingError) {
+          console.warn('Failed to add email tracking:', trackingError);
+          // Continue with original HTML if tracking fails
+        }
+      }
 
-      // Log successful email send (placeholder)
+      // Send email via Resend
+      const result = await resendClient.sendEmail({
+        from: this.fromEmail,
+        to: options.to,
+        subject,
+        html: finalHtmlContent,
+        text: textContent,
+        attachments: options.pdfAttachment ? [{
+          filename: options.pdfAttachment.filename,
+          content: options.pdfAttachment.content,
+          contentType: options.pdfAttachment.contentType || 'application/pdf'
+        }] : undefined,
+        tags: [
+          { name: 'template', value: 'report_delivery' },
+          { name: 'child', value: options.childName },
+          ...(options.practiceId ? [{ name: 'practice_id', value: options.practiceId }] : [])
+        ]
+      });
+
+      // Log email send attempt
       await this.logEmailSend({
         templateType: 'report_delivery',
         recipientEmail: options.to,
-        messageId: mockMessageId,
-        status: 'sent',
+        messageId: result.messageId,
+        status: result.success ? 'sent' : 'failed',
+        error: result.error
       });
 
-      return { success: true, messageId: mockMessageId };
+      if (!result.success) {
+        if (result.rateLimited) {
+          throw new EmailRateLimitError(result.error);
+        }
+        throw new EmailDeliveryError(result.error || 'Failed to send email');
+      }
+
+      return {
+        success: true,
+        messageId: result.messageId,
+      };
+
     } catch (error) {
-      // Email service error occurred
+      // Handle specific error types
+      if (error instanceof EmailConfigurationError ||
+          error instanceof EmailRateLimitError ||
+          error instanceof EmailAuthenticationError ||
+          error instanceof EmailValidationError ||
+          error instanceof EmailDeliveryError) {
+        return {
+          success: false,
+          error: error.message,
+          rateLimited: error instanceof EmailRateLimitError
+        };
+      }
+
+      // Unknown error
+      const errorMessage = error instanceof Error ? error.message : 'Unknown email error';
       return {
         success: false,
-        error: error instanceof Error ? error.message : 'Unknown email error',
+        error: errorMessage,
       };
     }
   }
 
   /**
    * Send notification to user that their report is ready
-   * TODO: Replace placeholder with actual Resend implementation
    */
   async sendReportReadyNotification(
-    options: ReportReadyNotificationOptions
+    options: ReportReadyNotificationOptions & { practiceId?: string }
   ): Promise<EmailResult> {
     try {
-      const subject = 'Your Pediatric Health Assessment Report is Ready';
+      // Check if Resend is configured
+      if (!resendClient) {
+        throw new EmailConfigurationError('Resend API not configured');
+      }
 
-      const htmlContent = this.generateReportReadyHTML(options);
-      const textContent = this.generateReportReadyText(options);
+      // Prepare template data
+      const templateData = {
+        firstName: options.firstName,
+        reportId: options.reportId,
+        downloadUrl: options.downloadUrl,
+        expiresAt: options.expiresAt,
+        practiceInfo: {
+          name: config.practice?.name,
+          logo: config.practice?.logo,
+          address: config.practice?.address,
+          phone: config.practice?.phone,
+          website: config.practice?.website,
+        },
+      };
 
-      // PLACEHOLDER: Log what would be sent instead of actually sending
-      // Would send report ready notification to user
+      const { html: htmlContent, text: textContent, subject } = 
+        await EmailTemplateService.renderReportReady(templateData);
 
-      // Generate a mock message ID for tracking
-      const mockMessageId = `mock_${Date.now()}_${Math.random().toString(36).substring(2, 11)}`;
+      // Add tracking to email content if practice ID is available
+      let finalHtmlContent = htmlContent;
+      if (options.practiceId) {
+        try {
+          const trackingResult = await emailTrackingService.addTrackingToEmail({
+            practiceId: options.practiceId,
+            htmlContent,
+            recipientEmail: options.to,
+          });
+          finalHtmlContent = trackingResult.html;
+        } catch (trackingError) {
+          console.warn('Failed to add email tracking:', trackingError);
+          // Continue with original HTML if tracking fails
+        }
+      }
 
-      // Log successful notification send (placeholder)
+      // Send email via Resend
+      const result = await resendClient.sendEmail({
+        from: this.fromEmail,
+        to: options.to,
+        subject,
+        html: finalHtmlContent,
+        text: textContent,
+        tags: [
+          { name: 'template', value: 'report_ready' },
+          { name: 'report_id', value: options.reportId },
+          ...(options.practiceId ? [{ name: 'practice_id', value: options.practiceId }] : [])
+        ]
+      });
+
+      // Log email send attempt
       await this.logEmailSend({
         templateType: 'report_ready',
         recipientEmail: options.to,
-        messageId: mockMessageId,
-        status: 'sent',
+        messageId: result.messageId,
+        status: result.success ? 'sent' : 'failed',
+        error: result.error
       });
 
-      return { success: true, messageId: mockMessageId };
+      if (!result.success) {
+        if (result.rateLimited) {
+          throw new EmailRateLimitError(result.error);
+        }
+        throw new EmailDeliveryError(result.error || 'Failed to send notification');
+      }
+
+      return {
+        success: true,
+        messageId: result.messageId,
+      };
+
     } catch (error) {
-      // Notification service error occurred
+      // Handle specific error types
+      if (error instanceof EmailConfigurationError ||
+          error instanceof EmailRateLimitError ||
+          error instanceof EmailAuthenticationError ||
+          error instanceof EmailValidationError ||
+          error instanceof EmailDeliveryError) {
+        return {
+          success: false,
+          error: error.message,
+          rateLimited: error instanceof EmailRateLimitError
+        };
+      }
+
+      // Unknown error
+      const errorMessage = error instanceof Error ? error.message : 'Unknown notification error';
       return {
         success: false,
-        error:
-          error instanceof Error ? error.message : 'Unknown notification error',
+        error: errorMessage,
       };
     }
   }
 
   /**
-   * Generate HTML content for report delivery email
+   * Schedule a delayed email delivery
    */
-  private generateReportDeliveryHTML(
-    options: ReportDeliveryEmailOptions
-  ): string {
-    return `
-      <!DOCTYPE html>
-      <html>
-        <head>
-          <meta charset="utf-8">
-          <meta name="viewport" content="width=device-width, initial-scale=1.0">
-          <title>Pediatric Health Assessment Report</title>
-          <style>
-            body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
-            .container { max-width: 600px; margin: 0 auto; padding: 20px; }
-            .header { background: #2563eb; color: white; padding: 20px; text-align: center; border-radius: 8px 8px 0 0; }
-            .content { background: #f8fafc; padding: 30px; border-radius: 0 0 8px 8px; }
-            .button { display: inline-block; background: #2563eb; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; margin: 20px 0; }
-            .footer { margin-top: 30px; padding-top: 20px; border-top: 1px solid #e2e8f0; font-size: 14px; color: #64748b; }
-            .attachment-note { background: #ecfdf5; border: 1px solid #10b981; padding: 15px; border-radius: 6px; margin: 20px 0; }
-          </style>
-        </head>
-        <body>
-          <div class="container">
-            <div class="header">
-              <h1>Pediatric Health Assessment Report</h1>
-            </div>
-            <div class="content">
-              <h2>Report for ${options.childName}</h2>
-              <p>Assessment Date: ${new Date(options.assessmentDate).toLocaleDateString()}</p>
-              
-              ${
-                options.pdfAttachment
-                  ? `
-                <div class="attachment-note">
-                  <strong>📎 PDF Report Attached</strong><br>
-                  The complete assessment report is attached to this email as a PDF file.
-                </div>
-              `
-                  : ''
-              }
-              
-              <p>You can also access your report online using the secure link below:</p>
-              
-              <a href="${options.downloadUrl}" class="button">Download Report</a>
-              
-              <p><strong>Important:</strong> This link will expire in 72 hours for security purposes.</p>
-              
-              <h3>What's in this report:</h3>
-              <ul>
-                <li>Comprehensive health assessment results</li>
-                <li>Developmental milestone tracking</li>
-                <li>Personalized recommendations</li>
-                <li>Next steps and follow-up guidance</li>
-              </ul>
-              
-              <p>If you have any questions about this report, please don't hesitate to contact your healthcare provider.</p>
-            </div>
-            <div class="footer">
-              <p>This email was sent from the Pediatric Health Assessment platform. Please do not reply to this email.</p>
-              <p>For support, visit our help center or contact your healthcare provider.</p>
-            </div>
-          </div>
-        </body>
-      </html>
-    `;
+  async scheduleEmail(options: ScheduleEmailOptions): Promise<{ success: boolean; scheduledEmailId?: string; error?: string }> {
+    try {
+      // Import emailScheduler dynamically to avoid circular dependencies
+      const { emailScheduler } = await import('@/features/dashboard/services/emailScheduler');
+      
+      return await emailScheduler.scheduleEmail(options);
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown scheduling error';
+      return { success: false, error: errorMessage };
+    }
   }
 
   /**
-   * Generate plain text content for report delivery email
+   * Schedule recurring emails
    */
-  private generateReportDeliveryText(
-    options: ReportDeliveryEmailOptions
-  ): string {
-    return `
-Pediatric Health Assessment Report
-
-Report for: ${options.childName}
-Assessment Date: ${new Date(options.assessmentDate).toLocaleDateString()}
-
-${options.pdfAttachment ? 'The complete assessment report is attached to this email as a PDF file.\n\n' : ''}
-
-You can also access your report online using this secure link:
-${options.downloadUrl}
-
-IMPORTANT: This link will expire in 72 hours for security purposes.
-
-What's in this report:
-- Comprehensive health assessment results
-- Developmental milestone tracking  
-- Personalized recommendations
-- Next steps and follow-up guidance
-
-If you have any questions about this report, please don't hesitate to contact your healthcare provider.
-
----
-This email was sent from the Pediatric Health Assessment platform.
-For support, visit our help center or contact your healthcare provider.
-    `.trim();
+  async scheduleRecurringEmail(options: RecurringEmailOptions): Promise<{ success: boolean; scheduledEmailId?: string; error?: string }> {
+    try {
+      // Import emailScheduler dynamically to avoid circular dependencies
+      const { emailScheduler } = await import('@/features/dashboard/services/emailScheduler');
+      
+      return await emailScheduler.scheduleRecurringEmail(options);
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown recurring scheduling error';
+      return { success: false, error: errorMessage };
+    }
   }
 
   /**
-   * Generate HTML content for report ready notification
+   * Cancel a scheduled email
    */
-  private generateReportReadyHTML(
-    options: ReportReadyNotificationOptions
-  ): string {
-    return `
-      <!DOCTYPE html>
-      <html>
-        <head>
-          <meta charset="utf-8">
-          <meta name="viewport" content="width=device-width, initial-scale=1.0">
-          <title>Your Report is Ready</title>
-          <style>
-            body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
-            .container { max-width: 600px; margin: 0 auto; padding: 20px; }
-            .header { background: #10b981; color: white; padding: 20px; text-align: center; border-radius: 8px 8px 0 0; }
-            .content { background: #f8fafc; padding: 30px; border-radius: 0 0 8px 8px; }
-            .button { display: inline-block; background: #10b981; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; margin: 20px 0; }
-            .footer { margin-top: 30px; padding-top: 20px; border-top: 1px solid #e2e8f0; font-size: 14px; color: #64748b; }
-          </style>
-        </head>
-        <body>
-          <div class="container">
-            <div class="header">
-              <h1>✅ Your Report is Ready!</h1>
-            </div>
-            <div class="content">
-              <p>Hi ${options.firstName},</p>
-              
-              <p>Great news! Your pediatric health assessment report has been generated and is now ready for download.</p>
-              
-              ${
-                options.downloadUrl
-                  ? `
-                <a href="${options.downloadUrl}" class="button">Download Your Report</a>
-                
-                ${
-                  options.expiresAt
-                    ? `
-                  <p><strong>Note:</strong> This download link will expire on ${options.expiresAt.toLocaleDateString()} at ${options.expiresAt.toLocaleTimeString()}.</p>
-                `
-                    : ''
-                }
-              `
-                  : `
-                <p>You can access your report by logging into your account on our platform.</p>
-              `
-              }
-              
-              <p>Your report includes:</p>
-              <ul>
-                <li>Complete assessment results</li>
-                <li>Developmental insights</li>
-                <li>Personalized recommendations</li>
-                <li>Next steps for your child's health journey</li>
-              </ul>
-              
-              <p>Thank you for using our pediatric health assessment platform!</p>
-            </div>
-            <div class="footer">
-              <p>This is an automated notification. Please do not reply to this email.</p>
-              <p>For support, visit our help center or contact your healthcare provider.</p>
-            </div>
-          </div>
-        </body>
-      </html>
-    `;
+  async cancelScheduledEmail(scheduledEmailId: string, practiceId: string): Promise<{ success: boolean; error?: string }> {
+    try {
+      // Import emailScheduler dynamically to avoid circular dependencies
+      const { emailScheduler } = await import('@/features/dashboard/services/emailScheduler');
+      
+      return await emailScheduler.cancelScheduledEmail(scheduledEmailId, practiceId);
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown cancellation error';
+      return { success: false, error: errorMessage };
+    }
   }
 
   /**
-   * Generate plain text content for report ready notification
+   * Get scheduled emails for a practice
    */
-  private generateReportReadyText(
-    options: ReportReadyNotificationOptions
-  ): string {
-    return `
-Your Report is Ready!
-
-Hi ${options.firstName},
-
-Great news! Your pediatric health assessment report has been generated and is now ready for download.
-
-${
-  options.downloadUrl
-    ? `
-Download your report: ${options.downloadUrl}
-
-${options.expiresAt ? `Note: This download link will expire on ${options.expiresAt.toLocaleDateString()} at ${options.expiresAt.toLocaleTimeString()}.` : ''}
-`
-    : 'You can access your report by logging into your account on our platform.'
-}
-
-Your report includes:
-- Complete assessment results
-- Developmental insights
-- Personalized recommendations
-- Next steps for your child's health journey
-
-Thank you for using our pediatric health assessment platform!
-
----
-This is an automated notification. Please do not reply to this email.
-For support, visit our help center or contact your healthcare provider.
-    `.trim();
+  async getScheduledEmails(
+    practiceId: string,
+    options: {
+      status?: string;
+      limit?: number;
+      offset?: number;
+    } = {}
+  ): Promise<{ data: ScheduledEmailRecord[]; error?: string }> {
+    try {
+      // Import emailScheduler dynamically to avoid circular dependencies
+      const { emailScheduler } = await import('@/features/dashboard/services/emailScheduler');
+      
+      return await emailScheduler.getScheduledEmails(practiceId, options);
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown query error';
+      return { data: [], error: errorMessage };
+    }
   }
+
+  /**
+   * Schedule report delivery email for later
+   */
+  async scheduleReportDeliveryEmail(
+    options: ReportDeliveryEmailOptions & {
+      practiceId: string;
+      scheduledAt: Date;
+      priority?: 'high' | 'medium' | 'low';
+    }
+  ): Promise<{ success: boolean; scheduledEmailId?: string; error?: string }> {
+    try {
+      const templateData = {
+        childName: options.childName,
+        assessmentDate: options.assessmentDate,
+        downloadUrl: options.downloadUrl,
+        pdfAttachment: options.pdfAttachment
+      };
+
+      return await this.scheduleEmail({
+        practiceId: options.practiceId,
+        templateType: 'report_delivery',
+        recipientEmail: options.to,
+        subject: `Assessment Report for ${options.childName}`,
+        templateData,
+        scheduledAt: options.scheduledAt,
+        priority: options.priority || 'medium'
+      });
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown report delivery scheduling error';
+      return { success: false, error: errorMessage };
+    }
+  }
+
+  /**
+   * Schedule report ready notification for later
+   */
+  async scheduleReportReadyNotification(
+    options: ReportReadyNotificationOptions & {
+      practiceId: string;
+      scheduledAt: Date;
+      priority?: 'high' | 'medium' | 'low';
+    }
+  ): Promise<{ success: boolean; scheduledEmailId?: string; error?: string }> {
+    try {
+      const templateData = {
+        firstName: options.firstName,
+        reportId: options.reportId,
+        downloadUrl: options.downloadUrl,
+        expiresAt: options.expiresAt
+      };
+
+      return await this.scheduleEmail({
+        practiceId: options.practiceId,
+        templateType: 'report_share',
+        recipientEmail: options.to,
+        subject: `Your Assessment Report is Ready, ${options.firstName}`,
+        templateData,
+        scheduledAt: options.scheduledAt,
+        priority: options.priority || 'medium'
+      });
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown notification scheduling error';
+      return { success: false, error: errorMessage };
+    }
+  }
+
+
 
   /**
    * Log email send for tracking and analytics
    */
   private async logEmailSend(options: {
-    templateType: string;
+    templateType: EmailTemplateType;
     recipientEmail: string;
     messageId?: string;
-    status: string;
+    status: 'pending' | 'sent' | 'delivered' | 'bounced' | 'complained' | 'failed';
+    error?: string;
   }): Promise<void> {
     try {
       await this.supabase.from('email_sends').insert({
@@ -374,6 +431,243 @@ For support, visit our help center or contact your healthcare provider.
         .eq('message_id', messageId);
     } catch (error) {
       // Failed to track email click
+    }
+  }
+
+  /**
+   * Get email analytics for a practice
+   */
+  async getEmailAnalytics(practiceId: string, options: {
+    campaignId?: string;
+    startDate?: Date;
+    endDate?: Date;
+    eventTypes?: ('sent' | 'delivered' | 'opened' | 'clicked' | 'bounced' | 'complained' | 'unsubscribed')[];
+  } = {}): Promise<{ success: boolean; data?: any; error?: string }> {
+    try {
+      const analytics = await emailTrackingService.getAnalyticsSummary({
+        practiceId,
+        ...options,
+      });
+
+      return {
+        success: true,
+        data: analytics,
+      };
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown analytics error';
+      return {
+        success: false,
+        error: errorMessage,
+      };
+    }
+  }
+
+  /**
+   * Get detailed email performance metrics
+   */
+  async getEmailPerformance(practiceId: string, campaignId?: string): Promise<{
+    success: boolean;
+    data?: {
+      totalSent: number;
+      totalDelivered: number;
+      totalOpened: number;
+      totalClicked: number;
+      totalBounced: number;
+      totalComplaints: number;
+      openRate: number;
+      clickRate: number;
+      deliveryRate: number;
+      bounceRate: number;
+    };
+    error?: string;
+  }> {
+    try {
+      const performance = await emailTrackingService.getEmailPerformance(practiceId, campaignId);
+
+      return {
+        success: true,
+        data: performance,
+      };
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown performance error';
+      return {
+        success: false,
+        error: errorMessage,
+      };
+    }
+  }
+
+  /**
+   * Get detailed tracking events
+   */
+  async getTrackingEvents(practiceId: string, options: {
+    campaignId?: string;
+    startDate?: Date;
+    endDate?: Date;
+    eventTypes?: ('sent' | 'delivered' | 'opened' | 'clicked' | 'bounced' | 'complained' | 'unsubscribed')[];
+  } = {}): Promise<{ success: boolean; data?: any[]; error?: string }> {
+    try {
+      const events = await emailTrackingService.getTrackingEvents({
+        practiceId,
+        ...options,
+      });
+
+      return {
+        success: true,
+        data: events,
+      };
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown tracking error';
+      return {
+        success: false,
+        error: errorMessage,
+      };
+    }
+  }
+
+  /**
+   * Check if an email address is suppressed (bounced/unsubscribed)
+   */
+  async isEmailSuppressed(practiceId: string, email: string): Promise<{ 
+    success: boolean; 
+    suppressed?: boolean; 
+    error?: string 
+  }> {
+    try {
+      const suppressed = await emailTrackingService.isEmailSuppressed(practiceId, email);
+
+      return {
+        success: true,
+        suppressed,
+      };
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown suppression check error';
+      return {
+        success: false,
+        error: errorMessage,
+      };
+    }
+  }
+
+  /**
+   * Manually add an email to the suppression list
+   */
+  async suppressEmail(
+    practiceId: string, 
+    email: string, 
+    reason: 'bounce' | 'complaint' | 'unsubscribe'
+  ): Promise<{ success: boolean; error?: string }> {
+    try {
+      await emailTrackingService.addToSuppressionList(practiceId, email, reason);
+
+      return {
+        success: true,
+      };
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown suppression error';
+      return {
+        success: false,
+        error: errorMessage,
+      };
+    }
+  }
+
+  /**
+   * Check if email service is properly configured
+   */
+  isConfigured(): boolean {
+    return !!resendClient && resendClient.isConfigured();
+  }
+
+  /**
+   * Get current rate limit status
+   */
+  getRateLimitStatus() {
+    if (!resendClient) {
+      return {
+        tokensAvailable: 0,
+        nextRefillTime: new Date(),
+        isLimited: true,
+        configured: false
+      };
+    }
+
+    const status = resendClient.getRateLimitStatus();
+    return {
+      ...status,
+      configured: true
+    };
+  }
+
+  /**
+   * Test email service connectivity
+   */
+  async testConnection(): Promise<{ success: boolean; error?: string }> {
+    if (!resendClient) {
+      return {
+        success: false,
+        error: 'Resend client not configured'
+      };
+    }
+
+    return await resendClient.testConnection();
+  }
+
+  /**
+   * Send a test email to verify configuration
+   */
+  async sendTestEmail(
+    to: string,
+    subject: string = 'Test Email from Pediatric Health Assessment'
+  ): Promise<EmailResult> {
+    if (!resendClient) {
+      return {
+        success: false,
+        error: 'Email service not configured'
+      };
+    }
+
+    try {
+      const result = await resendClient.sendEmail({
+        from: this.fromEmail,
+        to,
+        subject,
+        html: `
+          <h2>Test Email</h2>
+          <p>This is a test email from the Pediatric Health Assessment platform.</p>
+          <p>If you received this email, the email service is working correctly.</p>
+          <p>Sent at: ${new Date().toISOString()}</p>
+        `,
+        text: `
+Test Email
+
+This is a test email from the Pediatric Health Assessment platform.
+If you received this email, the email service is working correctly.
+
+Sent at: ${new Date().toISOString()}
+        `,
+        tags: [
+          { name: 'template', value: 'system_notification' },
+          { name: 'type', value: 'test' }
+        ]
+      });
+
+      // Log test email
+      await this.logEmailSend({
+        templateType: 'system_notification',
+        recipientEmail: to,
+        messageId: result.messageId,
+        status: result.success ? 'sent' : 'failed',
+        error: result.error
+      });
+
+      return result;
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      return {
+        success: false,
+        error: errorMessage
+      };
     }
   }
 }
