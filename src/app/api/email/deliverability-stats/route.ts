@@ -9,7 +9,7 @@ const supabase = createClient(
 
 /**
  * GET /api/email/deliverability-stats
- * 
+ *
  * Get comprehensive email deliverability statistics for a practice
  * Query parameters:
  * - practiceId: string (required)
@@ -36,9 +36,12 @@ export async function GET(request: NextRequest) {
     ]);
 
     // Calculate delivery rate
-    const deliveryRate = bounceStats.totalSent > 0 
-      ? ((bounceStats.totalSent - bounceStats.totalBounced) / bounceStats.totalSent) * 100 
-      : 100;
+    const deliveryRate =
+      bounceStats.totalSent > 0
+        ? ((bounceStats.totalSent - bounceStats.totalBounced) /
+            bounceStats.totalSent) *
+          100
+        : 100;
 
     // Get recent alerts (last 24 hours)
     const [bounceAlerts, complaintAlerts] = await Promise.all([
@@ -72,7 +75,6 @@ export async function GET(request: NextRequest) {
     };
 
     return NextResponse.json(stats);
-
   } catch (error) {
     console.error('Failed to fetch deliverability stats:', error);
     return NextResponse.json(
@@ -102,4 +104,4 @@ async function getSuppressionCount(practiceId: string): Promise<number> {
     console.error('Error getting suppression count:', error);
     return 0;
   }
-} 
+}

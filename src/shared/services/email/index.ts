@@ -5,4 +5,4 @@ export * from './tracking';
 export { emailService } from '../email';
 
 // Re-export main service for convenience
-export { EmailService } from '../email'; 
+export { EmailService } from '../email';

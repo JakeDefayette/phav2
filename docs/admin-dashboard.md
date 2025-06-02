@@ -19,7 +19,6 @@ Implement role-based access control (RBAC) with admin privileges
 Secure admin routes with proper middleware
 Add admin user type to existing user schema
 
-
 Practice Management Module
 
 Create new chiropractic practices with auto-generated unique practiceIDs
@@ -27,7 +26,6 @@ Edit existing practice information (name, contact, branding)
 Enable/disable practices
 View practice-specific analytics and metrics
 Manage practice subscription status
-
 
 User Management Module
 
@@ -38,7 +36,6 @@ Reset user passwords
 Suspend/reactivate user accounts
 View user activity history
 
-
 Platform Analytics Dashboard
 
 Total practices, users, and assessments overview
@@ -47,15 +44,12 @@ Viral coefficient and growth metrics
 Assessment completion rates
 Email engagement statistics
 
-
 System Configuration
 
 Manage global email templates
 Configure survey questions
 Set platform-wide settings
 Manage educational content library
-
-
 
 Technical Requirements:
 

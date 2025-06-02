@@ -28,7 +28,10 @@ const UNSUBSCRIBE_REASONS = [
   { value: 'other', label: 'Other (please specify)' },
 ];
 
-export function UnsubscribeForm({ token, defaultReason }: UnsubscribeFormProps) {
+export function UnsubscribeForm({
+  token,
+  defaultReason,
+}: UnsubscribeFormProps) {
   const [state, setState] = useState<UnsubscribeState>({
     loading: false,
     success: false,
@@ -83,8 +86,10 @@ export function UnsubscribeForm({ token, defaultReason }: UnsubscribeFormProps) 
     setState(prev => ({ ...prev, loading: true, error: null }));
 
     try {
-      const finalReason = reason === 'other' ? customReason : 
-        UNSUBSCRIBE_REASONS.find(r => r.value === reason)?.label || reason;
+      const finalReason =
+        reason === 'other'
+          ? customReason
+          : UNSUBSCRIBE_REASONS.find(r => r.value === reason)?.label || reason;
 
       const response = await fetch('/api/email/unsubscribe', {
         method: 'POST',
@@ -109,7 +114,6 @@ export function UnsubscribeForm({ token, defaultReason }: UnsubscribeFormProps) 
         success: true,
         loading: false,
       }));
-
     } catch (error) {
       setState(prev => ({
         ...prev,
@@ -121,21 +125,21 @@ export function UnsubscribeForm({ token, defaultReason }: UnsubscribeFormProps) 
 
   if (isValidating) {
     return (
-      <div className="text-center">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
-        <p className="mt-2 text-gray-600">Validating unsubscribe request...</p>
+      <div className='text-center'>
+        <div className='animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto'></div>
+        <p className='mt-2 text-gray-600'>Validating unsubscribe request...</p>
       </div>
     );
   }
 
   if (state.error && !state.email) {
     return (
-      <Alert variant="error">
+      <Alert variant='error'>
         <div>
-          <h3 className="font-medium">Invalid Unsubscribe Link</h3>
-          <p className="mt-1 text-sm">{state.error}</p>
-          <p className="mt-2 text-sm">
-            This link may have expired or been used already. Please contact 
+          <h3 className='font-medium'>Invalid Unsubscribe Link</h3>
+          <p className='mt-1 text-sm'>{state.error}</p>
+          <p className='mt-2 text-sm'>
+            This link may have expired or been used already. Please contact
             support if you continue to receive unwanted emails.
           </p>
         </div>
@@ -145,37 +149,37 @@ export function UnsubscribeForm({ token, defaultReason }: UnsubscribeFormProps) 
 
   if (state.success) {
     return (
-      <div className="text-center">
-        <div className="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-green-100">
+      <div className='text-center'>
+        <div className='mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-green-100'>
           <svg
-            className="h-6 w-6 text-green-600"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
+            className='h-6 w-6 text-green-600'
+            fill='none'
+            viewBox='0 0 24 24'
+            stroke='currentColor'
           >
             <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
+              strokeLinecap='round'
+              strokeLinejoin='round'
               strokeWidth={2}
-              d="M5 13l4 4L19 7"
+              d='M5 13l4 4L19 7'
             />
           </svg>
         </div>
-        <h3 className="mt-4 text-lg font-medium text-gray-900">
+        <h3 className='mt-4 text-lg font-medium text-gray-900'>
           Successfully Unsubscribed
         </h3>
-        <p className="mt-2 text-sm text-gray-600">
-          You have been removed from our email list. You will no longer receive 
+        <p className='mt-2 text-sm text-gray-600'>
+          You have been removed from our email list. You will no longer receive
           marketing emails from us.
         </p>
-        <p className="mt-2 text-xs text-gray-500">
-          Note: You may still receive transactional emails related to your account 
-          or services you use.
+        <p className='mt-2 text-xs text-gray-500'>
+          Note: You may still receive transactional emails related to your
+          account or services you use.
         </p>
-        <div className="mt-4">
+        <div className='mt-4'>
           <a
-            href="/preferences"
-            className="text-blue-600 hover:text-blue-500 text-sm font-medium"
+            href='/preferences'
+            className='text-blue-600 hover:text-blue-500 text-sm font-medium'
           >
             Manage other email preferences
           </a>
@@ -185,29 +189,28 @@ export function UnsubscribeForm({ token, defaultReason }: UnsubscribeFormProps) 
   }
 
   return (
-    <form onSubmit={handleUnsubscribe} className="space-y-6">
+    <form onSubmit={handleUnsubscribe} className='space-y-6'>
       {state.email && (
-        <div className="bg-gray-50 p-4 rounded-md">
-          <p className="text-sm text-gray-700">
-            <span className="font-medium">Email:</span> {state.email}
+        <div className='bg-gray-50 p-4 rounded-md'>
+          <p className='text-sm text-gray-700'>
+            <span className='font-medium'>Email:</span> {state.email}
           </p>
         </div>
       )}
 
-      {state.error && (
-        <Alert variant="error">
-          {state.error}
-        </Alert>
-      )}
+      {state.error && <Alert variant='error'>{state.error}</Alert>}
 
-      <div className="space-y-4">
+      <div className='space-y-4'>
         <div>
-          <Label htmlFor="reason" className="text-base font-medium text-gray-900">
+          <Label
+            htmlFor='reason'
+            className='text-base font-medium text-gray-900'
+          >
             Help us improve: Why are you unsubscribing? (Optional)
           </Label>
-          <div className="mt-2">
+          <div className='mt-2'>
             <RadioGroup
-              name="reason"
+              name='reason'
               value={reason}
               onChange={setReason}
               options={UNSUBSCRIBE_REASONS}
@@ -217,38 +220,43 @@ export function UnsubscribeForm({ token, defaultReason }: UnsubscribeFormProps) 
 
         {reason === 'other' && (
           <div>
-            <Label htmlFor="customReason" className="text-sm font-medium text-gray-700">
+            <Label
+              htmlFor='customReason'
+              className='text-sm font-medium text-gray-700'
+            >
               Please specify:
             </Label>
             <Input
-              id="customReason"
-              name="customReason"
-              type="text"
+              id='customReason'
+              name='customReason'
+              type='text'
               value={customReason}
-              onChange={(e) => setCustomReason(e.target.value)}
-              placeholder="Tell us more about your reason..."
-              className="mt-1"
+              onChange={e => setCustomReason(e.target.value)}
+              placeholder='Tell us more about your reason...'
+              className='mt-1'
               required={reason === 'other'}
             />
           </div>
         )}
       </div>
 
-      <div className="space-y-3">
+      <div className='space-y-3'>
         <Button
-          type="submit"
-          className="w-full"
-          variant="primary"
+          type='submit'
+          className='w-full'
+          variant='primary'
           isLoading={state.loading}
-          disabled={state.loading || (reason === 'other' && !customReason.trim())}
+          disabled={
+            state.loading || (reason === 'other' && !customReason.trim())
+          }
         >
           {state.loading ? 'Processing...' : 'Unsubscribe'}
         </Button>
 
         <Button
-          type="button"
-          className="w-full"
-          variant="secondary"
+          type='button'
+          className='w-full'
+          variant='secondary'
           onClick={() => window.history.back()}
           disabled={state.loading}
         >
@@ -256,16 +264,16 @@ export function UnsubscribeForm({ token, defaultReason }: UnsubscribeFormProps) 
         </Button>
       </div>
 
-      <div className="text-xs text-gray-500 text-center space-y-1">
+      <div className='text-xs text-gray-500 text-center space-y-1'>
         <p>
-          By clicking "Unsubscribe", you confirm that you want to stop receiving 
+          By clicking "Unsubscribe", you confirm that you want to stop receiving
           marketing emails from us.
         </p>
         <p>
-          This action cannot be undone through this form. You can resubscribe 
-          by visiting our website.
+          This action cannot be undone through this form. You can resubscribe by
+          visiting our website.
         </p>
       </div>
     </form>
   );
-} 
+}

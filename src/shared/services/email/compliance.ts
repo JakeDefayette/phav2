@@ -92,32 +92,32 @@ export interface EmailSuppressionEntry {
   updated_at: Date;
 }
 
-export type EmailPreferenceType = 
-  | 'marketing' 
-  | 'transactional' 
-  | 'reports' 
-  | 'notifications' 
-  | 'newsletters' 
-  | 'reminders' 
+export type EmailPreferenceType =
+  | 'marketing'
+  | 'transactional'
+  | 'reports'
+  | 'notifications'
+  | 'newsletters'
+  | 'reminders'
   | 'system';
 
-export type EmailConsentStatus = 
-  | 'opted_in' 
-  | 'opted_out' 
-  | 'pending' 
-  | 'double_opt_in_pending' 
-  | 'unsubscribed' 
-  | 'bounced' 
+export type EmailConsentStatus =
+  | 'opted_in'
+  | 'opted_out'
+  | 'pending'
+  | 'double_opt_in_pending'
+  | 'unsubscribed'
+  | 'bounced'
   | 'complained';
 
-export type ConsentAction = 
-  | 'subscribe' 
-  | 'unsubscribe' 
-  | 'update_preferences' 
-  | 'double_opt_in_confirm' 
-  | 'admin_action' 
-  | 'system_suppression' 
-  | 'bounce_suppression' 
+export type ConsentAction =
+  | 'subscribe'
+  | 'unsubscribe'
+  | 'update_preferences'
+  | 'double_opt_in_confirm'
+  | 'admin_action'
+  | 'system_suppression'
+  | 'bounce_suppression'
   | 'complaint_suppression';
 
 export interface ConsentRequestOptions {
@@ -170,17 +170,17 @@ export class EmailComplianceService {
     error?: string;
   }> {
     try {
-      const { 
-        email, 
-        practiceId, 
-        preferenceTypes, 
+      const {
+        email,
+        practiceId,
+        preferenceTypes,
         consentSource,
         ipAddress,
         userAgent,
         requireDoubleOptIn = false,
         dataProcessingConsent = false,
         marketingConsent = false,
-        legalBasis = 'consent'
+        legalBasis = 'consent',
       } = options;
 
       // Check if practice exists and get quota settings
@@ -194,8 +194,11 @@ export class EmailComplianceService {
         throw new Error(`Failed to get practice quota: ${quotaError.message}`);
       }
 
-      const shouldRequireDoubleOptIn = requireDoubleOptIn || practiceQuota?.requires_double_opt_in || false;
-      const doubleOptInToken = shouldRequireDoubleOptIn ? this.generateSecureToken() : undefined;
+      const shouldRequireDoubleOptIn =
+        requireDoubleOptIn || practiceQuota?.requires_double_opt_in || false;
+      const doubleOptInToken = shouldRequireDoubleOptIn
+        ? this.generateSecureToken()
+        : undefined;
       const unsubscribeToken = this.generateSecureToken();
 
       // Create preferences for each type
@@ -204,14 +207,19 @@ export class EmailComplianceService {
         email,
         preference_type: preferenceType,
         is_subscribed: true,
-        consent_status: shouldRequireDoubleOptIn ? 'double_opt_in_pending' : 'opted_in',
-        consent_date: shouldRequireDoubleOptIn ? null : new Date().toISOString(),
+        consent_status: shouldRequireDoubleOptIn
+          ? 'double_opt_in_pending'
+          : 'opted_in',
+        consent_date: shouldRequireDoubleOptIn
+          ? null
+          : new Date().toISOString(),
         consent_source: consentSource,
         consent_ip_address: ipAddress,
         consent_user_agent: userAgent,
         double_opt_in_token: shouldRequireDoubleOptIn ? doubleOptInToken : null,
-        double_opt_in_expires_at: shouldRequireDoubleOptIn ? 
-          new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString() : null, // 7 days
+        double_opt_in_expires_at: shouldRequireDoubleOptIn
+          ? new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString()
+          : null, // 7 days
         unsubscribe_token: unsubscribeToken,
         data_processing_consent: dataProcessingConsent,
         marketing_consent: marketingConsent && preferenceType === 'marketing',
@@ -225,7 +233,9 @@ export class EmailComplianceService {
         .select();
 
       if (preferencesError) {
-        throw new Error(`Failed to create preferences: ${preferencesError.message}`);
+        throw new Error(
+          `Failed to create preferences: ${preferencesError.message}`
+        );
       }
 
       // Log the consent action
@@ -243,9 +253,10 @@ export class EmailComplianceService {
       return {
         success: true,
         preferences: preferences as EmailPreference[],
-        doubleOptInToken: shouldRequireDoubleOptIn ? doubleOptInToken : undefined,
+        doubleOptInToken: shouldRequireDoubleOptIn
+          ? doubleOptInToken
+          : undefined,
       };
-
     } catch (error) {
       console.error('Error creating email preferences:', error);
       return {
@@ -258,7 +269,11 @@ export class EmailComplianceService {
   /**
    * Confirm double opt-in subscription
    */
-  async confirmDoubleOptIn(token: string, ipAddress?: string, userAgent?: string): Promise<{
+  async confirmDoubleOptIn(
+    token: string,
+    ipAddress?: string,
+    userAgent?: string
+  ): Promise<{
     success: boolean;
     email?: string;
     practiceId?: string;
@@ -281,8 +296,10 @@ export class EmailComplianceService {
       }
 
       // Check if token is expired
-      if (preference.double_opt_in_expires_at && 
-          new Date() > new Date(preference.double_opt_in_expires_at)) {
+      if (
+        preference.double_opt_in_expires_at &&
+        new Date() > new Date(preference.double_opt_in_expires_at)
+      ) {
         return {
           success: false,
           error: 'Confirmation token has expired',
@@ -327,7 +344,6 @@ export class EmailComplianceService {
         email: preference.email,
         practiceId: preference.practice_id,
       };
-
     } catch (error) {
       console.error('Error confirming double opt-in:', error);
       return {
@@ -347,7 +363,12 @@ export class EmailComplianceService {
     error?: string;
   }> {
     try {
-      const { token, reason = 'User requested unsubscribe', ipAddress, userAgent } = options;
+      const {
+        token,
+        reason = 'User requested unsubscribe',
+        ipAddress,
+        userAgent,
+      } = options;
 
       // Find the preference with this token
       const { data: preference, error: findError } = await supabase
@@ -412,7 +433,6 @@ export class EmailComplianceService {
         email: preference.email,
         practiceId: preference.practice_id,
       };
-
     } catch (error) {
       console.error('Error unsubscribing:', error);
       return {
@@ -431,20 +451,22 @@ export class EmailComplianceService {
     error?: string;
   }> {
     try {
-      const { 
-        email, 
-        practiceId, 
-        preferences, 
-        userId, 
-        ipAddress, 
-        userAgent, 
-        reason = 'User updated preferences' 
+      const {
+        email,
+        practiceId,
+        preferences,
+        userId,
+        ipAddress,
+        userAgent,
+        reason = 'User updated preferences',
       } = options;
 
       const updatedPreferences: EmailPreference[] = [];
 
       // Update each preference type
-      for (const [preferenceType, isSubscribed] of Object.entries(preferences)) {
+      for (const [preferenceType, isSubscribed] of Object.entries(
+        preferences
+      )) {
         if (isSubscribed === undefined) continue;
 
         const { data: currentPreference, error: findError } = await supabase
@@ -456,7 +478,10 @@ export class EmailComplianceService {
           .single();
 
         if (findError && findError.code !== 'PGRST116') {
-          console.error(`Error finding preference for ${preferenceType}:`, findError);
+          console.error(
+            `Error finding preference for ${preferenceType}:`,
+            findError
+          );
           continue;
         }
 
@@ -476,13 +501,17 @@ export class EmailComplianceService {
               consent_user_agent: userAgent,
               unsubscribe_token: this.generateSecureToken(),
               data_processing_consent: true,
-              marketing_consent: preferenceType === 'marketing' ? isSubscribed : false,
+              marketing_consent:
+                preferenceType === 'marketing' ? isSubscribed : false,
             })
             .select()
             .single();
 
           if (createError) {
-            console.error(`Error creating preference for ${preferenceType}:`, createError);
+            console.error(
+              `Error creating preference for ${preferenceType}:`,
+              createError
+            );
             continue;
           }
 
@@ -494,7 +523,10 @@ export class EmailComplianceService {
             .update({
               is_subscribed: isSubscribed,
               consent_status: isSubscribed ? 'opted_in' : 'opted_out',
-              marketing_consent: preferenceType === 'marketing' ? isSubscribed : currentPreference.marketing_consent,
+              marketing_consent:
+                preferenceType === 'marketing'
+                  ? isSubscribed
+                  : currentPreference.marketing_consent,
               updated_at: new Date().toISOString(),
             })
             .eq('id', currentPreference.id)
@@ -502,7 +534,10 @@ export class EmailComplianceService {
             .single();
 
           if (updateError) {
-            console.error(`Error updating preference for ${preferenceType}:`, updateError);
+            console.error(
+              `Error updating preference for ${preferenceType}:`,
+              updateError
+            );
             continue;
           }
 
@@ -533,7 +568,6 @@ export class EmailComplianceService {
         success: true,
         updatedPreferences,
       };
-
     } catch (error) {
       console.error('Error updating preferences:', error);
       return {
@@ -546,7 +580,10 @@ export class EmailComplianceService {
   /**
    * Check if an email is suppressed for a practice
    */
-  async isEmailSuppressed(practiceId: string, email: string): Promise<{
+  async isEmailSuppressed(
+    practiceId: string,
+    email: string
+  ): Promise<{
     success: boolean;
     suppressed: boolean;
     suppressionInfo?: EmailSuppressionEntry;
@@ -565,8 +602,11 @@ export class EmailComplianceService {
       }
 
       // Check if suppression has expired
-      if (suppression && suppression.expires_at && 
-          new Date() > new Date(suppression.expires_at)) {
+      if (
+        suppression &&
+        suppression.expires_at &&
+        new Date() > new Date(suppression.expires_at)
+      ) {
         // Remove expired suppression
         await supabase
           .from('email_suppression_list')
@@ -584,7 +624,6 @@ export class EmailComplianceService {
         suppressed: !!suppression,
         suppressionInfo: suppression || undefined,
       };
-
     } catch (error) {
       console.error('Error checking email suppression:', error);
       return {
@@ -645,7 +684,6 @@ export class EmailComplianceService {
         success: true,
         suppressionEntry: suppressionEntry as EmailSuppressionEntry,
       };
-
     } catch (error) {
       console.error('Error adding to suppression list:', error);
       return {
@@ -658,7 +696,10 @@ export class EmailComplianceService {
   /**
    * Get email preferences for a user
    */
-  async getEmailPreferences(practiceId: string, email: string): Promise<{
+  async getEmailPreferences(
+    practiceId: string,
+    email: string
+  ): Promise<{
     success: boolean;
     preferences?: EmailPreference[];
     error?: string;
@@ -679,7 +720,6 @@ export class EmailComplianceService {
         success: true,
         preferences: preferences as EmailPreference[],
       };
-
     } catch (error) {
       console.error('Error getting email preferences:', error);
       return {
@@ -730,7 +770,6 @@ export class EmailComplianceService {
         success: true,
         quota: quota as PracticeEmailQuota,
       };
-
     } catch (error) {
       console.error('Error getting practice quota:', error);
       return {
@@ -743,7 +782,10 @@ export class EmailComplianceService {
   /**
    * Check if practice can send emails (quota and rate limiting)
    */
-  async canSendEmail(practiceId: string, emailCount: number = 1): Promise<{
+  async canSendEmail(
+    practiceId: string,
+    emailCount: number = 1
+  ): Promise<{
     canSend: boolean;
     reason?: string;
     quota?: PracticeEmailQuota;
@@ -781,7 +823,6 @@ export class EmailComplianceService {
         canSend: true,
         quota,
       };
-
     } catch (error) {
       console.error('Error checking email send permission:', error);
       return {
@@ -794,7 +835,10 @@ export class EmailComplianceService {
   /**
    * Increment email usage count for a practice
    */
-  async incrementEmailUsage(practiceId: string, emailCount: number = 1): Promise<{
+  async incrementEmailUsage(
+    practiceId: string,
+    emailCount: number = 1
+  ): Promise<{
     success: boolean;
     quota?: PracticeEmailQuota;
     error?: string;
@@ -819,7 +863,6 @@ export class EmailComplianceService {
         success: true,
         quota: quota as PracticeEmailQuota,
       };
-
     } catch (error) {
       console.error('Error incrementing email usage:', error);
       return {
@@ -852,27 +895,25 @@ export class EmailComplianceService {
     webhookData?: any;
   }): Promise<void> {
     try {
-      await supabase
-        .from('email_consent_log')
-        .insert({
-          practice_id: options.practiceId,
-          preference_id: options.preferenceId,
-          action: options.action,
-          email: options.email,
-          preference_type: options.preferenceType,
-          previous_status: options.previousStatus,
-          new_status: options.newStatus,
-          previous_subscribed: options.previousSubscribed,
-          new_subscribed: options.newSubscribed,
-          action_source: options.actionSource,
-          ip_address: options.ipAddress,
-          user_agent: options.userAgent,
-          user_id: options.userId,
-          reason: options.reason,
-          legal_basis: options.legalBasis || 'consent',
-          retention_period_days: options.retentionPeriodDays,
-          webhook_data: options.webhookData || {},
-        });
+      await supabase.from('email_consent_log').insert({
+        practice_id: options.practiceId,
+        preference_id: options.preferenceId,
+        action: options.action,
+        email: options.email,
+        preference_type: options.preferenceType,
+        previous_status: options.previousStatus,
+        new_status: options.newStatus,
+        previous_subscribed: options.previousSubscribed,
+        new_subscribed: options.newSubscribed,
+        action_source: options.actionSource,
+        ip_address: options.ipAddress,
+        user_agent: options.userAgent,
+        user_id: options.userId,
+        reason: options.reason,
+        legal_basis: options.legalBasis || 'consent',
+        retention_period_days: options.retentionPeriodDays,
+        webhook_data: options.webhookData || {},
+      });
     } catch (error) {
       console.error('Error logging consent action:', error);
       // Don't throw error as this shouldn't break the main operation
@@ -902,7 +943,6 @@ export class EmailComplianceService {
         success: true,
         report,
       };
-
     } catch (error) {
       console.error('Error getting compliance report:', error);
       return {
@@ -915,15 +955,21 @@ export class EmailComplianceService {
   /**
    * Export user data for GDPR compliance
    */
-  async exportUserData(practiceId: string, email: string): Promise<{
+  async exportUserData(
+    practiceId: string,
+    email: string
+  ): Promise<{
     success: boolean;
     data?: any;
     error?: string;
   }> {
     try {
       // Get all email preferences
-      const preferencesResult = await this.getEmailPreferences(practiceId, email);
-      
+      const preferencesResult = await this.getEmailPreferences(
+        practiceId,
+        email
+      );
+
       // Get consent log
       const { data: consentLog, error: logError } = await supabase
         .from('email_consent_log')
@@ -950,7 +996,6 @@ export class EmailComplianceService {
           exported_at: new Date().toISOString(),
         },
       };
-
     } catch (error) {
       console.error('Error exporting user data:', error);
       return {
@@ -962,4 +1007,4 @@ export class EmailComplianceService {
 }
 
 // Export singleton instance
-export const emailComplianceService = new EmailComplianceService(); 
+export const emailComplianceService = new EmailComplianceService();

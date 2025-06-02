@@ -25,7 +25,11 @@ export interface ComplaintAnalysis {
 }
 
 export interface DeliverabilityAlert {
-  type: 'high_bounce_rate' | 'complaint_spike' | 'reputation_decline' | 'quota_exceeded';
+  type:
+    | 'high_bounce_rate'
+    | 'complaint_spike'
+    | 'reputation_decline'
+    | 'quota_exceeded';
   practiceId: string;
   severity: 'critical' | 'warning' | 'info';
   threshold: number;
@@ -49,7 +53,7 @@ export interface SuppressionListEntry {
 
 export class EmailBounceHandler {
   private static instance: EmailBounceHandler;
-  
+
   // Bounce classification patterns
   private readonly bouncePatterns = {
     hard: [
@@ -75,13 +79,13 @@ export class EmailBounceHandler {
 
   // Complaint feedback type mappings
   private readonly complaintSeverity = {
-    'abuse': 'critical',
-    'fraud': 'critical', 
-    'phishing': 'critical',
-    'virus': 'critical',
+    abuse: 'critical',
+    fraud: 'critical',
+    phishing: 'critical',
+    virus: 'critical',
     'not-spam': 'low',
     'opt-out': 'medium',
-    'other': 'medium',
+    other: 'medium',
   } as const;
 
   private constructor() {}
@@ -104,27 +108,31 @@ export class EmailBounceHandler {
     event: ResendWebhookEvent,
     trackingEvent: EmailTrackingEvent
   ): Promise<BounceAnalysis> {
-    const bounceReason = trackingEvent.bounceReason || event.data.bounce?.reason || '';
+    const bounceReason =
+      trackingEvent.bounceReason || event.data.bounce?.reason || '';
     const bounceType = event.data.bounce?.type || 'unknown';
-    
+
     const analysis = this.analyzeBounce(bounceReason, bounceType);
-    
+
     // Execute appropriate action based on analysis
     await this.executeBounceAction(trackingEvent, analysis);
-    
+
     // Check for alerts and notifications
     await this.checkBounceThresholds(trackingEvent.practiceId);
-    
+
     // Log the bounce processing
     await this.logBounceProcessing(trackingEvent, analysis);
-    
+
     return analysis;
   }
 
   /**
    * Analyze bounce to determine classification and recommended action
    */
-  private analyzeBounce(bounceReason: string, bounceType: string): BounceAnalysis {
+  private analyzeBounce(
+    bounceReason: string,
+    bounceType: string
+  ): BounceAnalysis {
     // Check for hard bounce patterns
     for (const pattern of this.bouncePatterns.hard) {
       if (pattern.test(bounceReason)) {
@@ -138,7 +146,7 @@ export class EmailBounceHandler {
       }
     }
 
-    // Check for soft bounce patterns  
+    // Check for soft bounce patterns
     for (const pattern of this.bouncePatterns.soft) {
       if (pattern.test(bounceReason)) {
         return {
@@ -200,7 +208,10 @@ export class EmailBounceHandler {
           suppressionReason: analysis.reason,
           bounceType: analysis.classification,
           canBeResubscribed: analysis.classification === 'soft',
-          expiresAt: analysis.classification === 'soft' ? this.calculateExpiryDate() : undefined,
+          expiresAt:
+            analysis.classification === 'soft'
+              ? this.calculateExpiryDate()
+              : undefined,
         });
         break;
 
@@ -214,13 +225,15 @@ export class EmailBounceHandler {
 
       case 'ignore':
         // Log but take no action
-        console.log(`Ignoring bounce for ${trackingEvent.recipientEmail}: ${analysis.reason}`);
+        console.log(
+          `Ignoring bounce for ${trackingEvent.recipientEmail}: ${analysis.reason}`
+        );
         break;
     }
   }
 
   // =====================
-  // Complaint Processing  
+  // Complaint Processing
   // =====================
 
   /**
@@ -230,19 +243,22 @@ export class EmailBounceHandler {
     event: ResendWebhookEvent,
     trackingEvent: EmailTrackingEvent
   ): Promise<ComplaintAnalysis> {
-    const feedbackType = trackingEvent.complaintFeedbackType || event.data.complaint?.type || 'other';
-    
+    const feedbackType =
+      trackingEvent.complaintFeedbackType ||
+      event.data.complaint?.type ||
+      'other';
+
     const analysis = this.analyzeComplaint(feedbackType);
-    
+
     // Execute appropriate action
     await this.executeComplaintAction(trackingEvent, analysis);
-    
+
     // Check for reputation alerts
     await this.checkComplaintThresholds(trackingEvent.practiceId);
-    
+
     // Log complaint processing
     await this.logComplaintProcessing(trackingEvent, analysis);
-    
+
     return analysis;
   }
 
@@ -250,11 +266,14 @@ export class EmailBounceHandler {
    * Analyze complaint to determine severity and action
    */
   private analyzeComplaint(feedbackType: string): ComplaintAnalysis {
-    const severity = this.complaintSeverity[feedbackType as keyof typeof this.complaintSeverity] || 'medium';
-    
+    const severity =
+      this.complaintSeverity[
+        feedbackType as keyof typeof this.complaintSeverity
+      ] || 'medium';
+
     let action: ComplaintAnalysis['action'] = 'suppress';
     let reputationImpact = 5; // Medium impact by default
-    
+
     switch (severity) {
       case 'critical':
         action = 'suppress';
@@ -299,7 +318,7 @@ export class EmailBounceHandler {
           suppressionReason: analysis.reason,
           canBeResubscribed: false, // Complaints should not be resubscribed automatically
         });
-        
+
         // Also update email preferences to unsubscribe from all types
         await this.unsubscribeFromAllEmails(
           trackingEvent.practiceId,
@@ -335,18 +354,16 @@ export class EmailBounceHandler {
     expiresAt?: Date;
   }): Promise<void> {
     try {
-      const { error } = await supabase
-        .from('email_suppression_list')
-        .upsert({
-          practice_id: entry.practiceId,
-          email: entry.email,
-          suppression_type: entry.suppressionType,
-          suppression_reason: entry.suppressionReason,
-          bounce_type: entry.bounceType,
-          can_be_resubscribed: entry.canBeResubscribed || false,
-          expires_at: entry.expiresAt?.toISOString(),
-          updated_at: new Date().toISOString(),
-        });
+      const { error } = await supabase.from('email_suppression_list').upsert({
+        practice_id: entry.practiceId,
+        email: entry.email,
+        suppression_type: entry.suppressionType,
+        suppression_reason: entry.suppressionReason,
+        bounce_type: entry.bounceType,
+        can_be_resubscribed: entry.canBeResubscribed || false,
+        expires_at: entry.expiresAt?.toISOString(),
+        updated_at: new Date().toISOString(),
+      });
 
       if (error) {
         console.error('Failed to add to suppression list:', error);
@@ -360,7 +377,9 @@ export class EmailBounceHandler {
         entry.suppressionType as 'bounce' | 'complaint' | 'unsubscribe'
       );
 
-      console.log(`Added ${entry.email} to suppression list for practice ${entry.practiceId}: ${entry.suppressionReason}`);
+      console.log(
+        `Added ${entry.email} to suppression list for practice ${entry.practiceId}: ${entry.suppressionReason}`
+      );
     } catch (error) {
       console.error('Error adding to suppression list:', error);
       throw error;
@@ -406,7 +425,10 @@ export class EmailBounceHandler {
   /**
    * Remove email from suppression list
    */
-  async removeFromSuppressionList(practiceId: string, email: string): Promise<void> {
+  async removeFromSuppressionList(
+    practiceId: string,
+    email: string
+  ): Promise<void> {
     try {
       const { error } = await supabase
         .from('email_suppression_list')
@@ -419,7 +441,9 @@ export class EmailBounceHandler {
         throw error;
       }
 
-      console.log(`Removed ${email} from suppression list for practice ${practiceId}`);
+      console.log(
+        `Removed ${email} from suppression list for practice ${practiceId}`
+      );
     } catch (error) {
       console.error('Error removing from suppression list:', error);
       throw error;
@@ -433,12 +457,14 @@ export class EmailBounceHandler {
   /**
    * Check bounce rate thresholds and trigger alerts
    */
-  async checkBounceThresholds(practiceId: string): Promise<DeliverabilityAlert[]> {
+  async checkBounceThresholds(
+    practiceId: string
+  ): Promise<DeliverabilityAlert[]> {
     const alerts: DeliverabilityAlert[] = [];
-    
+
     // Get bounce rates for the last 24 hours
     const bounceStats = await this.getBounceStatistics(practiceId, 24);
-    
+
     // High bounce rate alert (>5%)
     if (bounceStats.bounceRate > 5) {
       alerts.push({
@@ -469,12 +495,14 @@ export class EmailBounceHandler {
   /**
    * Check complaint rate thresholds and trigger alerts
    */
-  async checkComplaintThresholds(practiceId: string): Promise<DeliverabilityAlert[]> {
+  async checkComplaintThresholds(
+    practiceId: string
+  ): Promise<DeliverabilityAlert[]> {
     const alerts: DeliverabilityAlert[] = [];
-    
+
     // Get complaint rates for the last 24 hours
     const complaintStats = await this.getComplaintStatistics(practiceId, 24);
-    
+
     // High complaint rate alert (>0.1%)
     if (complaintStats.complaintRate > 0.1) {
       alerts.push({
@@ -509,7 +537,10 @@ export class EmailBounceHandler {
   /**
    * Get bounce statistics for a practice over a time period
    */
-  async getBounceStatistics(practiceId: string, hoursBack: number): Promise<{
+  async getBounceStatistics(
+    practiceId: string,
+    hoursBack: number
+  ): Promise<{
     totalSent: number;
     totalBounced: number;
     hardBounces: number;
@@ -517,7 +548,7 @@ export class EmailBounceHandler {
     bounceRate: number;
   }> {
     const startTime = new Date(Date.now() - hoursBack * 60 * 60 * 1000);
-    
+
     const { data, error } = await supabase
       .from('email_tracking_events')
       .select('event_type, bounce_type')
@@ -526,14 +557,24 @@ export class EmailBounceHandler {
 
     if (error) {
       console.error('Error fetching bounce statistics:', error);
-      return { totalSent: 0, totalBounced: 0, hardBounces: 0, softBounces: 0, bounceRate: 0 };
+      return {
+        totalSent: 0,
+        totalBounced: 0,
+        hardBounces: 0,
+        softBounces: 0,
+        bounceRate: 0,
+      };
     }
 
     const totalSent = data.filter(event => event.event_type === 'sent').length;
     const bounces = data.filter(event => event.event_type === 'bounced');
     const totalBounced = bounces.length;
-    const hardBounces = bounces.filter(event => event.bounce_type === 'hard').length;
-    const softBounces = bounces.filter(event => event.bounce_type === 'soft').length;
+    const hardBounces = bounces.filter(
+      event => event.bounce_type === 'hard'
+    ).length;
+    const softBounces = bounces.filter(
+      event => event.bounce_type === 'soft'
+    ).length;
     const bounceRate = totalSent > 0 ? (totalBounced / totalSent) * 100 : 0;
 
     return {
@@ -548,14 +589,17 @@ export class EmailBounceHandler {
   /**
    * Get complaint statistics for a practice over a time period
    */
-  async getComplaintStatistics(practiceId: string, hoursBack: number): Promise<{
+  async getComplaintStatistics(
+    practiceId: string,
+    hoursBack: number
+  ): Promise<{
     totalSent: number;
     totalComplaints: number;
     complaintRate: number;
     complaintsByType: Record<string, number>;
   }> {
     const startTime = new Date(Date.now() - hoursBack * 60 * 60 * 1000);
-    
+
     const { data, error } = await supabase
       .from('email_tracking_events')
       .select('event_type, complaint_feedback_type')
@@ -564,13 +608,19 @@ export class EmailBounceHandler {
 
     if (error) {
       console.error('Error fetching complaint statistics:', error);
-      return { totalSent: 0, totalComplaints: 0, complaintRate: 0, complaintsByType: {} };
+      return {
+        totalSent: 0,
+        totalComplaints: 0,
+        complaintRate: 0,
+        complaintsByType: {},
+      };
     }
 
     const totalSent = data.filter(event => event.event_type === 'sent').length;
     const complaints = data.filter(event => event.event_type === 'complained');
     const totalComplaints = complaints.length;
-    const complaintRate = totalSent > 0 ? (totalComplaints / totalSent) * 100 : 0;
+    const complaintRate =
+      totalSent > 0 ? (totalComplaints / totalSent) * 100 : 0;
 
     const complaintsByType: Record<string, number> = {};
     complaints.forEach(complaint => {
@@ -591,7 +641,9 @@ export class EmailBounceHandler {
   // =====================
 
   private getBounceCategory(bounceReason: string): string {
-    if (/user unknown|mailbox not found|invalid recipient/i.test(bounceReason)) {
+    if (
+      /user unknown|mailbox not found|invalid recipient/i.test(bounceReason)
+    ) {
       return 'invalid_recipient';
     }
     if (/quota|full|storage/i.test(bounceReason)) {
@@ -619,27 +671,47 @@ export class EmailBounceHandler {
     return new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
   }
 
-  private async scheduleRetry(trackingEvent: EmailTrackingEvent, retryAfter: number): Promise<void> {
+  private async scheduleRetry(
+    trackingEvent: EmailTrackingEvent,
+    retryAfter: number
+  ): Promise<void> {
     // Implementation would depend on your scheduling system
-    console.log(`Scheduling retry for ${trackingEvent.recipientEmail} in ${retryAfter} seconds`);
+    console.log(
+      `Scheduling retry for ${trackingEvent.recipientEmail} in ${retryAfter} seconds`
+    );
     // This would integrate with the email scheduler from subtask 10.3
   }
 
-  private async flagForManualReview(trackingEvent: EmailTrackingEvent, analysis: BounceAnalysis): Promise<void> {
+  private async flagForManualReview(
+    trackingEvent: EmailTrackingEvent,
+    analysis: BounceAnalysis
+  ): Promise<void> {
     // Flag bounce for manual review
-    console.log(`Flagging bounce for manual review: ${trackingEvent.recipientEmail} - ${analysis.reason}`);
+    console.log(
+      `Flagging bounce for manual review: ${trackingEvent.recipientEmail} - ${analysis.reason}`
+    );
     // Implementation would create a task/ticket for admin review
   }
 
-  private async flagForInvestigation(trackingEvent: EmailTrackingEvent, analysis: ComplaintAnalysis): Promise<void> {
+  private async flagForInvestigation(
+    trackingEvent: EmailTrackingEvent,
+    analysis: ComplaintAnalysis
+  ): Promise<void> {
     // Flag complaint for investigation
-    console.log(`Flagging complaint for investigation: ${trackingEvent.recipientEmail} - ${analysis.reason}`);
+    console.log(
+      `Flagging complaint for investigation: ${trackingEvent.recipientEmail} - ${analysis.reason}`
+    );
     // Implementation would create investigation task
   }
 
-  private async addToMonitoringList(trackingEvent: EmailTrackingEvent, analysis: ComplaintAnalysis): Promise<void> {
+  private async addToMonitoringList(
+    trackingEvent: EmailTrackingEvent,
+    analysis: ComplaintAnalysis
+  ): Promise<void> {
     // Add to monitoring list for future complaint tracking
-    console.log(`Adding to monitoring list: ${trackingEvent.recipientEmail} - ${analysis.reason}`);
+    console.log(
+      `Adding to monitoring list: ${trackingEvent.recipientEmail} - ${analysis.reason}`
+    );
   }
 
   private async unsubscribeFromAllEmails(
@@ -650,7 +722,7 @@ export class EmailBounceHandler {
     try {
       const { error } = await supabase
         .from('email_preferences')
-        .update({ 
+        .update({
           is_subscribed: false,
           consent_status: 'complained',
           unsubscribe_date: new Date().toISOString(),
@@ -672,7 +744,9 @@ export class EmailBounceHandler {
     analysis: BounceAnalysis
   ): Promise<void> {
     // Log bounce processing for audit and debugging
-    console.log(`Bounce processed: ${trackingEvent.recipientEmail} - ${analysis.classification} - ${analysis.action}`);
+    console.log(
+      `Bounce processed: ${trackingEvent.recipientEmail} - ${analysis.classification} - ${analysis.action}`
+    );
   }
 
   private async logComplaintProcessing(
@@ -680,13 +754,17 @@ export class EmailBounceHandler {
     analysis: ComplaintAnalysis
   ): Promise<void> {
     // Log complaint processing for audit and debugging
-    console.log(`Complaint processed: ${trackingEvent.recipientEmail} - ${analysis.severity} - ${analysis.action}`);
+    console.log(
+      `Complaint processed: ${trackingEvent.recipientEmail} - ${analysis.severity} - ${analysis.action}`
+    );
   }
 
-  private async sendDeliverabilityAlert(alert: DeliverabilityAlert): Promise<void> {
+  private async sendDeliverabilityAlert(
+    alert: DeliverabilityAlert
+  ): Promise<void> {
     // Send deliverability alert to practice administrators
     console.log(`DELIVERABILITY ALERT: ${alert.type} - ${alert.message}`);
-    
+
     // Implementation would:
     // 1. Send email to practice admins
     // 2. Create in-app notification
@@ -696,4 +774,4 @@ export class EmailBounceHandler {
 }
 
 // Export singleton instance
-export const emailBounceHandler = EmailBounceHandler.getInstance(); 
+export const emailBounceHandler = EmailBounceHandler.getInstance();

@@ -7,10 +7,7 @@ export async function POST(request: NextRequest) {
     const { token } = body;
 
     if (!token) {
-      return NextResponse.json(
-        { error: 'Token is required' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Token is required' }, { status: 400 });
     }
 
     // For validation, we need to check if the token exists and get the email
@@ -34,7 +31,6 @@ export async function POST(request: NextRequest) {
       email: preferences.email,
       practiceId: preferences.practice_id,
     });
-
   } catch (error) {
     console.error('Error validating unsubscribe token:', error);
     return NextResponse.json(
@@ -42,4 +38,4 @@ export async function POST(request: NextRequest) {
       { status: 500 }
     );
   }
-} 
+}

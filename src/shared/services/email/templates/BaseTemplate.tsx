@@ -51,9 +51,7 @@ export const BaseTemplate: React.FC<BaseTemplateProps> = ({
                 style={logo}
               />
             )}
-            <Heading style={headerTitleStyle}>
-              {headerTitle}
-            </Heading>
+            <Heading style={headerTitleStyle}>{headerTitle}</Heading>
           </Section>
 
           {/* Main Content */}
@@ -75,11 +73,14 @@ export const BaseTemplate: React.FC<BaseTemplateProps> = ({
                       <Text style={footerText}>{practiceInfo.address}</Text>
                     )}
                     {practiceInfo.phone && (
-                      <Text style={footerText}>Phone: {practiceInfo.phone}</Text>
+                      <Text style={footerText}>
+                        Phone: {practiceInfo.phone}
+                      </Text>
                     )}
                     {practiceInfo.website && (
                       <Text style={footerText}>
-                        Website: <Link href={practiceInfo.website} style={link}>
+                        Website:{' '}
+                        <Link href={practiceInfo.website} style={link}>
                           {practiceInfo.website}
                         </Link>
                       </Text>
@@ -88,9 +89,9 @@ export const BaseTemplate: React.FC<BaseTemplateProps> = ({
                 )}
 
                 <Text style={disclaimer}>
-                  This email was sent from an automated system. Please do not reply 
-                  to this email. If you need assistance, please contact us using the 
-                  information provided above.
+                  This email was sent from an automated system. Please do not
+                  reply to this email. If you need assistance, please contact us
+                  using the information provided above.
                 </Text>
               </>
             )}
@@ -104,7 +105,8 @@ export const BaseTemplate: React.FC<BaseTemplateProps> = ({
 // Shared styles
 const main = {
   backgroundColor: '#f6f9fc',
-  fontFamily: '-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Ubuntu,sans-serif',
+  fontFamily:
+    '-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Ubuntu,sans-serif',
 };
 
 const container = {
@@ -242,4 +244,4 @@ export const commonStyles = {
   },
 };
 
-export default BaseTemplate; 
+export default BaseTemplate;

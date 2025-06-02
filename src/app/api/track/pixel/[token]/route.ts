@@ -15,7 +15,7 @@ const TRACKING_PIXEL = Buffer.from(
 
 /**
  * GET /api/track/pixel/[token]
- * 
+ *
  * Serve tracking pixel for email open tracking.
  * Returns a 1x1 transparent PNG and records the open event.
  */
@@ -49,27 +49,28 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
       headers: {
         'Content-Type': 'image/png',
         'Content-Length': TRACKING_PIXEL.length.toString(),
-        'Cache-Control': 'no-cache, no-store, must-revalidate, private, max-age=0',
-        'Pragma': 'no-cache',
-        'Expires': '0',
+        'Cache-Control':
+          'no-cache, no-store, must-revalidate, private, max-age=0',
+        Pragma: 'no-cache',
+        Expires: '0',
         'Access-Control-Allow-Origin': '*',
         'Access-Control-Allow-Methods': 'GET',
         'Access-Control-Allow-Headers': 'Content-Type',
       },
     });
-
   } catch (error) {
     console.error('Pixel tracking error:', error);
-    
+
     // Still return the pixel to avoid breaking email display
     return new NextResponse(TRACKING_PIXEL, {
       status: 200,
       headers: {
         'Content-Type': 'image/png',
         'Content-Length': TRACKING_PIXEL.length.toString(),
-        'Cache-Control': 'no-cache, no-store, must-revalidate, private, max-age=0',
-        'Pragma': 'no-cache',
-        'Expires': '0',
+        'Cache-Control':
+          'no-cache, no-store, must-revalidate, private, max-age=0',
+        Pragma: 'no-cache',
+        Expires: '0',
       },
     });
   }
@@ -84,26 +85,27 @@ export async function HEAD(request: NextRequest, { params }: RouteParams) {
   try {
     // Check if tracking token exists
     const trackingPixel = await emailTrackingService.getTrackingPixel(token);
-    
+
     if (!trackingPixel) {
-      return new NextResponse(null, { 
+      return new NextResponse(null, {
         status: 404,
         headers: {
           'Cache-Control': 'no-cache, no-store, must-revalidate',
-          'Expires': '0',
-        }
+          Expires: '0',
+        },
       });
     }
 
-    return new NextResponse(null, { 
+    return new NextResponse(null, {
       status: 200,
       headers: {
         'Content-Type': 'image/png',
         'Content-Length': TRACKING_PIXEL.length.toString(),
-        'Cache-Control': 'no-cache, no-store, must-revalidate, private, max-age=0',
-        'Pragma': 'no-cache',
-        'Expires': '0',
-      }
+        'Cache-Control':
+          'no-cache, no-store, must-revalidate, private, max-age=0',
+        Pragma: 'no-cache',
+        Expires: '0',
+      },
     });
   } catch (error) {
     console.error('Pixel tracking HEAD request error:', error);
@@ -124,4 +126,4 @@ export async function OPTIONS() {
       'Access-Control-Max-Age': '86400',
     },
   });
-} 
+}

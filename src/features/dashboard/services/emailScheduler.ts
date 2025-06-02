@@ -17,7 +17,8 @@ export interface ScheduleEmailOptions {
   campaignId?: string;
 }
 
-export interface RecurringEmailOptions extends Omit<ScheduleEmailOptions, 'scheduledAt'> {
+export interface RecurringEmailOptions
+  extends Omit<ScheduleEmailOptions, 'scheduledAt'> {
   recurrenceRule: string; // cron expression
   startDate?: Date;
   endDate?: Date;
@@ -88,14 +89,14 @@ export class EmailScheduler {
         maxRequests: 50, // 50 emails per minute
         windowMs: 60000,
         priority: 'medium',
-        resource: 'email'
+        resource: 'email',
       },
       adaptiveThrottling: true,
       loadBalancing: true,
       maxBackpressure: 500,
-      circuitBreakerThreshold: 0.3 // 30% error rate trips circuit breaker
+      circuitBreakerThreshold: 0.3, // 30% error rate trips circuit breaker
     });
-    
+
     this.emailService = new EmailService();
     this.startProcessing();
     this.startRecurringJobs();
@@ -111,7 +112,9 @@ export class EmailScheduler {
   /**
    * Schedule a single email for delayed delivery
    */
-  async scheduleEmail(options: ScheduleEmailOptions): Promise<{ success: boolean; scheduledEmailId?: string; error?: string }> {
+  async scheduleEmail(
+    options: ScheduleEmailOptions
+  ): Promise<{ success: boolean; scheduledEmailId?: string; error?: string }> {
     try {
       const { data, error } = await supabase
         .from('scheduled_emails')
@@ -125,7 +128,7 @@ export class EmailScheduler {
           priority: options.priority || 'medium',
           max_retries: options.maxRetries || 3,
           campaign_id: options.campaignId || null,
-          is_recurring: false
+          is_recurring: false,
         })
         .select('id')
         .single();
@@ -136,7 +139,8 @@ export class EmailScheduler {
 
       return { success: true, scheduledEmailId: data.id };
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Unknown scheduling error';
+      const errorMessage =
+        error instanceof Error ? error.message : 'Unknown scheduling error';
       return { success: false, error: errorMessage };
     }
   }
@@ -144,7 +148,9 @@ export class EmailScheduler {
   /**
    * Schedule recurring emails based on cron expression
    */
-  async scheduleRecurringEmail(options: RecurringEmailOptions): Promise<{ success: boolean; scheduledEmailId?: string; error?: string }> {
+  async scheduleRecurringEmail(
+    options: RecurringEmailOptions
+  ): Promise<{ success: boolean; scheduledEmailId?: string; error?: string }> {
     try {
       // Validate cron expression
       if (!cron.validate(options.recurrenceRule)) {
@@ -152,7 +158,7 @@ export class EmailScheduler {
       }
 
       const startDate = options.startDate || new Date();
-      
+
       const { data, error } = await supabase
         .from('scheduled_emails')
         .insert({
@@ -166,7 +172,7 @@ export class EmailScheduler {
           max_retries: options.maxRetries || 3,
           campaign_id: options.campaignId || null,
           is_recurring: true,
-          recurrence_rule: options.recurrenceRule
+          recurrence_rule: options.recurrenceRule,
         })
         .select('id')
         .single();
@@ -177,7 +183,10 @@ export class EmailScheduler {
 
       return { success: true, scheduledEmailId: data.id };
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Unknown recurring scheduling error';
+      const errorMessage =
+        error instanceof Error
+          ? error.message
+          : 'Unknown recurring scheduling error';
       return { success: false, error: errorMessage };
     }
   }
@@ -185,13 +194,16 @@ export class EmailScheduler {
   /**
    * Cancel a scheduled email
    */
-  async cancelScheduledEmail(scheduledEmailId: string, practiceId: string): Promise<{ success: boolean; error?: string }> {
+  async cancelScheduledEmail(
+    scheduledEmailId: string,
+    practiceId: string
+  ): Promise<{ success: boolean; error?: string }> {
     try {
       const { error } = await supabase
         .from('scheduled_emails')
-        .update({ 
+        .update({
           status: 'cancelled',
-          updated_at: new Date().toISOString()
+          updated_at: new Date().toISOString(),
         })
         .eq('id', scheduledEmailId)
         .eq('practice_id', practiceId) // Ensure multi-tenant isolation
@@ -203,7 +215,8 @@ export class EmailScheduler {
 
       return { success: true };
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Unknown cancellation error';
+      const errorMessage =
+        error instanceof Error ? error.message : 'Unknown cancellation error';
       return { success: false, error: errorMessage };
     }
   }
@@ -212,7 +225,7 @@ export class EmailScheduler {
    * Get scheduled emails for a practice
    */
   async getScheduledEmails(
-    practiceId: string, 
+    practiceId: string,
     options: {
       status?: string;
       limit?: number;
@@ -235,7 +248,10 @@ export class EmailScheduler {
       }
 
       if (options.offset) {
-        query = query.range(options.offset, options.offset + (options.limit || 50) - 1);
+        query = query.range(
+          options.offset,
+          options.offset + (options.limit || 50) - 1
+        );
       }
 
       const { data, error } = await query;
@@ -254,12 +270,16 @@ export class EmailScheduler {
         scheduledAt: new Date(record.scheduled_at),
         retryCount: record.retry_count,
         maxRetries: record.max_retries,
-        nextRetryAt: record.next_retry_at ? new Date(record.next_retry_at) : undefined,
+        nextRetryAt: record.next_retry_at
+          ? new Date(record.next_retry_at)
+          : undefined,
         status: record.status,
         priority: record.priority,
         campaignId: record.campaign_id,
         processingAttempts: record.processing_attempts,
-        lastAttemptedAt: record.last_attempted_at ? new Date(record.last_attempted_at) : undefined,
+        lastAttemptedAt: record.last_attempted_at
+          ? new Date(record.last_attempted_at)
+          : undefined,
         sentAt: record.sent_at ? new Date(record.sent_at) : undefined,
         failedAt: record.failed_at ? new Date(record.failed_at) : undefined,
         errorMessage: record.error_message,
@@ -267,12 +287,13 @@ export class EmailScheduler {
         recurrenceRule: record.recurrence_rule,
         parentScheduledEmailId: record.parent_scheduled_email_id,
         createdAt: new Date(record.created_at),
-        updatedAt: new Date(record.updated_at)
+        updatedAt: new Date(record.updated_at),
       }));
 
       return { data: scheduledEmails };
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Unknown query error';
+      const errorMessage =
+        error instanceof Error ? error.message : 'Unknown query error';
       return { data: [], error: errorMessage };
     }
   }
@@ -310,7 +331,6 @@ export class EmailScheduler {
       for (const queueItem of queueItems) {
         await this.processEmailWithScheduler(queueItem);
       }
-
     } catch (error) {
       console.error('Error in email queue processing:', error);
     } finally {
@@ -326,7 +346,7 @@ export class EmailScheduler {
       // Mark email as processing
       await this.updateScheduledEmailStatus(queueItem.id, 'processing', {
         processing_attempts: queueItem.processing_attempts + 1,
-        last_attempted_at: new Date().toISOString()
+        last_attempted_at: new Date().toISOString(),
       });
 
       // Schedule the email processing with rate limiting
@@ -338,13 +358,12 @@ export class EmailScheduler {
           priority: queueItem.priority as 'high' | 'medium' | 'low',
           resource: `email_practice_${queueItem.practice_id}`,
           maxRetries: 0, // We handle retries at the application level
-          rateLimitRule: 'email_scheduling'
+          rateLimitRule: 'email_scheduling',
         }
       );
-
     } catch (error) {
       console.error(`Error processing email ${queueItem.id}:`, error);
-      
+
       // Handle failure and retry logic
       await this.handleEmailProcessingFailure(queueItem, error);
     }
@@ -357,7 +376,7 @@ export class EmailScheduler {
     try {
       // Determine the email method based on template type
       let result;
-      
+
       switch (queueItem.template_type) {
         case 'report_delivery':
           result = await this.emailService.sendReportDeliveryEmail({
@@ -365,28 +384,30 @@ export class EmailScheduler {
             childName: queueItem.template_data.childName,
             assessmentDate: queueItem.template_data.assessmentDate,
             downloadUrl: queueItem.template_data.downloadUrl,
-            pdfAttachment: queueItem.template_data.pdfAttachment
+            pdfAttachment: queueItem.template_data.pdfAttachment,
           });
           break;
-          
+
         case 'report_share':
           result = await this.emailService.sendReportReadyNotification({
             to: queueItem.recipient_email,
             firstName: queueItem.template_data.firstName,
             reportId: queueItem.template_data.reportId,
             downloadUrl: queueItem.template_data.downloadUrl,
-            expiresAt: queueItem.template_data.expiresAt
+            expiresAt: queueItem.template_data.expiresAt,
           });
           break;
-          
+
         default:
-          throw new Error(`Unsupported template type: ${queueItem.template_type}`);
+          throw new Error(
+            `Unsupported template type: ${queueItem.template_type}`
+          );
       }
 
       if (result.success) {
         // Mark as sent
         await this.updateScheduledEmailStatus(queueItem.id, 'sent', {
-          sent_at: new Date().toISOString()
+          sent_at: new Date().toISOString(),
         });
 
         // Handle recurring emails
@@ -396,7 +417,6 @@ export class EmailScheduler {
       } else {
         throw new Error(result.error || 'Email sending failed');
       }
-
     } catch (error) {
       throw error; // Re-throw to be handled by the calling function
     }
@@ -405,9 +425,13 @@ export class EmailScheduler {
   /**
    * Handle email processing failure with retry logic
    */
-  private async handleEmailProcessingFailure(queueItem: any, error: any): Promise<void> {
+  private async handleEmailProcessingFailure(
+    queueItem: any,
+    error: any
+  ): Promise<void> {
     const newRetryCount = queueItem.retry_count + 1;
-    const errorMessage = error instanceof Error ? error.message : 'Unknown processing error';
+    const errorMessage =
+      error instanceof Error ? error.message : 'Unknown processing error';
 
     if (newRetryCount <= queueItem.max_retries) {
       // Calculate next retry time with exponential backoff
@@ -417,14 +441,14 @@ export class EmailScheduler {
       await this.updateScheduledEmailStatus(queueItem.id, 'failed', {
         retry_count: newRetryCount,
         next_retry_at: nextRetryAt.toISOString(),
-        error_message: errorMessage
+        error_message: errorMessage,
       });
     } else {
       // Max retries reached - mark as permanently failed
       await this.updateScheduledEmailStatus(queueItem.id, 'failed', {
         retry_count: newRetryCount,
         failed_at: new Date().toISOString(),
-        error_message: `Max retries exceeded: ${errorMessage}`
+        error_message: `Max retries exceeded: ${errorMessage}`,
       });
     }
   }
@@ -433,8 +457,8 @@ export class EmailScheduler {
    * Update the status of a scheduled email
    */
   private async updateScheduledEmailStatus(
-    id: string, 
-    status: string, 
+    id: string,
+    status: string,
     additionalFields: Record<string, any> = {}
   ): Promise<void> {
     await supabase
@@ -442,7 +466,7 @@ export class EmailScheduler {
       .update({
         status,
         ...additionalFields,
-        updated_at: new Date().toISOString()
+        updated_at: new Date().toISOString(),
       })
       .eq('id', id);
   }
@@ -457,22 +481,20 @@ export class EmailScheduler {
       const nextScheduleTime = this.getNextCronOccurrence(cronExpression);
 
       if (nextScheduleTime) {
-        await supabase
-          .from('scheduled_emails')
-          .insert({
-            practice_id: queueItem.practice_id,
-            template_type: queueItem.template_type,
-            recipient_email: queueItem.recipient_email,
-            subject: queueItem.subject,
-            template_data: queueItem.template_data,
-            scheduled_at: nextScheduleTime.toISOString(),
-            priority: queueItem.priority,
-            max_retries: queueItem.max_retries,
-            campaign_id: queueItem.campaign_id,
-            is_recurring: true,
-            recurrence_rule: queueItem.recurrence_rule,
-            parent_scheduled_email_id: queueItem.id
-          });
+        await supabase.from('scheduled_emails').insert({
+          practice_id: queueItem.practice_id,
+          template_type: queueItem.template_type,
+          recipient_email: queueItem.recipient_email,
+          subject: queueItem.subject,
+          template_data: queueItem.template_data,
+          scheduled_at: nextScheduleTime.toISOString(),
+          priority: queueItem.priority,
+          max_retries: queueItem.max_retries,
+          campaign_id: queueItem.campaign_id,
+          is_recurring: true,
+          recurrence_rule: queueItem.recurrence_rule,
+          parent_scheduled_email_id: queueItem.id,
+        });
       }
     } catch (error) {
       console.error('Error scheduling next recurrence:', error);
@@ -487,10 +509,13 @@ export class EmailScheduler {
       // Parse cron expression to get next execution time
       // Cron format: minute hour day month day_of_week
       // Example: "0 9 * * 1" = Every Monday at 9:00 AM
-      
+
       const cronParts = cronExpression.trim().split(/\s+/);
       if (cronParts.length !== 5) {
-        console.error('Invalid cron expression format. Expected 5 parts:', cronExpression);
+        console.error(
+          'Invalid cron expression format. Expected 5 parts:',
+          cronExpression
+        );
         return null;
       }
 
@@ -524,11 +549,11 @@ export class EmailScheduler {
           if (!isNaN(targetDay) && targetDay >= 0 && targetDay <= 6) {
             const currentDay = now.getDay();
             let daysToAdd = targetDay - currentDay;
-            
+
             if (daysToAdd <= 0 || (daysToAdd === 0 && nextDate <= now)) {
               daysToAdd += 7; // Next week
             }
-            
+
             nextDate.setDate(now.getDate() + daysToAdd);
             nextDate.setHours(targetHour, targetMinute, 0, 0);
           }
@@ -539,17 +564,27 @@ export class EmailScheduler {
             // Move to next month if target date has passed
             let targetMonth = now.getMonth();
             let targetYear = now.getFullYear();
-            
-            if (now.getDate() > targetDate || 
-                (now.getDate() === targetDate && nextDate <= now)) {
+
+            if (
+              now.getDate() > targetDate ||
+              (now.getDate() === targetDate && nextDate <= now)
+            ) {
               targetMonth++;
               if (targetMonth > 11) {
                 targetMonth = 0;
                 targetYear++;
               }
             }
-            
-            nextDate = new Date(targetYear, targetMonth, targetDate, targetHour, targetMinute, 0, 0);
+
+            nextDate = new Date(
+              targetYear,
+              targetMonth,
+              targetDate,
+              targetHour,
+              targetMinute,
+              0,
+              0
+            );
           }
         } else {
           // Daily recurrence - just add one day
@@ -579,9 +614,12 @@ export class EmailScheduler {
    */
   private startRecurringJobs(): void {
     // Check for recurring jobs every 5 minutes
-    this.recurringJobsInterval = setInterval(async () => {
-      await this.processRecurringJobs();
-    }, 5 * 60 * 1000);
+    this.recurringJobsInterval = setInterval(
+      async () => {
+        await this.processRecurringJobs();
+      },
+      5 * 60 * 1000
+    );
   }
 
   /**
@@ -617,14 +655,14 @@ export class EmailScheduler {
     if (this.processingInterval) {
       clearInterval(this.processingInterval);
     }
-    
+
     if (this.recurringJobsInterval) {
       clearInterval(this.recurringJobsInterval);
     }
-    
+
     await this.scheduler.shutdown();
   }
 }
 
 // Export singleton instance
-export const emailScheduler = EmailScheduler.getInstance(); 
+export const emailScheduler = EmailScheduler.getInstance();

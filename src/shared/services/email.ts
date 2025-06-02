@@ -3,7 +3,7 @@ import { config } from '@/shared/config';
 import { resendClient } from './email/resend';
 import { EmailTemplateService } from './email/templates';
 import { emailTrackingService } from './email/tracking';
-import { 
+import {
   EmailAttachment,
   ReportDeliveryEmailOptions,
   ReportReadyNotificationOptions,
@@ -14,14 +14,14 @@ import {
   EmailRateLimitError,
   EmailAuthenticationError,
   EmailValidationError,
-  EmailDeliveryError
+  EmailDeliveryError,
 } from './email/types';
 
 // Import email scheduler types
-import type { 
-  ScheduleEmailOptions, 
+import type {
+  ScheduleEmailOptions,
   RecurringEmailOptions,
-  ScheduledEmailRecord 
+  ScheduledEmailRecord,
 } from '@/features/dashboard/services/emailScheduler';
 
 export class EmailService {
@@ -55,8 +55,11 @@ export class EmailService {
         },
       };
 
-      const { html: htmlContent, text: textContent, subject } = 
-        await EmailTemplateService.renderReportDelivery(templateData);
+      const {
+        html: htmlContent,
+        text: textContent,
+        subject,
+      } = await EmailTemplateService.renderReportDelivery(templateData);
 
       // Add tracking to email content if practice ID is available
       let finalHtmlContent = htmlContent;
@@ -81,16 +84,23 @@ export class EmailService {
         subject,
         html: finalHtmlContent,
         text: textContent,
-        attachments: options.pdfAttachment ? [{
-          filename: options.pdfAttachment.filename,
-          content: options.pdfAttachment.content,
-          contentType: options.pdfAttachment.contentType || 'application/pdf'
-        }] : undefined,
+        attachments: options.pdfAttachment
+          ? [
+              {
+                filename: options.pdfAttachment.filename,
+                content: options.pdfAttachment.content,
+                contentType:
+                  options.pdfAttachment.contentType || 'application/pdf',
+              },
+            ]
+          : undefined,
         tags: [
           { name: 'template', value: 'report_delivery' },
           { name: 'child', value: options.childName },
-          ...(options.practiceId ? [{ name: 'practice_id', value: options.practiceId }] : [])
-        ]
+          ...(options.practiceId
+            ? [{ name: 'practice_id', value: options.practiceId }]
+            : []),
+        ],
       });
 
       // Log email send attempt
@@ -99,7 +109,7 @@ export class EmailService {
         recipientEmail: options.to,
         messageId: result.messageId,
         status: result.success ? 'sent' : 'failed',
-        error: result.error
+        error: result.error,
       });
 
       if (!result.success) {
@@ -113,23 +123,25 @@ export class EmailService {
         success: true,
         messageId: result.messageId,
       };
-
     } catch (error) {
       // Handle specific error types
-      if (error instanceof EmailConfigurationError ||
-          error instanceof EmailRateLimitError ||
-          error instanceof EmailAuthenticationError ||
-          error instanceof EmailValidationError ||
-          error instanceof EmailDeliveryError) {
+      if (
+        error instanceof EmailConfigurationError ||
+        error instanceof EmailRateLimitError ||
+        error instanceof EmailAuthenticationError ||
+        error instanceof EmailValidationError ||
+        error instanceof EmailDeliveryError
+      ) {
         return {
           success: false,
           error: error.message,
-          rateLimited: error instanceof EmailRateLimitError
+          rateLimited: error instanceof EmailRateLimitError,
         };
       }
 
       // Unknown error
-      const errorMessage = error instanceof Error ? error.message : 'Unknown email error';
+      const errorMessage =
+        error instanceof Error ? error.message : 'Unknown email error';
       return {
         success: false,
         error: errorMessage,
@@ -164,8 +176,11 @@ export class EmailService {
         },
       };
 
-      const { html: htmlContent, text: textContent, subject } = 
-        await EmailTemplateService.renderReportReady(templateData);
+      const {
+        html: htmlContent,
+        text: textContent,
+        subject,
+      } = await EmailTemplateService.renderReportReady(templateData);
 
       // Add tracking to email content if practice ID is available
       let finalHtmlContent = htmlContent;
@@ -193,8 +208,10 @@ export class EmailService {
         tags: [
           { name: 'template', value: 'report_ready' },
           { name: 'report_id', value: options.reportId },
-          ...(options.practiceId ? [{ name: 'practice_id', value: options.practiceId }] : [])
-        ]
+          ...(options.practiceId
+            ? [{ name: 'practice_id', value: options.practiceId }]
+            : []),
+        ],
       });
 
       // Log email send attempt
@@ -203,37 +220,41 @@ export class EmailService {
         recipientEmail: options.to,
         messageId: result.messageId,
         status: result.success ? 'sent' : 'failed',
-        error: result.error
+        error: result.error,
       });
 
       if (!result.success) {
         if (result.rateLimited) {
           throw new EmailRateLimitError(result.error);
         }
-        throw new EmailDeliveryError(result.error || 'Failed to send notification');
+        throw new EmailDeliveryError(
+          result.error || 'Failed to send notification'
+        );
       }
 
       return {
         success: true,
         messageId: result.messageId,
       };
-
     } catch (error) {
       // Handle specific error types
-      if (error instanceof EmailConfigurationError ||
-          error instanceof EmailRateLimitError ||
-          error instanceof EmailAuthenticationError ||
-          error instanceof EmailValidationError ||
-          error instanceof EmailDeliveryError) {
+      if (
+        error instanceof EmailConfigurationError ||
+        error instanceof EmailRateLimitError ||
+        error instanceof EmailAuthenticationError ||
+        error instanceof EmailValidationError ||
+        error instanceof EmailDeliveryError
+      ) {
         return {
           success: false,
           error: error.message,
-          rateLimited: error instanceof EmailRateLimitError
+          rateLimited: error instanceof EmailRateLimitError,
         };
       }
 
       // Unknown error
-      const errorMessage = error instanceof Error ? error.message : 'Unknown notification error';
+      const errorMessage =
+        error instanceof Error ? error.message : 'Unknown notification error';
       return {
         success: false,
         error: errorMessage,
@@ -244,14 +265,19 @@ export class EmailService {
   /**
    * Schedule a delayed email delivery
    */
-  async scheduleEmail(options: ScheduleEmailOptions): Promise<{ success: boolean; scheduledEmailId?: string; error?: string }> {
+  async scheduleEmail(
+    options: ScheduleEmailOptions
+  ): Promise<{ success: boolean; scheduledEmailId?: string; error?: string }> {
     try {
       // Import emailScheduler dynamically to avoid circular dependencies
-      const { emailScheduler } = await import('@/features/dashboard/services/emailScheduler');
-      
+      const { emailScheduler } = await import(
+        '@/features/dashboard/services/emailScheduler'
+      );
+
       return await emailScheduler.scheduleEmail(options);
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Unknown scheduling error';
+      const errorMessage =
+        error instanceof Error ? error.message : 'Unknown scheduling error';
       return { success: false, error: errorMessage };
     }
   }
@@ -259,14 +285,21 @@ export class EmailService {
   /**
    * Schedule recurring emails
    */
-  async scheduleRecurringEmail(options: RecurringEmailOptions): Promise<{ success: boolean; scheduledEmailId?: string; error?: string }> {
+  async scheduleRecurringEmail(
+    options: RecurringEmailOptions
+  ): Promise<{ success: boolean; scheduledEmailId?: string; error?: string }> {
     try {
       // Import emailScheduler dynamically to avoid circular dependencies
-      const { emailScheduler } = await import('@/features/dashboard/services/emailScheduler');
-      
+      const { emailScheduler } = await import(
+        '@/features/dashboard/services/emailScheduler'
+      );
+
       return await emailScheduler.scheduleRecurringEmail(options);
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Unknown recurring scheduling error';
+      const errorMessage =
+        error instanceof Error
+          ? error.message
+          : 'Unknown recurring scheduling error';
       return { success: false, error: errorMessage };
     }
   }
@@ -274,14 +307,23 @@ export class EmailService {
   /**
    * Cancel a scheduled email
    */
-  async cancelScheduledEmail(scheduledEmailId: string, practiceId: string): Promise<{ success: boolean; error?: string }> {
+  async cancelScheduledEmail(
+    scheduledEmailId: string,
+    practiceId: string
+  ): Promise<{ success: boolean; error?: string }> {
     try {
       // Import emailScheduler dynamically to avoid circular dependencies
-      const { emailScheduler } = await import('@/features/dashboard/services/emailScheduler');
-      
-      return await emailScheduler.cancelScheduledEmail(scheduledEmailId, practiceId);
+      const { emailScheduler } = await import(
+        '@/features/dashboard/services/emailScheduler'
+      );
+
+      return await emailScheduler.cancelScheduledEmail(
+        scheduledEmailId,
+        practiceId
+      );
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Unknown cancellation error';
+      const errorMessage =
+        error instanceof Error ? error.message : 'Unknown cancellation error';
       return { success: false, error: errorMessage };
     }
   }
@@ -299,11 +341,14 @@ export class EmailService {
   ): Promise<{ data: ScheduledEmailRecord[]; error?: string }> {
     try {
       // Import emailScheduler dynamically to avoid circular dependencies
-      const { emailScheduler } = await import('@/features/dashboard/services/emailScheduler');
-      
+      const { emailScheduler } = await import(
+        '@/features/dashboard/services/emailScheduler'
+      );
+
       return await emailScheduler.getScheduledEmails(practiceId, options);
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Unknown query error';
+      const errorMessage =
+        error instanceof Error ? error.message : 'Unknown query error';
       return { data: [], error: errorMessage };
     }
   }
@@ -323,7 +368,7 @@ export class EmailService {
         childName: options.childName,
         assessmentDate: options.assessmentDate,
         downloadUrl: options.downloadUrl,
-        pdfAttachment: options.pdfAttachment
+        pdfAttachment: options.pdfAttachment,
       };
 
       return await this.scheduleEmail({
@@ -333,10 +378,13 @@ export class EmailService {
         subject: `Assessment Report for ${options.childName}`,
         templateData,
         scheduledAt: options.scheduledAt,
-        priority: options.priority || 'medium'
+        priority: options.priority || 'medium',
       });
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Unknown report delivery scheduling error';
+      const errorMessage =
+        error instanceof Error
+          ? error.message
+          : 'Unknown report delivery scheduling error';
       return { success: false, error: errorMessage };
     }
   }
@@ -356,7 +404,7 @@ export class EmailService {
         firstName: options.firstName,
         reportId: options.reportId,
         downloadUrl: options.downloadUrl,
-        expiresAt: options.expiresAt
+        expiresAt: options.expiresAt,
       };
 
       return await this.scheduleEmail({
@@ -366,15 +414,16 @@ export class EmailService {
         subject: `Your Assessment Report is Ready, ${options.firstName}`,
         templateData,
         scheduledAt: options.scheduledAt,
-        priority: options.priority || 'medium'
+        priority: options.priority || 'medium',
       });
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Unknown notification scheduling error';
+      const errorMessage =
+        error instanceof Error
+          ? error.message
+          : 'Unknown notification scheduling error';
       return { success: false, error: errorMessage };
     }
   }
-
-
 
   /**
    * Log email send for tracking and analytics
@@ -383,7 +432,13 @@ export class EmailService {
     templateType: EmailTemplateType;
     recipientEmail: string;
     messageId?: string;
-    status: 'pending' | 'sent' | 'delivered' | 'bounced' | 'complained' | 'failed';
+    status:
+      | 'pending'
+      | 'sent'
+      | 'delivered'
+      | 'bounced'
+      | 'complained'
+      | 'failed';
     error?: string;
   }): Promise<void> {
     try {
@@ -437,12 +492,23 @@ export class EmailService {
   /**
    * Get email analytics for a practice
    */
-  async getEmailAnalytics(practiceId: string, options: {
-    campaignId?: string;
-    startDate?: Date;
-    endDate?: Date;
-    eventTypes?: ('sent' | 'delivered' | 'opened' | 'clicked' | 'bounced' | 'complained' | 'unsubscribed')[];
-  } = {}): Promise<{ success: boolean; data?: any; error?: string }> {
+  async getEmailAnalytics(
+    practiceId: string,
+    options: {
+      campaignId?: string;
+      startDate?: Date;
+      endDate?: Date;
+      eventTypes?: (
+        | 'sent'
+        | 'delivered'
+        | 'opened'
+        | 'clicked'
+        | 'bounced'
+        | 'complained'
+        | 'unsubscribed'
+      )[];
+    } = {}
+  ): Promise<{ success: boolean; data?: any; error?: string }> {
     try {
       const analytics = await emailTrackingService.getAnalyticsSummary({
         practiceId,
@@ -454,7 +520,8 @@ export class EmailService {
         data: analytics,
       };
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Unknown analytics error';
+      const errorMessage =
+        error instanceof Error ? error.message : 'Unknown analytics error';
       return {
         success: false,
         error: errorMessage,
@@ -465,7 +532,10 @@ export class EmailService {
   /**
    * Get detailed email performance metrics
    */
-  async getEmailPerformance(practiceId: string, campaignId?: string): Promise<{
+  async getEmailPerformance(
+    practiceId: string,
+    campaignId?: string
+  ): Promise<{
     success: boolean;
     data?: {
       totalSent: number;
@@ -482,14 +552,18 @@ export class EmailService {
     error?: string;
   }> {
     try {
-      const performance = await emailTrackingService.getEmailPerformance(practiceId, campaignId);
+      const performance = await emailTrackingService.getEmailPerformance(
+        practiceId,
+        campaignId
+      );
 
       return {
         success: true,
         data: performance,
       };
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Unknown performance error';
+      const errorMessage =
+        error instanceof Error ? error.message : 'Unknown performance error';
       return {
         success: false,
         error: errorMessage,
@@ -500,12 +574,23 @@ export class EmailService {
   /**
    * Get detailed tracking events
    */
-  async getTrackingEvents(practiceId: string, options: {
-    campaignId?: string;
-    startDate?: Date;
-    endDate?: Date;
-    eventTypes?: ('sent' | 'delivered' | 'opened' | 'clicked' | 'bounced' | 'complained' | 'unsubscribed')[];
-  } = {}): Promise<{ success: boolean; data?: any[]; error?: string }> {
+  async getTrackingEvents(
+    practiceId: string,
+    options: {
+      campaignId?: string;
+      startDate?: Date;
+      endDate?: Date;
+      eventTypes?: (
+        | 'sent'
+        | 'delivered'
+        | 'opened'
+        | 'clicked'
+        | 'bounced'
+        | 'complained'
+        | 'unsubscribed'
+      )[];
+    } = {}
+  ): Promise<{ success: boolean; data?: any[]; error?: string }> {
     try {
       const events = await emailTrackingService.getTrackingEvents({
         practiceId,
@@ -517,7 +602,8 @@ export class EmailService {
         data: events,
       };
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Unknown tracking error';
+      const errorMessage =
+        error instanceof Error ? error.message : 'Unknown tracking error';
       return {
         success: false,
         error: errorMessage,
@@ -528,20 +614,29 @@ export class EmailService {
   /**
    * Check if an email address is suppressed (bounced/unsubscribed)
    */
-  async isEmailSuppressed(practiceId: string, email: string): Promise<{ 
-    success: boolean; 
-    suppressed?: boolean; 
-    error?: string 
+  async isEmailSuppressed(
+    practiceId: string,
+    email: string
+  ): Promise<{
+    success: boolean;
+    suppressed?: boolean;
+    error?: string;
   }> {
     try {
-      const suppressed = await emailTrackingService.isEmailSuppressed(practiceId, email);
+      const suppressed = await emailTrackingService.isEmailSuppressed(
+        practiceId,
+        email
+      );
 
       return {
         success: true,
         suppressed,
       };
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Unknown suppression check error';
+      const errorMessage =
+        error instanceof Error
+          ? error.message
+          : 'Unknown suppression check error';
       return {
         success: false,
         error: errorMessage,
@@ -553,18 +648,23 @@ export class EmailService {
    * Manually add an email to the suppression list
    */
   async suppressEmail(
-    practiceId: string, 
-    email: string, 
+    practiceId: string,
+    email: string,
     reason: 'bounce' | 'complaint' | 'unsubscribe'
   ): Promise<{ success: boolean; error?: string }> {
     try {
-      await emailTrackingService.addToSuppressionList(practiceId, email, reason);
+      await emailTrackingService.addToSuppressionList(
+        practiceId,
+        email,
+        reason
+      );
 
       return {
         success: true,
       };
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Unknown suppression error';
+      const errorMessage =
+        error instanceof Error ? error.message : 'Unknown suppression error';
       return {
         success: false,
         error: errorMessage,
@@ -588,14 +688,14 @@ export class EmailService {
         tokensAvailable: 0,
         nextRefillTime: new Date(),
         isLimited: true,
-        configured: false
+        configured: false,
       };
     }
 
     const status = resendClient.getRateLimitStatus();
     return {
       ...status,
-      configured: true
+      configured: true,
     };
   }
 
@@ -606,7 +706,7 @@ export class EmailService {
     if (!resendClient) {
       return {
         success: false,
-        error: 'Resend client not configured'
+        error: 'Resend client not configured',
       };
     }
 
@@ -623,7 +723,7 @@ export class EmailService {
     if (!resendClient) {
       return {
         success: false,
-        error: 'Email service not configured'
+        error: 'Email service not configured',
       };
     }
 
@@ -648,8 +748,8 @@ Sent at: ${new Date().toISOString()}
         `,
         tags: [
           { name: 'template', value: 'system_notification' },
-          { name: 'type', value: 'test' }
-        ]
+          { name: 'type', value: 'test' },
+        ],
       });
 
       // Log test email
@@ -658,15 +758,16 @@ Sent at: ${new Date().toISOString()}
         recipientEmail: to,
         messageId: result.messageId,
         status: result.success ? 'sent' : 'failed',
-        error: result.error
+        error: result.error,
       });
 
       return result;
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      const errorMessage =
+        error instanceof Error ? error.message : 'Unknown error';
       return {
         success: false,
-        error: errorMessage
+        error: errorMessage,
       };
     }
   }

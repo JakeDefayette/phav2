@@ -65,12 +65,12 @@ class TokenBucket {
    */
   consume(): boolean {
     this.refill();
-    
+
     if (this.tokens >= 1) {
       this.tokens -= 1;
       return true;
     }
-    
+
     return false;
   }
 
@@ -79,15 +79,13 @@ class TokenBucket {
    */
   getStatus(): RateLimitStatus {
     this.refill();
-    
-    const nextRefillTime = new Date(
-      this.lastRefill + (1000 / this.refillRate)
-    );
-    
+
+    const nextRefillTime = new Date(this.lastRefill + 1000 / this.refillRate);
+
     return {
       tokensAvailable: Math.floor(this.tokens),
       nextRefillTime,
-      isLimited: this.tokens < 1
+      isLimited: this.tokens < 1,
     };
   }
 
@@ -98,7 +96,7 @@ class TokenBucket {
     const now = Date.now();
     const elapsed = now - this.lastRefill;
     const tokensToAdd = (elapsed / 1000) * this.refillRate;
-    
+
     this.tokens = Math.min(this.maxTokens, this.tokens + tokensToAdd);
     this.lastRefill = now;
   }
@@ -118,13 +116,13 @@ export class ResendClient {
       rateLimit: {
         tokensPerSecond: 10, // Resend free tier limit
         maxTokens: 20,
-        ...userConfig.rateLimit
+        ...userConfig.rateLimit,
       },
       retry: {
         maxAttempts: 3,
         baseDelayMs: 1000,
-        ...userConfig.retry
-      }
+        ...userConfig.retry,
+      },
     };
 
     this.client = new Resend(this.config.apiKey);
@@ -144,15 +142,15 @@ export class ResendClient {
         if (!this.tokenBucket.consume()) {
           const status = this.tokenBucket.getStatus();
           const waitTime = status.nextRefillTime.getTime() - Date.now();
-          
+
           if (attempt === this.config.retry.maxAttempts) {
             return {
               success: false,
               error: 'Rate limit exceeded',
-              rateLimited: true
+              rateLimited: true,
             };
           }
-          
+
           // Wait for next token
           await this.delay(Math.max(waitTime, 100));
           continue;
@@ -168,10 +166,10 @@ export class ResendClient {
           attachments: options.attachments?.map(att => ({
             filename: att.filename,
             content: att.content,
-            content_type: att.contentType
+            content_type: att.contentType,
           })),
           headers: options.headers,
-          tags: options.tags
+          tags: options.tags,
         });
 
         if (result.error) {
@@ -180,12 +178,12 @@ export class ResendClient {
 
         return {
           success: true,
-          messageId: result.data?.id
+          messageId: result.data?.id,
         };
-
       } catch (error) {
         const isLastAttempt = attempt === this.config.retry.maxAttempts;
-        const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+        const errorMessage =
+          error instanceof Error ? error.message : 'Unknown error';
 
         // Check for specific error types
         if (this.isRateLimitError(error)) {
@@ -193,45 +191,48 @@ export class ResendClient {
             return {
               success: false,
               error: 'Rate limit exceeded after retries',
-              rateLimited: true
+              rateLimited: true,
             };
           }
           // Wait longer for rate limit errors
-          await this.delay(this.config.retry.baseDelayMs * Math.pow(2, attempt));
+          await this.delay(
+            this.config.retry.baseDelayMs * Math.pow(2, attempt)
+          );
           continue;
         }
 
         if (this.isAuthError(error)) {
           return {
             success: false,
-            error: `Authentication failed: ${errorMessage}`
+            error: `Authentication failed: ${errorMessage}`,
           };
         }
 
         if (this.isValidationError(error)) {
           return {
             success: false,
-            error: `Validation error: ${errorMessage}`
+            error: `Validation error: ${errorMessage}`,
           };
         }
 
         // For other errors, retry with exponential backoff
         if (!isLastAttempt) {
-          const delay = this.config.retry.baseDelayMs * Math.pow(2, attempt - 1);
+          const delay =
+            this.config.retry.baseDelayMs * Math.pow(2, attempt - 1);
           await this.delay(delay);
           continue;
         }
 
         return {
           success: false,
-          error: `Failed after ${this.config.retry.maxAttempts} attempts: ${errorMessage}`
+          error: `Failed after ${this.config.retry.maxAttempts} attempts: ${errorMessage}`,
         };
       }
     }
 
     return {
       success: false,
-      error: 'Unexpected error: retry loop completed without result'
+      error: 'Unexpected error: retry loop completed without result',
     };
   }
 
@@ -257,11 +258,11 @@ export class ResendClient {
       // Use a dry-run approach by sending to a test endpoint
       // Note: Resend doesn't have a specific health check endpoint,
       // so we'll validate the API key format and configuration
-      
+
       if (!this.isConfigured()) {
         return {
           success: false,
-          error: 'API key not configured'
+          error: 'API key not configured',
         };
       }
 
@@ -269,7 +270,7 @@ export class ResendClient {
       if (!this.config.apiKey.startsWith('re_')) {
         return {
           success: false,
-          error: 'Invalid API key format'
+          error: 'Invalid API key format',
         };
       }
 
@@ -277,7 +278,8 @@ export class ResendClient {
     } catch (error) {
       return {
         success: false,
-        error: error instanceof Error ? error.message : 'Connection test failed'
+        error:
+          error instanceof Error ? error.message : 'Connection test failed',
       };
     }
   }
@@ -295,9 +297,11 @@ export class ResendClient {
   private isRateLimitError(error: unknown): boolean {
     if (error instanceof Error) {
       const message = error.message.toLowerCase();
-      return message.includes('rate limit') || 
-             message.includes('429') ||
-             message.includes('too many requests');
+      return (
+        message.includes('rate limit') ||
+        message.includes('429') ||
+        message.includes('too many requests')
+      );
     }
     return false;
   }
@@ -308,10 +312,12 @@ export class ResendClient {
   private isAuthError(error: unknown): boolean {
     if (error instanceof Error) {
       const message = error.message.toLowerCase();
-      return message.includes('unauthorized') ||
-             message.includes('invalid api key') ||
-             message.includes('401') ||
-             message.includes('403');
+      return (
+        message.includes('unauthorized') ||
+        message.includes('invalid api key') ||
+        message.includes('401') ||
+        message.includes('403')
+      );
     }
     return false;
   }
@@ -322,9 +328,11 @@ export class ResendClient {
   private isValidationError(error: unknown): boolean {
     if (error instanceof Error) {
       const message = error.message.toLowerCase();
-      return message.includes('validation') ||
-             message.includes('invalid email') ||
-             message.includes('400');
+      return (
+        message.includes('validation') ||
+        message.includes('invalid email') ||
+        message.includes('400')
+      );
     }
     return false;
   }
@@ -335,9 +343,11 @@ export class ResendClient {
  */
 export function createResendClient(): ResendClient | null {
   const apiKey = config.email.resend_api_key;
-  
+
   if (!apiKey) {
-    console.warn('RESEND_API_KEY not configured. Email functionality will be limited.');
+    console.warn(
+      'RESEND_API_KEY not configured. Email functionality will be limited.'
+    );
     return null;
   }
 
@@ -345,14 +355,14 @@ export function createResendClient(): ResendClient | null {
     apiKey,
     rateLimit: {
       tokensPerSecond: 10, // Conservative rate for free tier
-      maxTokens: 20
+      maxTokens: 20,
     },
     retry: {
       maxAttempts: 3,
-      baseDelayMs: 1000
-    }
+      baseDelayMs: 1000,
+    },
   });
 }
 
 // Export singleton instance (can be null if not configured)
-export const resendClient = createResendClient(); 
+export const resendClient = createResendClient();

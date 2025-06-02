@@ -7,17 +7,14 @@ export async function POST(request: NextRequest) {
     const { token, reason, userAgent } = body;
 
     if (!token) {
-      return NextResponse.json(
-        { error: 'Token is required' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Token is required' }, { status: 400 });
     }
 
     // Get client IP address for audit trail
     const forwarded = request.headers.get('x-forwarded-for');
-    const ipAddress = forwarded ? forwarded.split(',')[0] : 
-                     request.headers.get('x-real-ip') || 
-                     'unknown';
+    const ipAddress = forwarded
+      ? forwarded.split(',')[0]
+      : request.headers.get('x-real-ip') || 'unknown';
 
     // Use the compliance service to handle unsubscribe
     const result = await emailComplianceService.unsubscribeByToken({
@@ -28,10 +25,7 @@ export async function POST(request: NextRequest) {
     });
 
     if (!result.success) {
-      return NextResponse.json(
-        { error: result.error },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: result.error }, { status: 400 });
     }
 
     return NextResponse.json({
@@ -40,7 +34,6 @@ export async function POST(request: NextRequest) {
       practiceId: result.practiceId,
       message: 'Successfully unsubscribed from email list',
     });
-
   } catch (error) {
     console.error('Error processing unsubscribe request:', error);
     return NextResponse.json(
@@ -60,4 +53,4 @@ export async function OPTIONS(request: NextRequest) {
       'Access-Control-Allow-Headers': 'Content-Type',
     },
   });
-} 
+}

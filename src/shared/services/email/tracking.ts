@@ -1,14 +1,14 @@
 import { createClient } from '@supabase/supabase-js';
 import crypto from 'crypto';
-import { 
-  EmailTrackingEvent, 
-  EmailTrackingUrl, 
-  EmailTrackingPixel, 
+import {
+  EmailTrackingEvent,
+  EmailTrackingUrl,
+  EmailTrackingPixel,
   EmailAnalyticsSummary,
   ResendWebhookEvent,
   WebhookVerificationOptions,
   EmailTrackingConfig,
-  EmailAnalyticsQuery
+  EmailAnalyticsQuery,
 } from './types';
 
 const supabase = createClient(
@@ -20,7 +20,9 @@ export class EmailTrackingService {
   private readonly defaultConfig: EmailTrackingConfig = {
     enableOpenTracking: true,
     enableClickTracking: true,
-    trackingDomain: process.env.NEXT_PUBLIC_APP_URL || 'https://app.pediatricholisticassessment.com',
+    trackingDomain:
+      process.env.NEXT_PUBLIC_APP_URL ||
+      'https://app.pediatricholisticassessment.com',
     suppressionListEnabled: true,
     bounceHandlingEnabled: true,
     complaintHandlingEnabled: true,
@@ -37,15 +39,19 @@ export class EmailTrackingService {
   /**
    * Verify webhook signature from Resend
    */
-  verifyWebhookSignature({ signature, body, secret }: WebhookVerificationOptions): boolean {
+  verifyWebhookSignature({
+    signature,
+    body,
+    secret,
+  }: WebhookVerificationOptions): boolean {
     try {
       const expectedSignature = crypto
         .createHmac('sha256', secret)
         .update(body)
         .digest('hex');
-      
+
       const providedSignature = signature.replace('sha256=', '');
-      
+
       return crypto.timingSafeEqual(
         Buffer.from(expectedSignature, 'hex'),
         Buffer.from(providedSignature, 'hex')
@@ -60,7 +66,7 @@ export class EmailTrackingService {
    * Process incoming webhook event from Resend
    */
   async processWebhookEvent(
-    event: ResendWebhookEvent, 
+    event: ResendWebhookEvent,
     practiceId: string
   ): Promise<EmailTrackingEvent | null> {
     try {
@@ -71,14 +77,17 @@ export class EmailTrackingService {
       }
 
       // Extract recipient email
-      const recipientEmail = Array.isArray(event.data.to) 
-        ? event.data.to[0] 
+      const recipientEmail = Array.isArray(event.data.to)
+        ? event.data.to[0]
         : event.data.to;
 
       // Parse geographic and device data from webhook
       const trackingData = this.extractTrackingData(event);
 
-      const trackingEvent: Omit<EmailTrackingEvent, 'id' | 'createdAt' | 'updatedAt'> = {
+      const trackingEvent: Omit<
+        EmailTrackingEvent,
+        'id' | 'createdAt' | 'updatedAt'
+      > = {
         practiceId,
         emailId: event.data.email_id,
         eventType,
@@ -140,8 +149,11 @@ export class EmailTrackingService {
     recipientEmail: string;
   }): Promise<EmailTrackingUrl> {
     const trackingToken = this.generateTrackingToken();
-    
-    const trackingUrl: Omit<EmailTrackingUrl, 'id' | 'createdAt' | 'updatedAt'> = {
+
+    const trackingUrl: Omit<
+      EmailTrackingUrl,
+      'id' | 'createdAt' | 'updatedAt'
+    > = {
       practiceId: options.practiceId,
       originalUrl: options.originalUrl,
       trackingToken,
@@ -169,7 +181,9 @@ export class EmailTrackingService {
   /**
    * Get tracking URL by token
    */
-  async getTrackingUrl(trackingToken: string): Promise<EmailTrackingUrl | null> {
+  async getTrackingUrl(
+    trackingToken: string
+  ): Promise<EmailTrackingUrl | null> {
     const { data, error } = await supabase
       .from('email_tracking_urls')
       .select('*')
@@ -230,8 +244,11 @@ export class EmailTrackingService {
     recipientEmail: string;
   }): Promise<EmailTrackingPixel> {
     const trackingToken = this.generateTrackingToken();
-    
-    const trackingPixel: Omit<EmailTrackingPixel, 'id' | 'createdAt' | 'updatedAt'> = {
+
+    const trackingPixel: Omit<
+      EmailTrackingPixel,
+      'id' | 'createdAt' | 'updatedAt'
+    > = {
       practiceId: options.practiceId,
       trackingToken,
       emailId: options.emailId,
@@ -258,7 +275,9 @@ export class EmailTrackingService {
   /**
    * Get tracking pixel by token
    */
-  async getTrackingPixel(trackingToken: string): Promise<EmailTrackingPixel | null> {
+  async getTrackingPixel(
+    trackingToken: string
+  ): Promise<EmailTrackingPixel | null> {
     const { data, error } = await supabase
       .from('email_tracking_pixels')
       .select('*')
@@ -324,7 +343,9 @@ export class EmailTrackingService {
   /**
    * Get email analytics summary
    */
-  async getAnalyticsSummary(query: EmailAnalyticsQuery): Promise<EmailAnalyticsSummary[]> {
+  async getAnalyticsSummary(
+    query: EmailAnalyticsQuery
+  ): Promise<EmailAnalyticsSummary[]> {
     let queryBuilder = supabase
       .from('email_analytics_summary')
       .select('*')
@@ -335,14 +356,22 @@ export class EmailTrackingService {
     }
 
     if (query.startDate) {
-      queryBuilder = queryBuilder.gte('event_date', query.startDate.toISOString());
+      queryBuilder = queryBuilder.gte(
+        'event_date',
+        query.startDate.toISOString()
+      );
     }
 
     if (query.endDate) {
-      queryBuilder = queryBuilder.lte('event_date', query.endDate.toISOString());
+      queryBuilder = queryBuilder.lte(
+        'event_date',
+        query.endDate.toISOString()
+      );
     }
 
-    const { data, error } = await queryBuilder.order('event_date', { ascending: false });
+    const { data, error } = await queryBuilder.order('event_date', {
+      ascending: false,
+    });
 
     if (error) {
       console.error('Failed to get analytics summary:', error);
@@ -355,7 +384,9 @@ export class EmailTrackingService {
   /**
    * Get detailed tracking events
    */
-  async getTrackingEvents(query: EmailAnalyticsQuery): Promise<EmailTrackingEvent[]> {
+  async getTrackingEvents(
+    query: EmailAnalyticsQuery
+  ): Promise<EmailTrackingEvent[]> {
     let queryBuilder = supabase
       .from('email_tracking_events')
       .select('*')
@@ -370,14 +401,22 @@ export class EmailTrackingService {
     }
 
     if (query.startDate) {
-      queryBuilder = queryBuilder.gte('event_timestamp', query.startDate.toISOString());
+      queryBuilder = queryBuilder.gte(
+        'event_timestamp',
+        query.startDate.toISOString()
+      );
     }
 
     if (query.endDate) {
-      queryBuilder = queryBuilder.lte('event_timestamp', query.endDate.toISOString());
+      queryBuilder = queryBuilder.lte(
+        'event_timestamp',
+        query.endDate.toISOString()
+      );
     }
 
-    const { data, error } = await queryBuilder.order('event_timestamp', { ascending: false });
+    const { data, error } = await queryBuilder.order('event_timestamp', {
+      ascending: false,
+    });
 
     if (error) {
       console.error('Failed to get tracking events:', error);
@@ -390,7 +429,10 @@ export class EmailTrackingService {
   /**
    * Get email performance metrics
    */
-  async getEmailPerformance(practiceId: string, campaignId?: string): Promise<{
+  async getEmailPerformance(
+    practiceId: string,
+    campaignId?: string
+  ): Promise<{
     totalSent: number;
     totalDelivered: number;
     totalOpened: number;
@@ -450,7 +492,11 @@ export class EmailTrackingService {
     campaignId?: string;
     scheduledEmailId?: string;
     recipientEmail: string;
-  }): Promise<{ html: string; trackingPixel: EmailTrackingPixel; trackingUrls: EmailTrackingUrl[] }> {
+  }): Promise<{
+    html: string;
+    trackingPixel: EmailTrackingPixel;
+    trackingUrls: EmailTrackingUrl[];
+  }> {
     let { htmlContent } = options;
     const trackingUrls: EmailTrackingUrl[] = [];
 
@@ -458,12 +504,15 @@ export class EmailTrackingService {
     if (this.config.enableClickTracking) {
       const linkRegex = /<a[^>]*href="([^"]*)"[^>]*>/gi;
       let match;
-      
+
       while ((match = linkRegex.exec(htmlContent)) !== null) {
         const originalUrl = match[1];
-        
+
         // Skip tracking pixels and already tracked URLs
-        if (originalUrl.includes('/api/track/') || originalUrl.includes('data:')) {
+        if (
+          originalUrl.includes('/api/track/') ||
+          originalUrl.includes('data:')
+        ) {
           continue;
         }
 
@@ -476,7 +525,9 @@ export class EmailTrackingService {
           recipientEmail: options.recipientEmail,
         });
 
-        const trackingClickUrl = this.getTrackingClickUrl(trackingUrl.trackingToken);
+        const trackingClickUrl = this.getTrackingClickUrl(
+          trackingUrl.trackingToken
+        );
         htmlContent = htmlContent.replace(originalUrl, trackingClickUrl);
         trackingUrls.push(trackingUrl);
       }
@@ -495,10 +546,13 @@ export class EmailTrackingService {
 
       const pixelUrl = this.getTrackingPixelUrl(trackingPixel.trackingToken);
       const trackingPixelHtml = `<img src="${pixelUrl}" width="1" height="1" border="0" style="display:none;" alt="" />`;
-      
+
       // Insert pixel before closing body tag or at the end
       if (htmlContent.includes('</body>')) {
-        htmlContent = htmlContent.replace('</body>', `${trackingPixelHtml}</body>`);
+        htmlContent = htmlContent.replace(
+          '</body>',
+          `${trackingPixelHtml}</body>`
+        );
       } else {
         htmlContent += trackingPixelHtml;
       }
@@ -519,8 +573,8 @@ export class EmailTrackingService {
    * Add email to suppression list
    */
   async addToSuppressionList(
-    practiceId: string, 
-    email: string, 
+    practiceId: string,
+    email: string,
     reason: 'bounce' | 'complaint' | 'unsubscribe'
   ): Promise<void> {
     if (!this.config.suppressionListEnabled) return;
@@ -528,9 +582,9 @@ export class EmailTrackingService {
     // Update subscriber status
     await supabase
       .from('email_subscribers')
-      .update({ 
+      .update({
         status: reason === 'bounce' ? 'bounced' : 'unsubscribed',
-        unsubscribed_at: new Date().toISOString()
+        unsubscribed_at: new Date().toISOString(),
       })
       .eq('practice_id', practiceId)
       .eq('email', email);
@@ -556,7 +610,9 @@ export class EmailTrackingService {
   // Private Helper Methods
   // =====================
 
-  private mapResendEventType(resendType: string): EmailTrackingEvent['eventType'] | null {
+  private mapResendEventType(
+    resendType: string
+  ): EmailTrackingEvent['eventType'] | null {
     const typeMap: Record<string, EmailTrackingEvent['eventType']> = {
       'email.sent': 'sent',
       'email.delivered': 'delivered',
@@ -581,7 +637,7 @@ export class EmailTrackingService {
   } {
     const clickData = event.data.click;
     const openData = event.data.open;
-    
+
     return {
       userAgent: clickData?.userAgent || openData?.userAgent,
       ipAddress: clickData?.ipAddress || openData?.ipAddress,
@@ -600,40 +656,46 @@ export class EmailTrackingService {
     return undefined;
   }
 
-  private async findScheduledEmailId(emailId: string): Promise<string | undefined> {
+  private async findScheduledEmailId(
+    emailId: string
+  ): Promise<string | undefined> {
     // This would typically look up the scheduled email ID from the scheduled_emails table
     return undefined;
   }
 
   private async recordTrackingEvent(
-    eventData: Omit<EmailTrackingEvent, 'id' | 'createdAt' | 'updatedAt' | 'processedAt' | 'webhookReceivedAt'>
+    eventData: Omit<
+      EmailTrackingEvent,
+      'id' | 'createdAt' | 'updatedAt' | 'processedAt' | 'webhookReceivedAt'
+    >
   ): Promise<void> {
-    await supabase
-      .from('email_tracking_events')
-      .insert({
-        ...eventData,
-        processedAt: new Date(),
-        webhookReceivedAt: new Date(),
-      });
+    await supabase.from('email_tracking_events').insert({
+      ...eventData,
+      processedAt: new Date(),
+      webhookReceivedAt: new Date(),
+    });
   }
 
-  private async handleSpecificEventType(event: ResendWebhookEvent, trackingEvent: EmailTrackingEvent): Promise<void> {
+  private async handleSpecificEventType(
+    event: ResendWebhookEvent,
+    trackingEvent: EmailTrackingEvent
+  ): Promise<void> {
     switch (event.type) {
       case 'email.bounced':
         if (this.config.bounceHandlingEnabled) {
           await this.addToSuppressionList(
-            trackingEvent.practiceId, 
-            trackingEvent.recipientEmail, 
+            trackingEvent.practiceId,
+            trackingEvent.recipientEmail,
             'bounce'
           );
         }
         break;
-      
+
       case 'email.complained':
         if (this.config.complaintHandlingEnabled) {
           await this.addToSuppressionList(
-            trackingEvent.practiceId, 
-            trackingEvent.recipientEmail, 
+            trackingEvent.practiceId,
+            trackingEvent.recipientEmail,
             'complaint'
           );
         }
@@ -643,4 +705,4 @@ export class EmailTrackingService {
 }
 
 // Export singleton instance
-export const emailTrackingService = new EmailTrackingService(); 
+export const emailTrackingService = new EmailTrackingService();

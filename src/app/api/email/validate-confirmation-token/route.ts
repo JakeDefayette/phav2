@@ -7,10 +7,7 @@ export async function POST(request: NextRequest) {
     const { token } = body;
 
     if (!token) {
-      return NextResponse.json(
-        { error: 'Token is required' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Token is required' }, { status: 400 });
     }
 
     // Check if the token exists and is valid for double opt-in
@@ -29,8 +26,10 @@ export async function POST(request: NextRequest) {
     }
 
     // Check if token is expired
-    if (preference.double_opt_in_expires_at && 
-        new Date() > new Date(preference.double_opt_in_expires_at)) {
+    if (
+      preference.double_opt_in_expires_at &&
+      new Date() > new Date(preference.double_opt_in_expires_at)
+    ) {
       return NextResponse.json(
         { error: 'Confirmation token has expired' },
         { status: 400 }
@@ -42,7 +41,6 @@ export async function POST(request: NextRequest) {
       email: preference.email,
       practiceId: preference.practice_id,
     });
-
   } catch (error) {
     console.error('Error validating confirmation token:', error);
     return NextResponse.json(
@@ -50,4 +48,4 @@ export async function POST(request: NextRequest) {
       { status: 500 }
     );
   }
-} 
+}

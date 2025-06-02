@@ -28,7 +28,8 @@ const templateRegistry: Record<EmailTemplateType, EmailTemplate> = {
         <p>If you're seeing this message, there was an issue rendering the email template.</p>
       </div>
     `,
-    fallbackText: 'Your Pediatric Health Assessment Report is ready for download.',
+    fallbackText:
+      'Your Pediatric Health Assessment Report is ready for download.',
   },
   report_ready: {
     component: ReportReadyTemplate,
@@ -40,7 +41,8 @@ const templateRegistry: Record<EmailTemplateType, EmailTemplate> = {
         <p>If you're seeing this message, there was an issue rendering the email template.</p>
       </div>
     `,
-    fallbackText: 'Your Pediatric Health Assessment Report is ready for download.',
+    fallbackText:
+      'Your Pediatric Health Assessment Report is ready for download.',
   },
   welcome: {
     component: ReportDeliveryTemplate, // Placeholder - would need dedicated template
@@ -110,7 +112,7 @@ export class EmailTemplateService {
   ): Promise<{ html: string; text: string; subject: string }> {
     try {
       const template = templateRegistry[templateType];
-      
+
       if (!template) {
         throw new Error(`Template not found: ${templateType}`);
       }
@@ -127,10 +129,9 @@ export class EmailTemplateService {
         text,
         subject: template.defaultSubject,
       };
-
     } catch (error) {
       console.error(`Error rendering template ${templateType}:`, error);
-      
+
       // Return fallback content
       const template = templateRegistry[templateType];
       return {
@@ -213,7 +214,9 @@ export class EmailTemplateService {
   /**
    * Get sample data for testing templates
    */
-  private static getSampleData(templateType: EmailTemplateType): EmailTemplateData {
+  private static getSampleData(
+    templateType: EmailTemplateType
+  ): EmailTemplateData {
     switch (templateType) {
       case 'report_delivery':
         return {
@@ -252,4 +255,4 @@ export class EmailTemplateService {
   }
 }
 
-export default EmailTemplateService; 
+export default EmailTemplateService;

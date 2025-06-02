@@ -11,11 +11,11 @@ const CRON_SECRET = process.env.CRON_SECRET;
 
 /**
  * POST /api/cron/list-cleanup
- * 
+ *
  * Automated email list cleanup and maintenance job.
  * Runs regular maintenance tasks for email deliverability:
  * - Clean expired suppressions
- * - Check deliverability thresholds  
+ * - Check deliverability thresholds
  * - Generate health reports
  * - Cleanup old tracking data
  */
@@ -33,14 +33,11 @@ export async function POST(request: NextRequest) {
     const authHeader = request.headers.get('authorization');
     if (authHeader !== `Bearer ${CRON_SECRET}`) {
       console.error('Invalid cron authorization');
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
     console.log('Starting email list cleanup job...');
-    
+
     const results = {
       expiredSuppressions: 0,
       deliverabilityAlerts: 0,
@@ -67,21 +64,24 @@ export async function POST(request: NextRequest) {
     // Process each practice
     for (const practice of practices || []) {
       try {
-        console.log(`Processing cleanup for practice: ${practice.name} (${practice.id})`);
-        
+        console.log(
+          `Processing cleanup for practice: ${practice.name} (${practice.id})`
+        );
+
         // 1. Clean expired suppressions
         const expiredCount = await cleanExpiredSuppressions(practice.id);
         results.expiredSuppressions += expiredCount;
-        
+
         // 2. Check deliverability thresholds
         const alerts = await checkDeliverabilityThresholds(practice.id);
         results.deliverabilityAlerts += alerts.length;
-        
+
         // 3. Cleanup old tracking data (optional - keep last 90 days)
         await cleanupOldTrackingData(practice.id, 90);
-        
-        console.log(`Completed cleanup for practice ${practice.id}: ${expiredCount} suppressions cleaned, ${alerts.length} alerts`);
-        
+
+        console.log(
+          `Completed cleanup for practice ${practice.id}: ${expiredCount} suppressions cleaned, ${alerts.length} alerts`
+        );
       } catch (error) {
         const errorMsg = `Failed to process practice ${practice.id}: ${error}`;
         console.error(errorMsg);
@@ -100,13 +100,12 @@ export async function POST(request: NextRequest) {
     };
 
     console.log('Email list cleanup job completed:', summary);
-    
-    return NextResponse.json(summary);
 
+    return NextResponse.json(summary);
   } catch (error) {
     console.error('Email list cleanup job failed:', error);
     return NextResponse.json(
-      { 
+      {
         success: false,
         error: 'List cleanup job failed',
         timestamp: new Date().toISOString(),
@@ -122,7 +121,7 @@ export async function POST(request: NextRequest) {
 async function cleanExpiredSuppressions(practiceId: string): Promise<number> {
   try {
     const now = new Date().toISOString();
-    
+
     // Find expired suppressions
     const { data: expiredSuppressions, error: selectError } = await supabase
       .from('email_suppression_list')
@@ -153,9 +152,10 @@ async function cleanExpiredSuppressions(practiceId: string): Promise<number> {
       return 0;
     }
 
-    console.log(`Cleaned ${expiredSuppressions.length} expired suppressions for practice ${practiceId}`);
+    console.log(
+      `Cleaned ${expiredSuppressions.length} expired suppressions for practice ${practiceId}`
+    );
     return expiredSuppressions.length;
-
   } catch (error) {
     console.error('Error cleaning expired suppressions:', error);
     return 0;
@@ -165,20 +165,23 @@ async function cleanExpiredSuppressions(practiceId: string): Promise<number> {
 /**
  * Check deliverability thresholds and generate alerts
  */
-async function checkDeliverabilityThresholds(practiceId: string): Promise<any[]> {
+async function checkDeliverabilityThresholds(
+  practiceId: string
+): Promise<any[]> {
   try {
     const alerts = [];
-    
+
     // Check bounce rate thresholds (last 24 hours)
-    const bounceAlerts = await emailBounceHandler.checkBounceThresholds(practiceId);
+    const bounceAlerts =
+      await emailBounceHandler.checkBounceThresholds(practiceId);
     alerts.push(...bounceAlerts);
-    
+
     // Check complaint rate thresholds (last 24 hours)
-    const complaintAlerts = await emailBounceHandler.checkComplaintThresholds(practiceId);
+    const complaintAlerts =
+      await emailBounceHandler.checkComplaintThresholds(practiceId);
     alerts.push(...complaintAlerts);
-    
+
     return alerts;
-    
   } catch (error) {
     console.error('Error checking deliverability thresholds:', error);
     return [];
@@ -188,21 +191,26 @@ async function checkDeliverabilityThresholds(practiceId: string): Promise<any[]>
 /**
  * Cleanup old tracking data to maintain database performance
  */
-async function cleanupOldTrackingData(practiceId: string, daysToKeep: number): Promise<void> {
+async function cleanupOldTrackingData(
+  practiceId: string,
+  daysToKeep: number
+): Promise<void> {
   try {
-    const cutoffDate = new Date(Date.now() - daysToKeep * 24 * 60 * 60 * 1000).toISOString();
-    
+    const cutoffDate = new Date(
+      Date.now() - daysToKeep * 24 * 60 * 60 * 1000
+    ).toISOString();
+
     // Delete old tracking events (keep only last N days)
     const { error: eventsError } = await supabase
       .from('email_tracking_events')
       .delete()
       .eq('practice_id', practiceId)
       .lt('created_at', cutoffDate);
-      
+
     if (eventsError) {
       console.error('Failed to cleanup old tracking events:', eventsError);
     }
-    
+
     // Delete old tracking URLs that haven't been clicked
     const { error: urlsError } = await supabase
       .from('email_tracking_urls')
@@ -210,11 +218,11 @@ async function cleanupOldTrackingData(practiceId: string, daysToKeep: number): P
       .eq('practice_id', practiceId)
       .eq('click_count', 0)
       .lt('created_at', cutoffDate);
-      
+
     if (urlsError) {
       console.error('Failed to cleanup old tracking URLs:', urlsError);
     }
-    
+
     // Delete old tracking pixels that haven't been opened
     const { error: pixelsError } = await supabase
       .from('email_tracking_pixels')
@@ -222,11 +230,10 @@ async function cleanupOldTrackingData(practiceId: string, daysToKeep: number): P
       .eq('practice_id', practiceId)
       .eq('open_count', 0)
       .lt('created_at', cutoffDate);
-      
+
     if (pixelsError) {
       console.error('Failed to cleanup old tracking pixels:', pixelsError);
     }
-    
   } catch (error) {
     console.error('Error cleaning up old tracking data:', error);
   }
@@ -239,12 +246,11 @@ async function performGlobalMaintenance(): Promise<void> {
   try {
     // Refresh materialized views for better performance
     await supabase.rpc('refresh_email_analytics_summary');
-    
+
     // Vacuum and analyze email tables (if needed)
     // This would typically be done at the database level
-    
+
     console.log('Global maintenance tasks completed');
-    
   } catch (error) {
     console.error('Error performing global maintenance:', error);
   }
@@ -252,7 +258,7 @@ async function performGlobalMaintenance(): Promise<void> {
 
 /**
  * GET /api/cron/list-cleanup
- * 
+ *
  * Health check endpoint to verify cron job is accessible
  */
 export async function GET() {
@@ -262,4 +268,4 @@ export async function GET() {
     timestamp: new Date().toISOString(),
     description: 'Automated email list cleanup and maintenance job',
   });
-} 
+}

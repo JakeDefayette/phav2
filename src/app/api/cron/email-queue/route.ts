@@ -7,17 +7,14 @@ export async function POST(request: NextRequest) {
     // Verify authorization (optional - use API key or other auth method)
     const authHeader = request.headers.get('authorization');
     const expectedToken = process.env.CRON_SECRET_TOKEN;
-    
+
     if (expectedToken && authHeader !== `Bearer ${expectedToken}`) {
-      return NextResponse.json(
-        { error: 'Unauthorized' }, 
-        { status: 401 }
-      );
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
     // Get current queue metrics before processing
     const beforeMetrics = emailScheduler.getMetrics();
-    
+
     // Process the email queue manually (this triggers the processing)
     // The emailScheduler automatically processes emails, but we can also trigger manually
     const healthStatus = emailScheduler.getHealthStatus();
@@ -28,21 +25,20 @@ export async function POST(request: NextRequest) {
       message: 'Email queue processing triggered',
       metrics: {
         before: beforeMetrics,
-        current: currentMetrics
+        current: currentMetrics,
       },
       healthStatus,
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     });
-
   } catch (error) {
     console.error('Email queue cron job error:', error);
-    
+
     return NextResponse.json(
-      { 
+      {
         error: 'Internal server error',
         message: error instanceof Error ? error.message : 'Unknown error',
-        timestamp: new Date().toISOString()
-      }, 
+        timestamp: new Date().toISOString(),
+      },
       { status: 500 }
     );
   }
@@ -58,21 +54,20 @@ export async function GET() {
       status: 'healthy',
       emailScheduler: {
         healthStatus,
-        metrics
+        metrics,
       },
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     });
-
   } catch (error) {
     console.error('Email queue health check error:', error);
-    
+
     return NextResponse.json(
-      { 
+      {
         status: 'unhealthy',
         error: error instanceof Error ? error.message : 'Unknown error',
-        timestamp: new Date().toISOString()
-      }, 
+        timestamp: new Date().toISOString(),
+      },
       { status: 500 }
     );
   }
-} 
+}

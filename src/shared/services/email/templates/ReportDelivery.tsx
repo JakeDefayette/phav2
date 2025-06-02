@@ -59,26 +59,26 @@ export const ReportDeliveryTemplate: React.FC<ReportDeliveryTemplateProps> = ({
 
           {/* Main Content */}
           <Section style={content}>
-            <Text style={greeting}>
-              Dear Parent/Guardian,
-            </Text>
+            <Text style={greeting}>Dear Parent/Guardian,</Text>
 
             <Text style={paragraph}>
-              We're pleased to provide you with the completed Pediatric Health Assessment 
-              report for <strong>{childName}</strong>, conducted on {assessmentDate}.
+              We're pleased to provide you with the completed Pediatric Health
+              Assessment report for <strong>{childName}</strong>, conducted on{' '}
+              {assessmentDate}.
             </Text>
 
             {hasAttachment && (
               <Section style={attachmentNotice}>
                 <Text style={attachmentText}>
-                  📎 <strong>Report Attached:</strong> The complete assessment report 
-                  is attached to this email as a PDF document.
+                  📎 <strong>Report Attached:</strong> The complete assessment
+                  report is attached to this email as a PDF document.
                 </Text>
               </Section>
             )}
 
             <Text style={paragraph}>
-              You can also access and download your report using the secure link below:
+              You can also access and download your report using the secure link
+              below:
             </Text>
 
             <Section style={buttonContainer}>
@@ -88,15 +88,16 @@ export const ReportDeliveryTemplate: React.FC<ReportDeliveryTemplateProps> = ({
             </Section>
 
             <Text style={paragraph}>
-              This report contains valuable insights about your child's health and 
-              development. Please review it carefully and don't hesitate to contact 
-              us if you have any questions or concerns.
+              This report contains valuable insights about your child's health
+              and development. Please review it carefully and don't hesitate to
+              contact us if you have any questions or concerns.
             </Text>
 
             <Text style={paragraph}>
-              <strong>Important:</strong> This report is confidential and intended 
-              only for the child's parent or legal guardian. Please keep it secure 
-              and share only with authorized healthcare providers.
+              <strong>Important:</strong> This report is confidential and
+              intended only for the child's parent or legal guardian. Please
+              keep it secure and share only with authorized healthcare
+              providers.
             </Text>
 
             <Hr style={divider} />
@@ -116,7 +117,8 @@ export const ReportDeliveryTemplate: React.FC<ReportDeliveryTemplateProps> = ({
                 )}
                 {practiceInfo.website && (
                   <Text style={footerText}>
-                    Website: <Link href={practiceInfo.website} style={link}>
+                    Website:{' '}
+                    <Link href={practiceInfo.website} style={link}>
                       {practiceInfo.website}
                     </Link>
                   </Text>
@@ -125,8 +127,8 @@ export const ReportDeliveryTemplate: React.FC<ReportDeliveryTemplateProps> = ({
             )}
 
             <Text style={disclaimer}>
-              This email was sent from an automated system. Please do not reply 
-              to this email. If you need assistance, please contact us using the 
+              This email was sent from an automated system. Please do not reply
+              to this email. If you need assistance, please contact us using the
               information provided above.
             </Text>
           </Section>
@@ -139,7 +141,8 @@ export const ReportDeliveryTemplate: React.FC<ReportDeliveryTemplateProps> = ({
 // Styles
 const main = {
   backgroundColor: '#f6f9fc',
-  fontFamily: '-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Ubuntu,sans-serif',
+  fontFamily:
+    '-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Ubuntu,sans-serif',
 };
 
 const container = {
@@ -259,4 +262,4 @@ const disclaimer = {
   borderTop: '1px solid #e5e7eb',
 };
 
-export default ReportDeliveryTemplate; 
+export default ReportDeliveryTemplate;

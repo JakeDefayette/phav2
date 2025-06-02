@@ -36,7 +36,7 @@ export const ReportReadyTemplate: React.FC<ReportReadyTemplateProps> = ({
   practiceInfo,
 }) => {
   const previewText = `${firstName}, your Pediatric Health Assessment Report is ready for download`;
-  
+
   const formatExpiryDate = (date: Date) => {
     return date.toLocaleDateString('en-US', {
       weekday: 'long',
@@ -61,20 +61,16 @@ export const ReportReadyTemplate: React.FC<ReportReadyTemplateProps> = ({
                 style={logo}
               />
             )}
-            <Heading style={headerTitle}>
-              Your Report is Ready!
-            </Heading>
+            <Heading style={headerTitle}>Your Report is Ready!</Heading>
           </Section>
 
           {/* Main Content */}
           <Section style={content}>
-            <Text style={greeting}>
-              Hello {firstName},
-            </Text>
+            <Text style={greeting}>Hello {firstName},</Text>
 
             <Text style={paragraph}>
-              Great news! Your Pediatric Health Assessment Report has been completed 
-              and is now ready for download.
+              Great news! Your Pediatric Health Assessment Report has been
+              completed and is now ready for download.
             </Text>
 
             <Section style={highlightBox}>
@@ -89,7 +85,8 @@ export const ReportReadyTemplate: React.FC<ReportReadyTemplateProps> = ({
             {downloadUrl && (
               <>
                 <Text style={paragraph}>
-                  Click the button below to securely access and download your report:
+                  Click the button below to securely access and download your
+                  report:
                 </Text>
 
                 <Section style={buttonContainer}>
@@ -103,16 +100,16 @@ export const ReportReadyTemplate: React.FC<ReportReadyTemplateProps> = ({
             {expiresAt && (
               <Section style={warningBox}>
                 <Text style={warningText}>
-                  ⏰ <strong>Important:</strong> This download link will expire on{' '}
-                  <strong>{formatExpiryDate(expiresAt)}</strong>. Please download 
-                  your report before this date.
+                  ⏰ <strong>Important:</strong> This download link will expire
+                  on <strong>{formatExpiryDate(expiresAt)}</strong>. Please
+                  download your report before this date.
                 </Text>
               </Section>
             )}
 
             <Text style={paragraph}>
-              Your report contains personalized insights and recommendations based 
-              on the assessment data provided. We encourage you to:
+              Your report contains personalized insights and recommendations
+              based on the assessment data provided. We encourage you to:
             </Text>
 
             <Section style={listContainer}>
@@ -133,9 +130,9 @@ export const ReportReadyTemplate: React.FC<ReportReadyTemplateProps> = ({
             <Hr style={divider} />
 
             <Text style={paragraph}>
-              <strong>Need Help?</strong> If you're having trouble accessing your 
-              report or have questions about the findings, please don't hesitate 
-              to contact our office.
+              <strong>Need Help?</strong> If you're having trouble accessing
+              your report or have questions about the findings, please don't
+              hesitate to contact our office.
             </Text>
 
             {/* Practice Information */}
@@ -153,7 +150,8 @@ export const ReportReadyTemplate: React.FC<ReportReadyTemplateProps> = ({
                 )}
                 {practiceInfo.website && (
                   <Text style={footerText}>
-                    Website: <Link href={practiceInfo.website} style={link}>
+                    Website:{' '}
+                    <Link href={practiceInfo.website} style={link}>
                       {practiceInfo.website}
                     </Link>
                   </Text>
@@ -162,8 +160,8 @@ export const ReportReadyTemplate: React.FC<ReportReadyTemplateProps> = ({
             )}
 
             <Text style={disclaimer}>
-              This email was sent from an automated system. Please do not reply 
-              to this email. If you need assistance, please contact us using the 
+              This email was sent from an automated system. Please do not reply
+              to this email. If you need assistance, please contact us using the
               information provided above.
             </Text>
           </Section>
@@ -176,7 +174,8 @@ export const ReportReadyTemplate: React.FC<ReportReadyTemplateProps> = ({
 // Styles
 const main = {
   backgroundColor: '#f6f9fc',
-  fontFamily: '-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Ubuntu,sans-serif',
+  fontFamily:
+    '-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Ubuntu,sans-serif',
 };
 
 const container = {
@@ -331,4 +330,4 @@ const disclaimer = {
   borderTop: '1px solid #e5e7eb',
 };
 
-export default ReportReadyTemplate; 
+export default ReportReadyTemplate;

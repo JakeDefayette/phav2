@@ -93,7 +93,7 @@ export class EmailConfigurationError extends EmailServiceError {
 }
 
 // Email template types
-export type EmailTemplateType = 
+export type EmailTemplateType =
   | 'report_delivery'
   | 'report_ready'
   | 'welcome'
@@ -111,7 +111,13 @@ export interface EmailLogEntry {
   templateType: EmailTemplateType;
   recipientEmail: string;
   messageId?: string;
-  status: 'pending' | 'sent' | 'delivered' | 'bounced' | 'complained' | 'failed';
+  status:
+    | 'pending'
+    | 'sent'
+    | 'delivered'
+    | 'bounced'
+    | 'complained'
+    | 'failed';
   error?: string;
   sentAt?: Date;
   deliveredAt?: Date;
@@ -129,7 +135,14 @@ export interface EmailTrackingEvent {
   emailId?: string; // Resend message ID
   campaignId?: string;
   scheduledEmailId?: string;
-  eventType: 'sent' | 'delivered' | 'opened' | 'clicked' | 'bounced' | 'complained' | 'unsubscribed';
+  eventType:
+    | 'sent'
+    | 'delivered'
+    | 'opened'
+    | 'clicked'
+    | 'bounced'
+    | 'complained'
+    | 'unsubscribed';
   eventTimestamp: Date;
   recipientEmail: string;
   clickUrl?: string;
@@ -201,7 +214,14 @@ export interface EmailAnalyticsSummary {
 // Webhook Types
 
 export interface ResendWebhookEvent {
-  type: 'email.sent' | 'email.delivered' | 'email.delivery_delayed' | 'email.complained' | 'email.bounced' | 'email.opened' | 'email.clicked';
+  type:
+    | 'email.sent'
+    | 'email.delivered'
+    | 'email.delivery_delayed'
+    | 'email.complained'
+    | 'email.bounced'
+    | 'email.opened'
+    | 'email.clicked';
   created_at: string;
   data: {
     created_at: string;
@@ -211,7 +231,7 @@ export interface ResendWebhookEvent {
     subject: string;
     html?: string;
     text?: string;
-    tags?: { name: string; value: string; }[];
+    tags?: { name: string; value: string }[];
     click?: {
       ipAddress: string;
       link: string;
