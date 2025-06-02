@@ -71,17 +71,30 @@ export function AuthProvider({ children }: AuthProviderProps) {
       } catch (error) {
         console.error('Auth initialization error:', error);
         if (mounted) {
+          // Don't set error in state during initialization to prevent error boundary trigger
+          // Just set loading to false and user to null for anonymous access
           setState({
             user: null,
             loading: false,
-            error:
-              error instanceof Error ? error.message : 'Authentication error',
+            error: null, // Changed from setting error to null
           });
         }
       }
     };
 
-    initializeAuth();
+    // Wrap the entire initialization in a try-catch to prevent any uncaught errors
+    try {
+      initializeAuth();
+    } catch (error) {
+      console.error('Failed to initialize auth:', error);
+      if (mounted) {
+        setState({
+          user: null,
+          loading: false,
+          error: null,
+        });
+      }
+    }
 
     // Listen for auth changes
     const {
@@ -89,25 +102,35 @@ export function AuthProvider({ children }: AuthProviderProps) {
     } = supabase.auth.onAuthStateChange(async (event, session) => {
       if (!mounted) return;
 
-      if (event === 'SIGNED_IN' && session?.user) {
-        try {
-          const user = await getCurrentUser();
-          setState({
-            user,
-            loading: false,
-            error: null,
-          });
-        } catch (error) {
+      try {
+        if (event === 'SIGNED_IN' && session?.user) {
+          try {
+            const user = await getCurrentUser();
+            setState({
+              user,
+              loading: false,
+              error: null,
+            });
+          } catch (error) {
+            setState({
+              user: null,
+              loading: false,
+              error:
+                error instanceof Error
+                  ? error.message
+                  : 'Failed to load user profile',
+            });
+          }
+        } else if (event === 'SIGNED_OUT') {
           setState({
             user: null,
             loading: false,
-            error:
-              error instanceof Error
-                ? error.message
-                : 'Failed to load user profile',
+            error: null,
           });
         }
-      } else if (event === 'SIGNED_OUT') {
+      } catch (error) {
+        console.error('Auth state change error:', error);
+        // Don't set error state to prevent error boundary trigger
         setState({
           user: null,
           loading: false,

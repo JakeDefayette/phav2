@@ -33,16 +33,19 @@ export async function checkSupabaseHealth(): Promise<SupabaseHealthCheck> {
   };
 
   try {
-    // Test basic connection
+    // Test basic connection using a table we know exists
     const { data: connectionTest, error: connectionError } = await supabase
-      .from('health_check')
+      .from('user_profiles')
       .select('count')
       .limit(1);
 
     result.checks.connection = !connectionError;
 
-    // Test database access
-    const { data: dbTest, error: dbError } = await supabase.rpc('version');
+    // Test database access with a simple query
+    const { data: dbTest, error: dbError } = await supabase
+      .from('user_profiles')
+      .select('id')
+      .limit(1);
 
     result.checks.database = !dbError;
 
