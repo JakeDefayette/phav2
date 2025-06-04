@@ -2,7 +2,8 @@
 export * from './types';
 export * from './resend';
 export * from './tracking';
-export { EmailService as emailService } from '../email';
+// Create and export email service instance
+import { EmailService } from '../email';
+const emailService = new EmailService();
 
-// Re-export main service for convenience
-export { EmailService } from '../email';
+export { EmailService, emailService };

@@ -2,14 +2,11 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs';
 import { cookies } from 'next/headers';
 
-interface RouteParams {
-  params: {
-    id: string;
-  };
-}
-
 // GET /api/templates/email/[id] - Get a specific email template
-export async function GET(request: NextRequest, { params }: RouteParams) {
+export async function GET(
+  request: NextRequest,
+  { params }: { params: { id: string } }
+) {
   try {
     const supabase = createRouteHandlerClient<any>({ cookies });
 
@@ -69,7 +66,10 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
 }
 
 // PUT /api/templates/email/[id] - Update a specific email template
-export async function PUT(request: NextRequest, { params }: RouteParams) {
+export async function PUT(
+  request: NextRequest,
+  { params }: { params: { id: string } }
+) {
   try {
     const body = await request.json();
     const {
@@ -177,7 +177,10 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
 }
 
 // DELETE /api/templates/email/[id] - Delete a specific email template
-export async function DELETE(request: NextRequest, { params }: RouteParams) {
+export async function DELETE(
+  request: NextRequest,
+  { params }: { params: { id: string } }
+) {
   try {
     const supabase = createRouteHandlerClient<any>({ cookies });
 
