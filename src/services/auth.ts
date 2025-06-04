@@ -72,20 +72,23 @@ export async function registerUser(
       );
     }
 
+    // Get the user metadata for additional info
+    const userMetadata = authData.user.user_metadata;
+
     // Transform the profile data to match the expected UserProfile type
     // Map database role values back to frontend role values
     const frontendRole =
       profileData.role === 'Chiropractor' ? 'chiropractor' : 'parent';
 
     const userProfile: UserProfile = {
-      id: profileData.id,
-      email: profileData.email,
+      id: profileData.id as string,
+      email: profileData.email as string,
       role: frontendRole,
-      firstName: profileData.first_name || credentials.firstName,
-      lastName: profileData.last_name || credentials.lastName,
+      firstName: (profileData.first_name as string) || credentials.firstName,
+      lastName: (profileData.last_name as string) || credentials.lastName,
       practiceId: credentials.practiceId,
-      createdAt: profileData.createdAt,
-      updatedAt: profileData.updatedAt,
+      createdAt: profileData.created_at as string,
+      updatedAt: profileData.updated_at as string,
     };
 
     return userProfile;
@@ -140,14 +143,14 @@ export async function loginUser(
       profileData.role === 'Chiropractor' ? 'chiropractor' : 'parent';
 
     const userProfile: UserProfile = {
-      id: profileData.id,
-      email: profileData.email,
+      id: profileData.id as string,
+      email: profileData.email as string,
       role: frontendRole,
-      firstName: userMetadata?.firstName || profileData.first_name || '',
-      lastName: userMetadata?.lastName || profileData.last_name || '',
+      firstName: userMetadata?.firstName || (profileData.first_name as string) || '',
+      lastName: userMetadata?.lastName || (profileData.last_name as string) || '',
       practiceId: userMetadata?.practiceId,
-      createdAt: profileData.createdAt,
-      updatedAt: profileData.updatedAt,
+      createdAt: profileData.created_at as string,
+      updatedAt: profileData.updated_at as string,
     };
 
     return userProfile;
@@ -217,14 +220,14 @@ export async function getCurrentUser(): Promise<UserProfile | null> {
       profileData.role === 'Chiropractor' ? 'chiropractor' : 'parent';
 
     const userProfile: UserProfile = {
-      id: profileData.id,
-      email: profileData.email,
+      id: profileData.id as string,
+      email: profileData.email as string,
       role: frontendRole,
-      firstName: userMetadata?.firstName || profileData.first_name || '',
-      lastName: userMetadata?.lastName || profileData.last_name || '',
+      firstName: userMetadata?.firstName || (profileData.first_name as string) || '',
+      lastName: userMetadata?.lastName || (profileData.last_name as string) || '',
       practiceId: userMetadata?.practiceId,
-      createdAt: profileData.createdAt,
-      updatedAt: profileData.updatedAt,
+      createdAt: profileData.created_at as string,
+      updatedAt: profileData.updated_at as string,
     };
 
     return userProfile;

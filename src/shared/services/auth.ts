@@ -132,17 +132,17 @@ export async function registerUser(
 
     // Transform the profile data to match the expected UserProfile type
     // Map database role values back to frontend role values
-    const frontendRole = profileData.role;
+    const frontendRole = profileData.role as UserRole;
 
     const userProfile: UserProfile = {
-      id: profileData.id,
-      email: profileData.email,
+      id: profileData.id as string,
+      email: profileData.email as string,
       role: frontendRole,
-      firstName: profileData.first_name || credentials.firstName,
-      lastName: profileData.last_name || credentials.lastName,
+      firstName: (profileData.first_name as string) || credentials.firstName,
+      lastName: (profileData.last_name as string) || credentials.lastName,
       practiceId: credentials.practiceId,
-      createdAt: profileData.createdAt,
-      updatedAt: profileData.updatedAt,
+      createdAt: profileData.created_at as string,
+      updatedAt: profileData.updated_at as string,
     };
 
     return userProfile;
@@ -197,17 +197,17 @@ export async function loginUser(
     // Transform the profile data to match the expected UserProfile type
     // Use role directly from database (practitioner, parent, admin)
     console.log('User role from database during login:', profileData.role);
-    const frontendRole = profileData.role;
+    const frontendRole = profileData.role as UserRole;
 
     const userProfile: UserProfile = {
-      id: profileData.id,
-      email: profileData.email,
+      id: profileData.id as string,
+      email: profileData.email as string,
       role: frontendRole,
       firstName: userMetadata?.firstName || profileData.first_name || '',
       lastName: userMetadata?.lastName || profileData.last_name || '',
       practiceId: userMetadata?.practiceId,
-      createdAt: profileData.createdAt,
-      updatedAt: profileData.updatedAt,
+      createdAt: profileData.created_at as string,
+      updatedAt: profileData.updated_at as string,
     };
 
     return userProfile;
@@ -308,17 +308,17 @@ export async function getCurrentUser(): Promise<UserProfile | null> {
 
     // Transform the profile data to match the expected UserProfile type
     // Use role directly from database (practitioner, parent, admin)
-    const frontendRole = profileData.role;
+    const frontendRole = profileData.role as UserRole;
 
     const userProfile: UserProfile = {
-      id: profileData.id,
-      email: profileData.email,
+      id: profileData.id as string,
+      email: profileData.email as string,
       role: frontendRole,
       firstName: userMetadata?.firstName || profileData.first_name || '',
       lastName: userMetadata?.lastName || profileData.last_name || '',
       practiceId: userMetadata?.practiceId,
-      createdAt: profileData.createdAt,
-      updatedAt: profileData.updatedAt,
+      createdAt: profileData.created_at as string,
+      updatedAt: profileData.updated_at as string,
     };
 
     return userProfile;
