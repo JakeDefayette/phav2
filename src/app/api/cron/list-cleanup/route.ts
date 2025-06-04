@@ -2,10 +2,31 @@ import { NextRequest, NextResponse } from 'next/server';
 import { emailBounceHandler } from '@/shared/services/email/bounceHandler';
 import { createClient } from '@supabase/supabase-js';
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-);
+const supabase = (() => {
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+
+  if (!url) {
+    throw new Error(
+      'NEXT_PUBLIC_SUPABASE_URL is required for list cleanup cron'
+    );
+  }
+
+  if (!serviceKey) {
+    console.warn(
+      'SUPABASE_SERVICE_ROLE_KEY not available for list cleanup cron, falling back to anon key'
+    );
+    const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+    if (!anonKey) {
+      throw new Error(
+        'Either SUPABASE_SERVICE_ROLE_KEY or NEXT_PUBLIC_SUPABASE_ANON_KEY is required for list cleanup cron'
+      );
+    }
+    return createClient(url, anonKey);
+  }
+
+  return createClient(url, serviceKey);
+})();
 
 const CRON_SECRET = process.env.CRON_SECRET;
 

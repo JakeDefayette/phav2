@@ -42,7 +42,12 @@ export default function TemplatesPage() {
               <p className='text-gray-600 mb-4'>
                 Create and manage email templates for patient communications
               </p>
-              <button className='w-full bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition-colors'>
+              <button
+                onClick={() =>
+                  (window.location.href = '/dashboard/templates/email')
+                }
+                className='w-full bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition-colors'
+              >
                 Manage Email Templates
               </button>
             </Card>

@@ -11,6 +11,8 @@ import {
   AppointmentWidget,
   QuickActionsWidget,
   RecentActivityWidget,
+  ErrorMonitoringWidget,
+  AlertManagementWidget,
 } from './widgets';
 
 interface DashboardGridProps {
@@ -18,6 +20,8 @@ interface DashboardGridProps {
   className?: string;
   /** Layout variant for different dashboard views */
   layout?: 'default' | 'compact' | 'detailed';
+  /** Whether to show monitoring widgets (for admin/practitioner users) */
+  showMonitoring?: boolean;
 }
 
 /**
@@ -26,12 +30,13 @@ interface DashboardGridProps {
  *
  * @example
  * ```tsx
- * <DashboardGrid layout="detailed" />
+ * <DashboardGrid layout="detailed" showMonitoring={true} />
  * ```
  */
 export const DashboardGrid: React.FC<DashboardGridProps> = ({
   className = '',
   layout = 'default',
+  showMonitoring = false,
 }) => {
   const getGridClasses = () => {
     switch (layout) {
@@ -51,11 +56,48 @@ export const DashboardGrid: React.FC<DashboardGridProps> = ({
       <AppointmentWidget className='col-span-1' />
       <QuickActionsWidget compact={true} className='col-span-1' />
       <RecentActivityWidget maxItems={3} className='col-span-1' />
+
+      {/* Compact monitoring widgets */}
+      {showMonitoring && (
+        <>
+          <ErrorMonitoringWidget
+            className='col-span-1'
+            compactMode={true}
+            autoRefresh={true}
+            refreshInterval={60}
+          />
+          <AlertManagementWidget className='col-span-1' compactMode={true} />
+        </>
+      )}
     </div>
   );
 
   const renderDetailedLayout = () => (
     <div className={`space-y-6 ${className}`}>
+      {/* System Monitoring Section - Only show if enabled */}
+      {showMonitoring && (
+        <div className='space-y-4'>
+          <div className='flex items-center justify-between'>
+            <h3 className='text-lg font-semibold text-gray-900'>
+              System Monitoring
+            </h3>
+            <span className='text-sm text-gray-600'>
+              Real-time error tracking and alerts
+            </span>
+          </div>
+          <div className='grid grid-cols-1 xl:grid-cols-2 gap-6'>
+            <ErrorMonitoringWidget
+              className='col-span-1'
+              autoRefresh={true}
+              refreshInterval={30}
+              showDetailedMetrics={true}
+              compactMode={false}
+            />
+            <AlertManagementWidget className='col-span-1' compactMode={false} />
+          </div>
+        </div>
+      )}
+
       {/* Top row - Key metrics */}
       <div className='grid grid-cols-1 lg:grid-cols-2 gap-6'>
         <PatientSummaryWidget detailed={true} />
@@ -72,6 +114,21 @@ export const DashboardGrid: React.FC<DashboardGridProps> = ({
 
   const renderDefaultLayout = () => (
     <div className={`space-y-6 ${className}`}>
+      {/* Monitoring Section - Compact view for default layout */}
+      {showMonitoring && (
+        <div className='space-y-4'>
+          <h3 className='text-lg font-semibold text-gray-900'>System Health</h3>
+          <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
+            <ErrorMonitoringWidget
+              compactMode={true}
+              autoRefresh={true}
+              refreshInterval={60}
+            />
+            <AlertManagementWidget compactMode={true} />
+          </div>
+        </div>
+      )}
+
       {/* Top row - Summary widgets */}
       <div className={getGridClasses()}>
         <PatientSummaryWidget className='col-span-1' />

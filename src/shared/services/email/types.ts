@@ -93,17 +93,22 @@ export class EmailConfigurationError extends EmailServiceError {
 }
 
 // Email template types
-export type EmailTemplateType =
-  | 'report_delivery'
-  | 'report_ready'
-  | 'welcome'
-  | 'password_reset'
-  | 'account_verification'
-  | 'assessment_reminder'
-  | 'system_notification';
+export enum EmailTemplateType {
+  REPORT_DELIVERY = 'report_delivery',
+  REPORT_READY = 'report_ready',
+  WELCOME = 'welcome',
+  PASSWORD_RESET = 'password_reset',
+  ACCOUNT_VERIFICATION = 'account_verification',
+  ASSESSMENT_REMINDER = 'assessment_reminder',
+  SYSTEM_NOTIFICATION = 'system_notification',
+  REPORT_SHARE = 'report_share',
+}
+
+// Keep type alias for backwards compatibility
+export type EmailTemplateTypeValue = keyof typeof EmailTemplateType;
 
 export interface EmailTemplateData {
-  [key: string]: string | number | boolean | Date | undefined;
+  [key: string]: string | number | boolean | Date | undefined | EmailTemplateData | EmailTemplateData[];
 }
 
 export interface EmailLogEntry {
@@ -125,6 +130,27 @@ export interface EmailLogEntry {
   clickedAt?: Date;
   createdAt: Date;
   updatedAt: Date;
+}
+
+export interface EmailSendOptions {
+  from: string;
+  to: string | string[];
+  subject: string;
+  html?: string;
+  text?: string;
+  attachments?: EmailAttachment[];
+  headers?: Record<string, string>;
+  tags?: { name: string; value: string }[];
+}
+
+export interface ResendConfig {
+  apiKey: string;
+  baseUrl?: string;
+  timeout?: number;
+  retry?: {
+    maxAttempts: number;
+    baseDelayMs: number;
+  };
 }
 
 // Email Tracking Types
@@ -284,3 +310,16 @@ export interface EmailAnalyticsQuery {
   aggregateBy?: 'day' | 'week' | 'month';
   includeDetails?: boolean;
 }
+
+export type { 
+  EmailPreferenceType,
+  EmailConsentStatus,
+  ConsentAction,
+  EmailPreference,
+  EmailConsentLogEntry,
+  PracticeEmailQuota,
+  EmailSuppressionEntry,
+  ConsentRequestOptions,
+  UnsubscribeOptions,
+  PreferenceUpdateOptions,
+} from './compliance';

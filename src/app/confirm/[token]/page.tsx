@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import Link from 'next/link';
 import { Button } from '@/shared/components/atoms/Button';
 import { Alert } from '@/shared/components/molecules/Alert';
 
@@ -199,12 +200,12 @@ export default function ConfirmPage({ params }: ConfirmPageProps) {
                 >
                   Manage email preferences
                 </a>
-                <a
+                <Link
                   href='/'
                   className='text-gray-500 hover:text-gray-400 text-sm block'
                 >
                   Return to website
-                </a>
+                </Link>
               </div>
             </div>
           </div>
@@ -258,9 +259,12 @@ export default function ConfirmPage({ params }: ConfirmPageProps) {
             </Button>
 
             <div className='text-center'>
-              <a href='/' className='text-sm text-gray-500 hover:text-gray-400'>
+              <Link
+                href='/'
+                className='text-sm text-gray-500 hover:text-gray-400'
+              >
                 Cancel and return to website
-              </a>
+              </Link>
             </div>
           </div>
 

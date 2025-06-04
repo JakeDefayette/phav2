@@ -2,10 +2,29 @@ import { createClient } from '@supabase/supabase-js';
 import { EmailTrackingEvent, ResendWebhookEvent } from './types';
 import { emailTrackingService } from './tracking';
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-);
+const supabase = (() => {
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+
+  if (!url) {
+    throw new Error('NEXT_PUBLIC_SUPABASE_URL is required for BounceHandler');
+  }
+
+  if (!serviceKey) {
+    console.warn(
+      'SUPABASE_SERVICE_ROLE_KEY not available for BounceHandler, falling back to anon key'
+    );
+    const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+    if (!anonKey) {
+      throw new Error(
+        'Either SUPABASE_SERVICE_ROLE_KEY or NEXT_PUBLIC_SUPABASE_ANON_KEY is required for BounceHandler'
+      );
+    }
+    return createClient(url, anonKey);
+  }
+
+  return createClient(url, serviceKey);
+})();
 
 export interface BounceAnalysis {
   classification: 'hard' | 'soft' | 'unknown';
@@ -206,7 +225,7 @@ export class EmailBounceHandler {
           email: trackingEvent.recipientEmail,
           suppressionType: 'bounce',
           suppressionReason: analysis.reason,
-          bounceType: analysis.classification,
+          bounceType: analysis.classification === 'unknown' ? undefined : analysis.classification,
           canBeResubscribed: analysis.classification === 'soft',
           expiresAt:
             analysis.classification === 'soft'
@@ -266,10 +285,11 @@ export class EmailBounceHandler {
    * Analyze complaint to determine severity and action
    */
   private analyzeComplaint(feedbackType: string): ComplaintAnalysis {
-    const severity =
+    const severity = (
       this.complaintSeverity[
         feedbackType as keyof typeof this.complaintSeverity
-      ] || 'medium';
+      ] || 'medium'
+    ) as ComplaintAnalysis['severity'];
 
     let action: ComplaintAnalysis['action'] = 'suppress';
     let reputationImpact = 5; // Medium impact by default

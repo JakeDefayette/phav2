@@ -5,8 +5,14 @@ import {
   ReportReadyTemplate,
   ReportDeliveryTemplateProps,
   ReportReadyTemplateProps,
-} from './templates';
-import { EmailTemplateType, EmailTemplateData } from './types';
+} from './templates/';
+import { EmailTemplateType } from './types';
+
+// Extended EmailTemplateData to support specific template props
+export type EmailTemplateData = 
+  | ReportDeliveryTemplateProps 
+  | ReportReadyTemplateProps 
+  | Record<string, string | number | boolean | Date | undefined>;
 
 // Template registry interface
 export interface EmailTemplate {
@@ -18,7 +24,7 @@ export interface EmailTemplate {
 
 // Template registry
 const templateRegistry: Record<EmailTemplateType, EmailTemplate> = {
-  report_delivery: {
+  [EmailTemplateType.REPORT_DELIVERY]: {
     component: ReportDeliveryTemplate,
     defaultSubject: 'Pediatric Health Assessment Report',
     fallbackHtml: `
@@ -31,7 +37,7 @@ const templateRegistry: Record<EmailTemplateType, EmailTemplate> = {
     fallbackText:
       'Your Pediatric Health Assessment Report is ready for download.',
   },
-  report_ready: {
+  [EmailTemplateType.REPORT_READY]: {
     component: ReportReadyTemplate,
     defaultSubject: 'Your Report is Ready',
     fallbackHtml: `
@@ -44,7 +50,7 @@ const templateRegistry: Record<EmailTemplateType, EmailTemplate> = {
     fallbackText:
       'Your Pediatric Health Assessment Report is ready for download.',
   },
-  welcome: {
+  [EmailTemplateType.WELCOME]: {
     component: ReportDeliveryTemplate, // Placeholder - would need dedicated template
     defaultSubject: 'Welcome to Pediatric Health Assessment',
     fallbackHtml: `
@@ -55,7 +61,7 @@ const templateRegistry: Record<EmailTemplateType, EmailTemplate> = {
     `,
     fallbackText: 'Welcome to Pediatric Health Assessment platform.',
   },
-  password_reset: {
+  [EmailTemplateType.PASSWORD_RESET]: {
     component: ReportDeliveryTemplate, // Placeholder - would need dedicated template
     defaultSubject: 'Password Reset Request',
     fallbackHtml: `
@@ -66,7 +72,7 @@ const templateRegistry: Record<EmailTemplateType, EmailTemplate> = {
     `,
     fallbackText: 'Password reset instructions.',
   },
-  account_verification: {
+  [EmailTemplateType.ACCOUNT_VERIFICATION]: {
     component: ReportDeliveryTemplate, // Placeholder - would need dedicated template
     defaultSubject: 'Verify Your Account',
     fallbackHtml: `
@@ -77,7 +83,7 @@ const templateRegistry: Record<EmailTemplateType, EmailTemplate> = {
     `,
     fallbackText: 'Please verify your account.',
   },
-  assessment_reminder: {
+  [EmailTemplateType.ASSESSMENT_REMINDER]: {
     component: ReportDeliveryTemplate, // Placeholder - would need dedicated template
     defaultSubject: 'Assessment Reminder',
     fallbackHtml: `
@@ -88,7 +94,7 @@ const templateRegistry: Record<EmailTemplateType, EmailTemplate> = {
     `,
     fallbackText: 'Assessment reminder.',
   },
-  system_notification: {
+  [EmailTemplateType.SYSTEM_NOTIFICATION]: {
     component: ReportDeliveryTemplate, // Placeholder - would need dedicated template
     defaultSubject: 'System Notification',
     fallbackHtml: `
@@ -99,7 +105,21 @@ const templateRegistry: Record<EmailTemplateType, EmailTemplate> = {
     `,
     fallbackText: 'System notification.',
   },
+  [EmailTemplateType.REPORT_SHARE]: {
+    component: ReportDeliveryTemplate, // Placeholder - would need dedicated template
+    defaultSubject: 'Shared Report',
+    fallbackHtml: `
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+        <h1>Shared Report</h1>
+        <p>A report has been shared with you.</p>
+      </div>
+    `,
+    fallbackText: 'Report shared.',
+  },
 };
+
+// Track custom templates for testing/cleanup
+const customTemplates = new Set<EmailTemplateType>();
 
 // Template rendering service
 export class EmailTemplateService {
@@ -148,7 +168,7 @@ export class EmailTemplateService {
   static async renderReportDelivery(
     props: ReportDeliveryTemplateProps
   ): Promise<{ html: string; text: string; subject: string }> {
-    return this.renderTemplate('report_delivery', props);
+    return this.renderTemplate(EmailTemplateType.REPORT_DELIVERY, props);
   }
 
   /**
@@ -157,7 +177,7 @@ export class EmailTemplateService {
   static async renderReportReady(
     props: ReportReadyTemplateProps
   ): Promise<{ html: string; text: string; subject: string }> {
-    return this.renderTemplate('report_ready', props);
+    return this.renderTemplate(EmailTemplateType.REPORT_READY, props);
   }
 
   /**
@@ -199,6 +219,24 @@ export class EmailTemplateService {
     template: EmailTemplate
   ): void {
     templateRegistry[templateType] = template;
+    customTemplates.add(templateType);
+  }
+
+  /**
+   * Clear custom templates (useful for testing)
+   */
+  static clearCustomTemplates(): void {
+    customTemplates.forEach(templateType => {
+      delete templateRegistry[templateType];
+    });
+    customTemplates.clear();
+  }
+
+  /**
+   * Get list of custom templates
+   */
+  static getCustomTemplates(): EmailTemplateType[] {
+    return Array.from(customTemplates);
   }
 
   /**
@@ -230,7 +268,7 @@ export class EmailTemplateService {
             phone: '(555) 123-4567',
             website: 'https://example.com',
           },
-        };
+        } as ReportDeliveryTemplateProps;
 
       case 'report_ready':
         return {
@@ -244,7 +282,7 @@ export class EmailTemplateService {
             phone: '(555) 123-4567',
             website: 'https://example.com',
           },
-        };
+        } as ReportReadyTemplateProps;
 
       default:
         return {

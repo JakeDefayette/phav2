@@ -9,11 +9,26 @@ export default function DebugPage() {
 
   useEffect(() => {
     // Check environment variables
+    console.log('Raw process.env:', {
+      NEXT_PUBLIC_SUPABASE_URL: process.env.NEXT_PUBLIC_SUPABASE_URL,
+      NEXT_PUBLIC_SUPABASE_ANON_KEY: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
+      NODE_ENV: process.env.NODE_ENV,
+    });
+
     const envVars = {
       url: process.env.NEXT_PUBLIC_SUPABASE_URL,
       anonKey: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
       serviceKey: process.env.SUPABASE_SERVICE_ROLE_KEY,
       appUrl: process.env.NEXT_PUBLIC_APP_URL,
+      nodeEnv: process.env.NODE_ENV,
+      // Check if variables exist at all
+      hasUrl: typeof process.env.NEXT_PUBLIC_SUPABASE_URL !== 'undefined',
+      hasAnonKey:
+        typeof process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY !== 'undefined',
+      // Check all process.env keys that start with NEXT_PUBLIC
+      allNextPublicKeys: Object.keys(process.env).filter(key =>
+        key.startsWith('NEXT_PUBLIC')
+      ),
     };
     setEnvCheck(envVars);
 

@@ -4,8 +4,16 @@ module.exports = {
   testEnvironment: 'jsdom',
   roots: ['<rootDir>/src', '<rootDir>/tests'],
   testMatch: [
-    '**/__tests__/**/*.+(ts|tsx|js)',
+    '**/__tests__/**/*.(test|spec).+(ts|tsx|js)',
     '**/*.(test|spec).+(ts|tsx|js)',
+  ],
+  testPathIgnorePatterns: [
+    '/node_modules/',
+    '/__tests__/mocks/',
+    '/mocks/',
+    '\\.mock\\.(ts|tsx|js)$',
+    '.*\\.mock\\..*',
+    '.*/mocks/.*',
   ],
   transform: {
     '^.+\\.(ts|tsx)$': [
@@ -23,6 +31,8 @@ module.exports = {
     'src/**/*.{ts,tsx}',
     '!src/**/*.d.ts',
     '!src/**/*.stories.{ts,tsx}',
+    '!src/**/*mock*',
+    '!src/**/mocks/**',
   ],
   coverageDirectory: 'coverage',
   coverageReporters: ['text', 'lcov', 'html'],
@@ -36,15 +46,5 @@ module.exports = {
     '\\.(css|less|scss|sass)$': 'identity-obj-proxy',
     '\\.(jpg|jpeg|png|gif|eot|otf|webp|svg|ttf|woff|woff2|mp4|webm|wav|mp3|m4a|aac|oga)$':
       'jest-transform-stub',
-  },
-  // Add globals for React
-  globals: {
-    'ts-jest': {
-      tsconfig: {
-        jsx: 'react-jsx',
-        experimentalDecorators: true,
-        emitDecoratorMetadata: true,
-      },
-    },
   },
 };

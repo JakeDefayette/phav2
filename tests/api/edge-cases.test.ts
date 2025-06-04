@@ -16,13 +16,13 @@ jest.mock('../../src/lib/supabase', () => ({
 }));
 
 // Mock services
-jest.mock('../../src/services/pdf', () => ({
+jest.mock('../../src/features/reports/services/pdf', () => ({
   pdfService: {
     generateReport: jest.fn(),
   },
 }));
 
-jest.mock('../../src/services/delivery', () => ({
+jest.mock('../../src/features/reports/services/delivery', () => ({
   deliveryService: {
     deliverReport: jest.fn(),
     getDeliveryStatus: jest.fn(),
@@ -277,7 +277,7 @@ describe('API Edge Cases and Error Handling', () => {
 
         const validationErrors = [];
 
-        if (typeof reportId !== 'string' || !/^[0-9a-f-]{36}$/.test(reportId)) {
+        if (typeof reportId !== 'string' || !/^[0-9a-f\-]{36}$/.test(reportId)) {
           validationErrors.push('reportId must be a valid UUID');
         }
 
@@ -338,7 +338,7 @@ describe('API Edge Cases and Error Handling', () => {
 
         // Simulate SQL injection detection
         const sqlInjectionPatterns = [
-          /('|(\\')|(;)|(\\;)|(\\|)|(\\*)|(%27)|(%3B)|(%3D)/i,
+          /('|\\')|(;|\\;)|(\\\\\\|)|(\\*)|(%27)|(%3B)|(%3D)/i,
           /(DROP|DELETE|INSERT|UPDATE|CREATE|ALTER|EXEC|UNION|SELECT)/i,
           /(OR|AND)\s+\d+\s*=\s*\d+/i,
         ];
@@ -799,7 +799,7 @@ describe('API Edge Cases and Error Handling', () => {
       });
 
       // Mock external service failure
-      const { deliveryService } = require('../../src/services/delivery');
+      const { deliveryService } = require('../../src/features/reports/services/delivery');
       deliveryService.deliverReport.mockRejectedValue(
         new Error('External service unavailable')
       );

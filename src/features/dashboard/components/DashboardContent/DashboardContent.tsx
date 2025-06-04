@@ -4,6 +4,7 @@ import React from 'react';
 import { useAuth, useRole } from '@/shared/hooks';
 import { Button } from '@/shared/components/atoms/Button';
 import { RoleGuard } from '@/shared/components/atoms/RoleGuard';
+import { ErrorMonitoringWidget, AlertManagementWidget } from '../widgets';
 
 export function DashboardContent() {
   const { user } = useAuth();
@@ -32,6 +33,32 @@ export function DashboardContent() {
           </div>
         </div>
       </div>
+
+      {/* System Monitoring Section - Admin and Practitioners only */}
+      <RoleGuard requiredRole='practitioner'>
+        <div className='space-y-4'>
+          <div className='flex items-center justify-between'>
+            <h2 className='text-xl font-semibold text-gray-900'>
+              System Monitoring
+            </h2>
+            <span className='text-sm text-gray-600'>
+              Real-time error tracking and alerts
+            </span>
+          </div>
+
+          {/* Monitoring Widgets Grid */}
+          <div className='grid grid-cols-1 xl:grid-cols-2 gap-6'>
+            <ErrorMonitoringWidget
+              className='col-span-1'
+              autoRefresh={true}
+              refreshInterval={30}
+              showDetailedMetrics={true}
+              compactMode={false}
+            />
+            <AlertManagementWidget className='col-span-1' compactMode={false} />
+          </div>
+        </div>
+      </RoleGuard>
 
       {/* Main Feature Cards */}
       <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6'>
@@ -169,6 +196,59 @@ export function DashboardContent() {
                 </p>
                 <Button variant='primary' size='sm' className='w-full'>
                   View All
+                </Button>
+              </div>
+            </div>
+          </div>
+        </RoleGuard>
+
+        {/* System Monitoring */}
+        <RoleGuard requiredRole='practitioner'>
+          <div className='bg-white overflow-hidden shadow rounded-lg hover:shadow-md transition-shadow duration-200'>
+            <div className='px-4 py-5 sm:p-6'>
+              <div className='flex items-center'>
+                <div className='flex-shrink-0'>
+                  <div className='w-8 h-8 bg-blue-500 rounded-md flex items-center justify-center'>
+                    <svg
+                      className='w-5 h-5 text-white'
+                      fill='none'
+                      stroke='currentColor'
+                      viewBox='0 0 24 24'
+                    >
+                      <path
+                        strokeLinecap='round'
+                        strokeLinejoin='round'
+                        strokeWidth={2}
+                        d='M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z'
+                      />
+                    </svg>
+                  </div>
+                </div>
+                <div className='ml-5 w-0 flex-1'>
+                  <dl>
+                    <dt className='text-sm font-medium text-gray-500 truncate'>
+                      System Monitoring
+                    </dt>
+                    <dd className='text-lg font-medium text-gray-900'>
+                      View System Health
+                    </dd>
+                  </dl>
+                </div>
+              </div>
+              <div className='mt-5'>
+                <p className='text-sm text-gray-600 mb-4'>
+                  Monitor system health, track errors, and manage alerts for
+                  your practice platform.
+                </p>
+                <Button
+                  variant='primary'
+                  size='sm'
+                  onClick={() =>
+                    (window.location.href = '/dashboard/monitoring')
+                  }
+                  className='w-full'
+                >
+                  View Monitoring
                 </Button>
               </div>
             </div>

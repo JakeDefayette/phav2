@@ -1,5 +1,5 @@
-import { createClient } from '@supabase/supabase-js';
-import crypto from 'crypto';
+import { supabase } from '@/shared/services/supabase';
+import { createHash, randomBytes, createHmac, timingSafeEqual } from 'crypto';
 import {
   EmailTrackingEvent,
   EmailTrackingUrl,
@@ -10,11 +10,6 @@ import {
   EmailTrackingConfig,
   EmailAnalyticsQuery,
 } from './types';
-
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-);
 
 export class EmailTrackingService {
   private readonly defaultConfig: EmailTrackingConfig = {
@@ -28,7 +23,9 @@ export class EmailTrackingService {
     complaintHandlingEnabled: true,
   };
 
-  constructor(private config: EmailTrackingConfig = {}) {
+  private config: EmailTrackingConfig;
+
+  constructor(config: Partial<EmailTrackingConfig> = {}) {
     this.config = { ...this.defaultConfig, ...config };
   }
 
@@ -45,14 +42,13 @@ export class EmailTrackingService {
     secret,
   }: WebhookVerificationOptions): boolean {
     try {
-      const expectedSignature = crypto
-        .createHmac('sha256', secret)
+      const expectedSignature = createHmac('sha256', secret)
         .update(body)
         .digest('hex');
 
       const providedSignature = signature.replace('sha256=', '');
 
-      return crypto.timingSafeEqual(
+      return timingSafeEqual(
         Buffer.from(expectedSignature, 'hex'),
         Buffer.from(providedSignature, 'hex')
       );
@@ -124,9 +120,9 @@ export class EmailTrackingService {
       }
 
       // Handle specific event types
-      await this.handleSpecificEventType(event, data);
+      await this.handleSpecificEventType(event, data as unknown as EmailTrackingEvent);
 
-      return data;
+      return data as unknown as EmailTrackingEvent;
     } catch (error) {
       console.error('Failed to process webhook event:', error);
       throw error;
@@ -175,7 +171,7 @@ export class EmailTrackingService {
       throw error;
     }
 
-    return data;
+    return data as unknown as EmailTrackingUrl;
   }
 
   /**
@@ -195,7 +191,7 @@ export class EmailTrackingService {
       throw error;
     }
 
-    return data;
+    return data as unknown as EmailTrackingUrl | null;
   }
 
   /**
@@ -219,6 +215,7 @@ export class EmailTrackingService {
       campaignId: trackingUrl.campaignId,
       scheduledEmailId: trackingUrl.scheduledEmailId,
       eventType: 'clicked',
+      eventTimestamp: new Date(),
       recipientEmail: trackingUrl.recipientEmail,
       clickUrl: trackingUrl.originalUrl,
       userAgent,
@@ -269,7 +266,7 @@ export class EmailTrackingService {
       throw error;
     }
 
-    return data;
+    return data as unknown as EmailTrackingPixel;
   }
 
   /**
@@ -289,7 +286,7 @@ export class EmailTrackingService {
       throw error;
     }
 
-    return data;
+    return data as unknown as EmailTrackingPixel | null;
   }
 
   /**
@@ -313,6 +310,7 @@ export class EmailTrackingService {
       campaignId: trackingPixel.campaignId,
       scheduledEmailId: trackingPixel.scheduledEmailId,
       eventType: 'opened',
+      eventTimestamp: new Date(),
       recipientEmail: trackingPixel.recipientEmail,
       userAgent,
       ipAddress,
@@ -378,7 +376,7 @@ export class EmailTrackingService {
       throw error;
     }
 
-    return data || [];
+    return (data || []) as unknown as EmailAnalyticsSummary[];
   }
 
   /**
@@ -414,16 +412,16 @@ export class EmailTrackingService {
       );
     }
 
-    const { data, error } = await queryBuilder.order('event_timestamp', {
-      ascending: false,
-    });
+    const { data, error } = await queryBuilder
+      .order('event_timestamp', { ascending: false })
+      .limit(query.includeDetails ? 100 : 500);
 
     if (error) {
       console.error('Failed to get tracking events:', error);
       throw error;
     }
 
-    return data || [];
+    return (data || []) as unknown as EmailTrackingEvent[];
   }
 
   /**
@@ -606,6 +604,30 @@ export class EmailTrackingService {
     return data?.status === 'bounced' || data?.status === 'unsubscribed';
   }
 
+  /**
+   * Get campaign tracking data for analytics
+   */
+  async getCampaignTrackingData(campaignId: string): Promise<{
+    deviceBreakdown: {
+      mobile: number;
+      desktop: number;
+      tablet: number;
+    };
+    geographicBreakdown: Record<string, number>;
+  }> {
+    // For now, return default values
+    // In a full implementation, this would query analytics_events or similar table
+    // to get device and geographic data from user agents and IP addresses
+    return {
+      deviceBreakdown: {
+        mobile: 0,
+        desktop: 0,
+        tablet: 0,
+      },
+      geographicBreakdown: {},
+    };
+  }
+
   // =====================
   // Private Helper Methods
   // =====================
@@ -647,7 +669,7 @@ export class EmailTrackingService {
   }
 
   private generateTrackingToken(): string {
-    return crypto.randomBytes(32).toString('hex');
+    return randomBytes(32).toString('hex');
   }
 
   private async findCampaignId(emailId: string): Promise<string | undefined> {

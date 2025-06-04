@@ -1,43 +1,83 @@
 import { createClient } from '@supabase/supabase-js';
-import { config } from '@/shared/config';
 
-// Enhanced client configuration for production readiness
-export const supabase = createClient(
-  config.database.url,
-  config.database.anon_key,
-  {
-    auth: {
-      // Security enhancements
-      autoRefreshToken: true,
-      persistSession: true,
-      detectSessionInUrl: true,
-      flowType: 'pkce', // Enhanced security with PKCE
-      storage: typeof window !== 'undefined' ? window.localStorage : undefined,
-      storageKey: 'supabase.auth.token',
-      debug: config.app.environment === 'development',
-    },
-    global: {
-      headers: {
-        'X-Client-Info': 'pha-v2-web',
-      },
-    },
-    db: {
-      schema: 'public',
-    },
-    realtime: {
-      params: {
-        eventsPerSecond: 10,
-        // Add heartbeat for connection monitoring
-        heartbeatIntervalMs: 30000,
-        // Reconnection settings
-        reconnectAfterMs: (tries: number) => Math.min(tries * 1000, 30000),
-      },
-      // Add error handling for realtime connections
-      logger:
-        config.app.environment === 'development' ? console.log : undefined,
-    },
+// Lazy initialization to avoid issues with environment variables
+let supabaseClient: ReturnType<typeof createClient> | null = null;
+
+function getSupabaseClient() {
+  if (!supabaseClient) {
+    try {
+      // Check if we have the required environment variables
+      const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+      const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+
+      if (!supabaseUrl) {
+        throw new Error(
+          'NEXT_PUBLIC_SUPABASE_URL is required but not found in environment variables'
+        );
+      }
+
+      if (!supabaseAnonKey) {
+        throw new Error(
+          'NEXT_PUBLIC_SUPABASE_ANON_KEY is required but not found in environment variables'
+        );
+      }
+
+      console.log('Creating Supabase client with:', {
+        url: supabaseUrl,
+        hasAnonKey: !!supabaseAnonKey,
+        anonKeyLength: supabaseAnonKey?.length,
+      });
+
+      // Enhanced client configuration for production readiness
+      supabaseClient = createClient(supabaseUrl, supabaseAnonKey, {
+        auth: {
+          // Security enhancements
+          autoRefreshToken: true,
+          persistSession: true,
+          detectSessionInUrl: true,
+          flowType: 'pkce', // Enhanced security with PKCE
+          storage:
+            typeof window !== 'undefined' ? window.localStorage : undefined,
+          storageKey: 'supabase.auth.token',
+          debug: process.env.NODE_ENV === 'development',
+        },
+        global: {
+          headers: {
+            'X-Client-Info': 'pha-v2-web',
+          },
+        },
+        db: {
+          schema: 'public',
+        },
+        realtime: {
+          params: {
+            eventsPerSecond: 10,
+            // Add heartbeat for connection monitoring
+            heartbeatIntervalMs: 30000,
+            // Reconnection settings
+            reconnectAfterMs: (tries: number) => Math.min(tries * 1000, 30000),
+          },
+          // Add error handling for realtime connections
+          logger:
+            process.env.NODE_ENV === 'development' ? console.log : undefined,
+        },
+      });
+    } catch (error) {
+      console.error('Failed to initialize Supabase client:', error);
+      throw error;
+    }
   }
-);
+
+  return supabaseClient;
+}
+
+// Export the client getter function
+export const supabase = new Proxy({} as ReturnType<typeof createClient>, {
+  get(target, prop) {
+    const client = getSupabaseClient();
+    return client[prop as keyof typeof client];
+  },
+});
 
 // Enhanced error handling wrapper
 export class SupabaseError extends Error {
@@ -198,7 +238,7 @@ if (typeof window !== 'undefined') {
   setInterval(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (session) {
-        checkConnection();
+        checkConnection(false);
       }
     });
   }, CONNECTION_CHECK_INTERVAL);
