@@ -5,6 +5,7 @@
 The `EmailService` provides comprehensive email functionalities for the Pediatric Health Assessment platform. It handles sending various types of emails (e.g., report delivery, notifications), scheduling emails for future delivery, managing email templates, tracking email engagement (opens, clicks), and handling suppression lists (bounces, unsubscribes).
 
 It integrates with:
+
 - **Resend**: For the actual dispatch of emails.
 - **Supabase**: For logging email events and potentially other persistent storage needs related to email.
 - **Internal Services**: Such as `EmailTemplateService` for rendering email content from React Email templates, and `emailTrackingService` for managing tracking pixels and links.
@@ -31,6 +32,7 @@ Ensure that the domain used in `FROM_EMAIL` is verified with Resend.
 ## Rate Limiting
 
 The `EmailService` is subject to rate limits imposed by Resend.
+
 - If an email sending attempt is rate-limited, the methods like `sendReportDeliveryEmail` or `sendReportReadyNotification` will throw an `EmailRateLimitError` or return an `EmailResult` object with `rateLimited: true` and an appropriate error message.
 - You can check the current rate limit status by calling `emailService.getRateLimitStatus()`. This method returns an object indicating available sending tokens, the next refill time, and whether the service is currently limited.
 
@@ -39,7 +41,9 @@ import { emailService } from '@/shared/services/email'; // Assuming singleton ex
 
 const status = emailService.getRateLimitStatus();
 if (status.isLimited) {
-  console.warn(`Email service is currently rate limited. Next refill: ${status.nextRefillTime}`);
+  console.warn(
+    `Email service is currently rate limited. Next refill: ${status.nextRefillTime}`
+  );
 }
 ```
 
@@ -50,9 +54,18 @@ if (status.isLimited) {
 This email typically includes a PDF attachment of an assessment report and a download link.
 
 ```typescript
-import { emailService, EmailAttachment, ReportDeliveryEmailOptions } from '@/shared/services/email';
+import {
+  emailService,
+  EmailAttachment,
+  ReportDeliveryEmailOptions,
+} from '@/shared/services/email';
 
-async function sendReport(recipientEmail: string, childName: string, reportUrl: string, pdfContent: Buffer) {
+async function sendReport(
+  recipientEmail: string,
+  childName: string,
+  reportUrl: string,
+  pdfContent: Buffer
+) {
   const options: ReportDeliveryEmailOptions = {
     to: recipientEmail,
     childName: childName,
@@ -63,13 +76,15 @@ async function sendReport(recipientEmail: string, childName: string, reportUrl: 
       content: pdfContent, // Buffer or base64 string
     },
     // practiceId is optional, used for enhanced tracking
-    // practiceId: 'your-practice-id' 
+    // practiceId: 'your-practice-id'
   };
 
   try {
     const result = await emailService.sendReportDeliveryEmail(options);
     if (result.success) {
-      console.log(`Report delivery email sent successfully! Message ID: ${result.messageId}`);
+      console.log(
+        `Report delivery email sent successfully! Message ID: ${result.messageId}`
+      );
     } else {
       console.error(`Failed to send report delivery email: ${result.error}`);
       if (result.rateLimited) {
@@ -87,9 +102,17 @@ async function sendReport(recipientEmail: string, childName: string, reportUrl: 
 This sends an email at a future time to notify a user that their report is available.
 
 ```typescript
-import { emailService, ReportReadyNotificationOptions } from '@/shared/services/email';
+import {
+  emailService,
+  ReportReadyNotificationOptions,
+} from '@/shared/services/email';
 
-async function scheduleNotification(userEmail: string, userName: string, reportId: string, viewLink: string) {
+async function scheduleNotification(
+  userEmail: string,
+  userName: string,
+  reportId: string,
+  viewLink: string
+) {
   const scheduleOptions = {
     to: userEmail,
     firstName: userName,
@@ -101,9 +124,12 @@ async function scheduleNotification(userEmail: string, userName: string, reportI
   };
 
   try {
-    const result = await emailService.scheduleReportReadyNotification(scheduleOptions);
+    const result =
+      await emailService.scheduleReportReadyNotification(scheduleOptions);
     if (result.success) {
-      console.log(`Report ready notification scheduled! Scheduled ID: ${result.scheduledEmailId}`);
+      console.log(
+        `Report ready notification scheduled! Scheduled ID: ${result.scheduledEmailId}`
+      );
     } else {
       console.error(`Failed to schedule notification: ${result.error}`);
     }
@@ -152,4 +178,4 @@ It's recommended to use `try...catch` blocks when calling service methods and to
 
 ## Further Details
 
-For detailed information on each method's parameters and behavior, refer to the JSDoc comments directly within the `src/shared/services/email.ts` file. 
+For detailed information on each method's parameters and behavior, refer to the JSDoc comments directly within the `src/shared/services/email.ts` file.

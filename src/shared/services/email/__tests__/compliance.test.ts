@@ -40,7 +40,11 @@ jest.mock('@/shared/services/supabase', () => ({
 }));
 
 import { EmailComplianceService } from '../compliance';
-import { EmailPreferenceType, EmailConsentStatus, ConsentAction } from '../types';
+import {
+  EmailPreferenceType,
+  EmailConsentStatus,
+  ConsentAction,
+} from '../types';
 
 // Setup chaining behavior
 const setupMockChaining = () => {
@@ -113,11 +117,12 @@ describe('EmailComplianceService', () => {
 
       // Set up the from method to return the right chain for each call
       mockSupabase.from
-        .mockReturnValueOnce(firstChain)  // practice_email_quotas
+        .mockReturnValueOnce(firstChain) // practice_email_quotas
         .mockReturnValueOnce(secondChain) // email_preferences insert
-        .mockReturnValue(thirdChain);     // email_consent_log inserts
+        .mockReturnValue(thirdChain); // email_consent_log inserts
 
-      const result = await complianceService.createEmailPreferences(mockOptions);
+      const result =
+        await complianceService.createEmailPreferences(mockOptions);
 
       expect(result.success).toBe(true);
       expect(result.preferences).toHaveLength(1);
@@ -168,11 +173,15 @@ describe('EmailComplianceService', () => {
         .mockReturnValueOnce(secondChain)
         .mockReturnValue(thirdChain);
 
-      const result = await complianceService.createEmailPreferences(optionsWithDoubleOptIn);
+      const result = await complianceService.createEmailPreferences(
+        optionsWithDoubleOptIn
+      );
 
       expect(result.success).toBe(true);
       expect(result.doubleOptInToken).toBeDefined();
-      expect(result.preferences?.[0].consent_status).toBe('double_opt_in_pending');
+      expect(result.preferences?.[0].consent_status).toBe(
+        'double_opt_in_pending'
+      );
     });
 
     it('should handle practice quota lookup error', async () => {
@@ -184,7 +193,8 @@ describe('EmailComplianceService', () => {
 
       mockSupabase.from.mockReturnValueOnce(firstChain);
 
-      const result = await complianceService.createEmailPreferences(mockOptions);
+      const result =
+        await complianceService.createEmailPreferences(mockOptions);
 
       expect(result.success).toBe(false);
       expect(result.error).toContain('Failed to get practice quota');
@@ -207,7 +217,9 @@ describe('EmailComplianceService', () => {
             preference_type: 'marketing',
             is_subscribed: false,
             consent_status: 'double_opt_in_pending',
-            double_opt_in_expires_at: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
+            double_opt_in_expires_at: new Date(
+              Date.now() + 24 * 60 * 60 * 1000
+            ).toISOString(),
             created_at: new Date().toISOString(),
             updated_at: new Date().toISOString(),
           },
@@ -224,11 +236,15 @@ describe('EmailComplianceService', () => {
       thirdChain.insert.mockResolvedValue({ data: null, error: null });
 
       mockSupabase.from
-        .mockReturnValueOnce(firstChain)  // email_preferences select
+        .mockReturnValueOnce(firstChain) // email_preferences select
         .mockReturnValueOnce(secondChain) // email_preferences update
-        .mockReturnValue(thirdChain);     // email_consent_log insert
+        .mockReturnValue(thirdChain); // email_consent_log insert
 
-      const result = await complianceService.confirmDoubleOptIn('valid-token', '127.0.0.1', 'Mozilla/5.0');
+      const result = await complianceService.confirmDoubleOptIn(
+        'valid-token',
+        '127.0.0.1',
+        'Mozilla/5.0'
+      );
 
       expect(result.success).toBe(true);
       expect(result.email).toBe('test@example.com');
@@ -244,7 +260,8 @@ describe('EmailComplianceService', () => {
 
       mockSupabase.from.mockReturnValueOnce(firstChain);
 
-      const result = await complianceService.confirmDoubleOptIn('invalid-token');
+      const result =
+        await complianceService.confirmDoubleOptIn('invalid-token');
 
       expect(result.success).toBe(false);
       expect(result.error).toBe('Invalid or expired confirmation token');
@@ -261,7 +278,9 @@ describe('EmailComplianceService', () => {
             preference_type: 'marketing',
             is_subscribed: false,
             consent_status: 'double_opt_in_pending',
-            double_opt_in_expires_at: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString(), // Expired
+            double_opt_in_expires_at: new Date(
+              Date.now() - 24 * 60 * 60 * 1000
+            ).toISOString(), // Expired
             created_at: new Date().toISOString(),
             updated_at: new Date().toISOString(),
           },
@@ -271,7 +290,8 @@ describe('EmailComplianceService', () => {
 
       mockSupabase.from.mockReturnValueOnce(firstChain);
 
-      const result = await complianceService.confirmDoubleOptIn('expired-token');
+      const result =
+        await complianceService.confirmDoubleOptIn('expired-token');
 
       expect(result.success).toBe(false);
       expect(result.error).toBe('Confirmation token has expired');
@@ -390,9 +410,9 @@ describe('EmailComplianceService', () => {
       thirdChain.insert.mockResolvedValue({ data: null, error: null });
 
       mockSupabase.from
-        .mockReturnValueOnce(firstChain)  // find existing preference
+        .mockReturnValueOnce(firstChain) // find existing preference
         .mockReturnValueOnce(secondChain) // update preference
-        .mockReturnValue(thirdChain);     // log consent action
+        .mockReturnValue(thirdChain); // log consent action
 
       const result = await complianceService.updatePreferences({
         email: 'test@example.com',
@@ -438,8 +458,8 @@ describe('EmailComplianceService', () => {
       });
 
       mockSupabase.from
-        .mockReturnValueOnce(firstChain)  // find preference (not found)
-        .mockReturnValue(secondChain);   // create preference
+        .mockReturnValueOnce(firstChain) // find preference (not found)
+        .mockReturnValue(secondChain); // create preference
 
       const result = await complianceService.updatePreferences({
         email: 'test@example.com',
@@ -475,7 +495,10 @@ describe('EmailComplianceService', () => {
 
       mockSupabase.from.mockReturnValueOnce(firstChain);
 
-      const result = await complianceService.isEmailSuppressed('550e8400-e29b-41d4-a716-446655440000', 'test@example.com');
+      const result = await complianceService.isEmailSuppressed(
+        '550e8400-e29b-41d4-a716-446655440000',
+        'test@example.com'
+      );
 
       expect(result.success).toBe(true);
       expect(result.suppressed).toBe(true);
@@ -493,7 +516,10 @@ describe('EmailComplianceService', () => {
 
       mockSupabase.from.mockReturnValueOnce(firstChain);
 
-      const result = await complianceService.isEmailSuppressed('550e8400-e29b-41d4-a716-446655440000', 'test@example.com');
+      const result = await complianceService.isEmailSuppressed(
+        '550e8400-e29b-41d4-a716-446655440000',
+        'test@example.com'
+      );
 
       expect(result.success).toBe(true);
       expect(result.suppressed).toBe(false);
@@ -566,7 +592,10 @@ describe('EmailComplianceService', () => {
 
       mockSupabase.from.mockReturnValueOnce(firstChain);
 
-      const result = await complianceService.getEmailPreferences('550e8400-e29b-41d4-a716-446655440000', 'test@example.com');
+      const result = await complianceService.getEmailPreferences(
+        '550e8400-e29b-41d4-a716-446655440000',
+        'test@example.com'
+      );
 
       expect(result.success).toBe(true);
       expect(result.preferences).toHaveLength(2);
@@ -598,7 +627,9 @@ describe('EmailComplianceService', () => {
 
       mockSupabase.from.mockReturnValueOnce(firstChain);
 
-      const result = await complianceService.getPracticeQuota('550e8400-e29b-41d4-a716-446655440000');
+      const result = await complianceService.getPracticeQuota(
+        '550e8400-e29b-41d4-a716-446655440000'
+      );
 
       expect(result.success).toBe(true);
       expect(result.quota).toBeDefined();
@@ -637,10 +668,12 @@ describe('EmailComplianceService', () => {
       });
 
       mockSupabase.from
-        .mockReturnValueOnce(firstChain)  // quota lookup (not found)
+        .mockReturnValueOnce(firstChain) // quota lookup (not found)
         .mockReturnValueOnce(secondChain); // create default quota
 
-      const result = await complianceService.getPracticeQuota('550e8400-e29b-41d4-a716-446655440000');
+      const result = await complianceService.getPracticeQuota(
+        '550e8400-e29b-41d4-a716-446655440000'
+      );
 
       expect(result.success).toBe(true);
       expect(result.quota).toBeDefined();
@@ -671,7 +704,10 @@ describe('EmailComplianceService', () => {
 
       mockSupabase.from.mockReturnValueOnce(firstChain);
 
-      const result = await complianceService.canSendEmail('550e8400-e29b-41d4-a716-446655440000', 10);
+      const result = await complianceService.canSendEmail(
+        '550e8400-e29b-41d4-a716-446655440000',
+        10
+      );
 
       expect(result.canSend).toBe(true);
       expect(result.quota).toBeDefined();
@@ -700,7 +736,10 @@ describe('EmailComplianceService', () => {
 
       mockSupabase.from.mockReturnValueOnce(firstChain);
 
-      const result = await complianceService.canSendEmail('550e8400-e29b-41d4-a716-446655440000', 10);
+      const result = await complianceService.canSendEmail(
+        '550e8400-e29b-41d4-a716-446655440000',
+        10
+      );
 
       expect(result.canSend).toBe(false);
       expect(result.reason).toContain('Daily email limit exceeded');
@@ -751,10 +790,13 @@ describe('EmailComplianceService', () => {
       });
 
       mockSupabase.from
-        .mockReturnValueOnce(firstChain)  // get current quota
+        .mockReturnValueOnce(firstChain) // get current quota
         .mockReturnValueOnce(secondChain); // update quota
 
-      const result = await complianceService.incrementEmailUsage('550e8400-e29b-41d4-a716-446655440000', 10);
+      const result = await complianceService.incrementEmailUsage(
+        '550e8400-e29b-41d4-a716-446655440000',
+        10
+      );
 
       expect(result.success).toBe(true);
       expect(result.quota).toBeDefined();
@@ -783,7 +825,9 @@ describe('EmailComplianceService', () => {
       });
 
       expect(result.valid).toBe(false);
-      expect(result.errors).toContain('Marketing emails must include an unsubscribe link');
+      expect(result.errors).toContain(
+        'Marketing emails must include an unsubscribe link'
+      );
     });
 
     it('should detect spam trigger words', async () => {
@@ -796,7 +840,9 @@ describe('EmailComplianceService', () => {
 
       expect(result.valid).toBe(true); // Still valid but with warnings
       expect(result.warnings.length).toBeGreaterThan(0);
-      expect(result.warnings.some(w => w.includes('spam trigger words'))).toBe(true);
+      expect(result.warnings.some(w => w.includes('spam trigger words'))).toBe(
+        true
+      );
     });
   });
 
@@ -804,7 +850,7 @@ describe('EmailComplianceService', () => {
     it('should validate sending permissions when within limits', async () => {
       const firstChain = createChainableMock();
       const secondChain = createChainableMock();
-      
+
       // Mock the .single().returns() pattern used in getPracticeQuota (called twice)
       const quotaData = {
         id: 'quota-1',
@@ -818,14 +864,14 @@ describe('EmailComplianceService', () => {
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
       };
-      
+
       firstChain.single.mockReturnValue({
         returns: jest.fn().mockResolvedValue({
           data: quotaData,
           error: null,
         }),
       });
-      
+
       secondChain.single.mockReturnValue({
         returns: jest.fn().mockResolvedValue({
           data: quotaData,
@@ -834,10 +880,12 @@ describe('EmailComplianceService', () => {
       });
 
       mockSupabase.from
-        .mockReturnValueOnce(firstChain)  // First getPracticeQuota call
+        .mockReturnValueOnce(firstChain) // First getPracticeQuota call
         .mockReturnValueOnce(secondChain); // Second getPracticeQuota call from canSendEmail
 
-      const result = await complianceService.validateSendingPermissions('550e8400-e29b-41d4-a716-446655440000');
+      const result = await complianceService.validateSendingPermissions(
+        '550e8400-e29b-41d4-a716-446655440000'
+      );
 
       expect(result.canSend).toBe(true);
       expect(result.quota).toBeDefined();
@@ -897,15 +945,19 @@ describe('EmailComplianceService', () => {
       });
 
       mockSupabase.from
-        .mockReturnValueOnce(firstChain)  // email_preferences lookup
+        .mockReturnValueOnce(firstChain) // email_preferences lookup
         .mockReturnValueOnce(secondChain) // practice_email_quotas lookup
         .mockReturnValueOnce(thirdChain); // email_consent_log lookup
 
-      const result = await complianceService.getComplianceReport('550e8400-e29b-41d4-a716-446655440000');
+      const result = await complianceService.getComplianceReport(
+        '550e8400-e29b-41d4-a716-446655440000'
+      );
 
       expect(result.success).toBe(true);
       expect(result.report).toBeDefined();
-      expect(result.report.practice_id).toBe('550e8400-e29b-41d4-a716-446655440000');
+      expect(result.report.practice_id).toBe(
+        '550e8400-e29b-41d4-a716-446655440000'
+      );
     });
   });
 
@@ -950,11 +1002,14 @@ describe('EmailComplianceService', () => {
       });
 
       mockSupabase.from
-        .mockReturnValueOnce(firstChain)  // email_preferences lookup
+        .mockReturnValueOnce(firstChain) // email_preferences lookup
         .mockReturnValueOnce(secondChain) // email_consent_log lookup
         .mockReturnValueOnce(thirdChain); // email_suppressions lookup
 
-      const result = await complianceService.exportUserData('550e8400-e29b-41d4-a716-446655440000', 'test@example.com');
+      const result = await complianceService.exportUserData(
+        '550e8400-e29b-41d4-a716-446655440000',
+        'test@example.com'
+      );
 
       expect(result.success).toBe(true);
       expect(result.data).toBeDefined();

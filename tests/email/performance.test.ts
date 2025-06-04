@@ -3,7 +3,11 @@ import { EmailTemplateService } from '../../src/shared/services/email/templates'
 import { EmailTrackingService } from '../../src/shared/services/email/tracking';
 import { EmailBounceHandler } from '../../src/shared/services/email/bounceHandler';
 import { EmailComplianceService } from '../../src/shared/services/email/compliance';
-import { ResendConfig, EmailSendOptions, EmailTemplateType } from '../../src/shared/services/email/types';
+import {
+  ResendConfig,
+  EmailSendOptions,
+  EmailTemplateType,
+} from '../../src/shared/services/email/types';
 
 // Mock external dependencies to focus on performance characteristics
 jest.mock('resend', () => ({
@@ -13,12 +17,14 @@ jest.mock('resend', () => ({
         // Simulate API latency
         await new Promise(resolve => setTimeout(resolve, Math.random() * 10));
         return {
-          data: { id: `email-${Date.now()}-${Math.random().toString(36).substr(2, 9)}` },
-          error: null
+          data: {
+            id: `email-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+          },
+          error: null,
         };
-      })
-    }
-  }))
+      }),
+    },
+  })),
 }));
 
 jest.mock('../../src/shared/services/supabase', () => ({
@@ -28,18 +34,24 @@ jest.mock('../../src/shared/services/supabase', () => ({
         eq: jest.fn(() => ({
           eq: jest.fn(() => ({
             single: jest.fn(() => ({
-              returns: jest.fn(() => Promise.resolve({ data: null, error: null }))
-            }))
-          }))
-        }))
+              returns: jest.fn(() =>
+                Promise.resolve({ data: null, error: null })
+              ),
+            })),
+          })),
+        })),
       })),
       insert: jest.fn(() => ({
         select: jest.fn(() => ({
-          single: jest.fn(() => Promise.resolve({ data: { id: 'test-123' }, error: null }))
-        }))
+          single: jest.fn(() =>
+            Promise.resolve({ data: { id: 'test-123' }, error: null })
+          ),
+        })),
       })),
-      upsert: jest.fn(() => Promise.resolve({ data: { id: 'test-123' }, error: null }))
-    }))
+      upsert: jest.fn(() =>
+        Promise.resolve({ data: { id: 'test-123' }, error: null })
+      ),
+    })),
   },
 }));
 
@@ -50,28 +62,33 @@ jest.mock('@supabase/supabase-js', () => ({
         eq: jest.fn(() => ({
           eq: jest.fn(() => ({
             single: jest.fn(() => ({
-              returns: jest.fn(() => Promise.resolve({ data: null, error: null }))
-            }))
-          }))
-        }))
+              returns: jest.fn(() =>
+                Promise.resolve({ data: null, error: null })
+              ),
+            })),
+          })),
+        })),
       })),
       insert: jest.fn(() => ({
         select: jest.fn(() => ({
-          single: jest.fn(() => Promise.resolve({ data: { id: 'test-123' }, error: null }))
-        }))
+          single: jest.fn(() =>
+            Promise.resolve({ data: { id: 'test-123' }, error: null })
+          ),
+        })),
       })),
-      upsert: jest.fn(() => Promise.resolve({ data: { id: 'test-123' }, error: null }))
-    }))
-  }))
+      upsert: jest.fn(() =>
+        Promise.resolve({ data: { id: 'test-123' }, error: null })
+      ),
+    })),
+  })),
 }));
 
 jest.mock('@react-email/render', () => ({
-  render: jest.fn()
-    .mockImplementation(async () => {
-      // Simulate template rendering time
-      await new Promise(resolve => setTimeout(resolve, Math.random() * 5));
-      return '<html><body>Test email content</body></html>';
-    })
+  render: jest.fn().mockImplementation(async () => {
+    // Simulate template rendering time
+    await new Promise(resolve => setTimeout(resolve, Math.random() * 5));
+    return '<html><body>Test email content</body></html>';
+  }),
 }));
 
 describe('Email Service Performance Tests', () => {
@@ -84,7 +101,7 @@ describe('Email Service Performance Tests', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    
+
     // Configure for performance testing
     const config: ResendConfig = {
       apiKey: 'test-api-key',
@@ -134,8 +151,10 @@ describe('Email Service Performance Tests', () => {
 
       // Performance assertions
       const emailsPerSecond = burstSize / (duration / 1000);
-      console.log(`Processed ${burstSize} emails in ${duration}ms (${emailsPerSecond.toFixed(2)} emails/sec)`);
-      
+      console.log(
+        `Processed ${burstSize} emails in ${duration}ms (${emailsPerSecond.toFixed(2)} emails/sec)`
+      );
+
       // Should handle reasonable throughput
       expect(emailsPerSecond).toBeGreaterThan(10);
       expect(duration).toBeLessThan(5000); // Should complete within 5 seconds
@@ -177,7 +196,7 @@ describe('Email Service Performance Tests', () => {
       const failed = results.filter(r => r.status === 'rejected').length;
 
       console.log(`Successful: ${successful}, Failed: ${failed}`);
-      
+
       // Should handle rate limiting gracefully
       expect(successful + failed).toBe(5);
       expect(duration).toBeGreaterThan(1000); // Should take longer due to rate limiting
@@ -192,17 +211,20 @@ describe('Email Service Performance Tests', () => {
       for (let batch = 0; batch < numBatches; batch++) {
         const batchStartTime = Date.now();
 
-        const batchPromises = Array.from({ length: batchSize }, async (_, i) => {
-          const emailOptions: EmailSendOptions = {
-            to: [`batch${batch}-user${i}@example.com`],
-            from: 'test@practice.com',
-            subject: `Batch ${batch} Email ${i}`,
-            html: `<p>Batch ${batch} email content ${i}</p>`,
-            text: `Batch ${batch} email content ${i}`,
-          };
+        const batchPromises = Array.from(
+          { length: batchSize },
+          async (_, i) => {
+            const emailOptions: EmailSendOptions = {
+              to: [`batch${batch}-user${i}@example.com`],
+              from: 'test@practice.com',
+              subject: `Batch ${batch} Email ${i}`,
+              html: `<p>Batch ${batch} email content ${i}</p>`,
+              text: `Batch ${batch} email content ${i}`,
+            };
 
-          return resendClient.sendEmail(emailOptions);
-        });
+            return resendClient.sendEmail(emailOptions);
+          }
+        );
 
         const batchResults = await Promise.all(batchPromises);
         const batchEndTime = Date.now();
@@ -224,11 +246,14 @@ describe('Email Service Performance Tests', () => {
       });
 
       // Performance should remain consistent across batches
-      const avgBatchTime = batchTimes.reduce((sum, time) => sum + time, 0) / batchTimes.length;
+      const avgBatchTime =
+        batchTimes.reduce((sum, time) => sum + time, 0) / batchTimes.length;
       const maxBatchTime = Math.max(...batchTimes);
       const minBatchTime = Math.min(...batchTimes);
 
-      console.log(`Avg batch time: ${avgBatchTime.toFixed(2)}ms, Min: ${minBatchTime}ms, Max: ${maxBatchTime}ms`);
+      console.log(
+        `Avg batch time: ${avgBatchTime.toFixed(2)}ms, Min: ${minBatchTime}ms, Max: ${maxBatchTime}ms`
+      );
 
       // Performance shouldn't degrade significantly across batches
       expect(maxBatchTime - minBatchTime).toBeLessThan(avgBatchTime * 2);
@@ -251,8 +276,8 @@ describe('Email Service Performance Tests', () => {
               name: 'Test Practice',
               phone: '555-0123',
               email: 'test@practice.com',
-              website: 'https://testpractice.com'
-            }
+              website: 'https://testpractice.com',
+            },
           }
         );
       });
@@ -269,7 +294,9 @@ describe('Email Service Performance Tests', () => {
       });
 
       const templatesPerSecond = bulkSize / (duration / 1000);
-      console.log(`Rendered ${bulkSize} templates in ${duration}ms (${templatesPerSecond.toFixed(2)} templates/sec)`);
+      console.log(
+        `Rendered ${bulkSize} templates in ${duration}ms (${templatesPerSecond.toFixed(2)} templates/sec)`
+      );
 
       // Template rendering should be fast
       expect(templatesPerSecond).toBeGreaterThan(20);
@@ -285,7 +312,7 @@ describe('Email Service Performance Tests', () => {
           practiceId: mockPracticeId,
           recipientEmail: `bulk-user${i}@example.com`,
           originalUrl: `https://example.com/report/${i}`,
-          campaignId: 'bulk-campaign-123'
+          campaignId: 'bulk-campaign-123',
         });
       });
 
@@ -301,7 +328,9 @@ describe('Email Service Performance Tests', () => {
       });
 
       const urlsPerSecond = bulkSize / (duration / 1000);
-      console.log(`Generated ${bulkSize} tracking URLs in ${duration}ms (${urlsPerSecond.toFixed(2)} URLs/sec)`);
+      console.log(
+        `Generated ${bulkSize} tracking URLs in ${duration}ms (${urlsPerSecond.toFixed(2)} URLs/sec)`
+      );
 
       // URL generation should be fast
       expect(urlsPerSecond).toBeGreaterThan(30);
@@ -318,7 +347,7 @@ describe('Email Service Performance Tests', () => {
           email: `bounce-test${i}@example.com`,
           bounceType: i % 2 === 0 ? 'hard' : 'soft',
           reason: 'mailbox full',
-          timestamp: new Date()
+          timestamp: new Date(),
         });
       });
 
@@ -334,7 +363,9 @@ describe('Email Service Performance Tests', () => {
       });
 
       const bouncesPerSecond = bulkSize / (duration / 1000);
-      console.log(`Processed ${bulkSize} bounces in ${duration}ms (${bouncesPerSecond.toFixed(2)} bounces/sec)`);
+      console.log(
+        `Processed ${bulkSize} bounces in ${duration}ms (${bouncesPerSecond.toFixed(2)} bounces/sec)`
+      );
 
       // Bounce processing should be reasonably fast
       expect(bouncesPerSecond).toBeGreaterThan(5);
@@ -364,7 +395,9 @@ describe('Email Service Performance Tests', () => {
       });
 
       const checksPerSecond = bulkSize / (duration / 1000);
-      console.log(`Completed ${bulkSize} compliance checks in ${duration}ms (${checksPerSecond.toFixed(2)} checks/sec)`);
+      console.log(
+        `Completed ${bulkSize} compliance checks in ${duration}ms (${checksPerSecond.toFixed(2)} checks/sec)`
+      );
 
       // Compliance checks should be fast
       expect(checksPerSecond).toBeGreaterThan(15);
@@ -394,15 +427,15 @@ describe('Email Service Performance Tests', () => {
               name: 'Test Practice',
               phone: '555-0123',
               email: 'test@practice.com',
-              website: 'https://testpractice.com'
-            }
+              website: 'https://testpractice.com',
+            },
           }
         );
 
         await trackingService.generateTrackingUrl({
           practiceId: mockPracticeId,
           recipientEmail: `memory-test${i}@example.com`,
-          originalUrl: 'https://example.com/report'
+          originalUrl: 'https://example.com/report',
         });
 
         // Force garbage collection if available
@@ -427,7 +460,9 @@ describe('Email Service Performance Tests', () => {
         const memoryIncrease = finalMemory - initialMemory;
         const memoryIncreasePercent = (memoryIncrease / initialMemory) * 100;
 
-        console.log(`Memory usage: ${initialMemory} -> ${finalMemory} (${memoryIncreasePercent.toFixed(2)}% increase)`);
+        console.log(
+          `Memory usage: ${initialMemory} -> ${finalMemory} (${memoryIncreasePercent.toFixed(2)}% increase)`
+        );
 
         // Memory usage shouldn't increase dramatically
         expect(memoryIncreasePercent).toBeLessThan(200); // Less than 200% increase
@@ -440,23 +475,30 @@ describe('Email Service Performance Tests', () => {
 
       const operations = [
         // Template rendering operations
-        ...Array.from({ length: 5 }, (_, i) => 
+        ...Array.from({ length: 5 }, (_, i) =>
           EmailTemplateService.renderTemplate(
             EmailTemplateType.REPORT_DELIVERY,
-            { childName: `Concurrent ${i}`, assessmentDate: '2024-01-01', downloadUrl: 'https://example.com/download' }
+            {
+              childName: `Concurrent ${i}`,
+              assessmentDate: '2024-01-01',
+              downloadUrl: 'https://example.com/download',
+            }
           )
         ),
         // Tracking URL generation
-        ...Array.from({ length: 5 }, (_, i) => 
+        ...Array.from({ length: 5 }, (_, i) =>
           trackingService.generateTrackingUrl({
             practiceId: mockPracticeId,
             recipientEmail: `concurrent${i}@example.com`,
-            originalUrl: 'https://example.com/report'
+            originalUrl: 'https://example.com/report',
           })
         ),
         // Compliance checks
-        ...Array.from({ length: 5 }, (_, i) => 
-          complianceService.isEmailSuppressed(mockPracticeId, `concurrent${i}@example.com`)
+        ...Array.from({ length: 5 }, (_, i) =>
+          complianceService.isEmailSuppressed(
+            mockPracticeId,
+            `concurrent${i}@example.com`
+          )
         ),
       ];
 
@@ -466,7 +508,7 @@ describe('Email Service Performance Tests', () => {
 
       // Verify all operations completed successfully
       expect(results).toHaveLength(concurrentOperations);
-      
+
       // Template rendering results (first 5)
       results.slice(0, 5).forEach(result => {
         expect(result.html).toBeDefined();
@@ -483,7 +525,9 @@ describe('Email Service Performance Tests', () => {
       });
 
       const operationsPerSecond = concurrentOperations / (duration / 1000);
-      console.log(`Completed ${concurrentOperations} concurrent operations in ${duration}ms (${operationsPerSecond.toFixed(2)} ops/sec)`);
+      console.log(
+        `Completed ${concurrentOperations} concurrent operations in ${duration}ms (${operationsPerSecond.toFixed(2)} ops/sec)`
+      );
 
       // Concurrent operations should complete efficiently
       expect(operationsPerSecond).toBeGreaterThan(5);
@@ -502,13 +546,16 @@ describe('Email Service Performance Tests', () => {
           name: 'Test Practice',
           phone: '555-0123',
           email: 'test@practice.com',
-          website: 'https://testpractice.com'
-        }
+          website: 'https://testpractice.com',
+        },
       };
 
       // First render (cold)
       const coldStart = Date.now();
-      const firstResult = await EmailTemplateService.renderTemplate(templateType, templateData);
+      const firstResult = await EmailTemplateService.renderTemplate(
+        templateType,
+        templateData
+      );
       const coldDuration = Date.now() - coldStart;
 
       // Subsequent renders (potentially cached)
@@ -519,9 +566,12 @@ describe('Email Service Performance Tests', () => {
         warmTimes.push(Date.now() - warmStart);
       }
 
-      const avgWarmTime = warmTimes.reduce((sum, time) => sum + time, 0) / warmTimes.length;
+      const avgWarmTime =
+        warmTimes.reduce((sum, time) => sum + time, 0) / warmTimes.length;
 
-      console.log(`Cold render: ${coldDuration}ms, Avg warm render: ${avgWarmTime.toFixed(2)}ms`);
+      console.log(
+        `Cold render: ${coldDuration}ms, Avg warm render: ${avgWarmTime.toFixed(2)}ms`
+      );
 
       // Verify results are consistent
       expect(firstResult.html).toBeDefined();
@@ -538,21 +588,24 @@ describe('Email Service Performance Tests', () => {
       // Generate tracking URLs with similar patterns
       for (let i = 0; i < 10; i++) {
         const start = Date.now();
-        
+
         await trackingService.generateTrackingUrl({
           practiceId: mockPracticeId,
           recipientEmail: `pattern-test${i}@example.com`,
           originalUrl: `${baseUrl}/${i}`,
-          campaignId: 'pattern-campaign'
+          campaignId: 'pattern-campaign',
         });
-        
+
         urls.push(Date.now() - start);
       }
 
-      const avgGenerationTime = urls.reduce((sum, time) => sum + time, 0) / urls.length;
+      const avgGenerationTime =
+        urls.reduce((sum, time) => sum + time, 0) / urls.length;
       const maxGenerationTime = Math.max(...urls);
 
-      console.log(`Avg URL generation: ${avgGenerationTime.toFixed(2)}ms, Max: ${maxGenerationTime}ms`);
+      console.log(
+        `Avg URL generation: ${avgGenerationTime.toFixed(2)}ms, Max: ${maxGenerationTime}ms`
+      );
 
       // Generation times should be consistent
       expect(maxGenerationTime).toBeLessThan(avgGenerationTime * 3);

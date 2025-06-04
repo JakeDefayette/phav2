@@ -1,1 +1,1 @@
-export * from './supabase.mock'; 
+export * from './supabase.mock';

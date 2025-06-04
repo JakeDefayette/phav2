@@ -52,14 +52,14 @@ graph TD
 
 ## Key Components
 
--   **Application Code**: Any part of the PHA-v2 application (frontend actions, API routes) that needs to send an email.
--   **`EmailService`**: Located at `src/shared/services/email.ts`, this is the central service responsible for all email-related operations, including sending, scheduling, and interacting with the email provider.
--   **Template Engine**: Utilizes React Email for rendering dynamic HTML email templates.
--   **Webhook Handler**: An API route (e.g., `src/app/api/webhooks/resend/route.ts`) that receives and processes webhook events from the email provider (Resend) for tracking email status changes (delivery, opens, clicks, bounces).
--   **Resend API**: The external email sending provider's API that `EmailService` interacts with.
--   **Supabase Database**: Used for:
-    -   **`email_sends` table**: Logging all email send attempts, their parameters, and their status.
-    -   **`email_tracking_events` table**: Storing detailed tracking information received via webhooks.
+- **Application Code**: Any part of the PHA-v2 application (frontend actions, API routes) that needs to send an email.
+- **`EmailService`**: Located at `src/shared/services/email.ts`, this is the central service responsible for all email-related operations, including sending, scheduling, and interacting with the email provider.
+- **Template Engine**: Utilizes React Email for rendering dynamic HTML email templates.
+- **Webhook Handler**: An API route (e.g., `src/app/api/webhooks/resend/route.ts`) that receives and processes webhook events from the email provider (Resend) for tracking email status changes (delivery, opens, clicks, bounces).
+- **Resend API**: The external email sending provider's API that `EmailService` interacts with.
+- **Supabase Database**: Used for:
+  - **`email_sends` table**: Logging all email send attempts, their parameters, and their status.
+  - **`email_tracking_events` table**: Storing detailed tracking information received via webhooks.
 
 ## Email Sending Flow
 
@@ -78,4 +78,4 @@ graph TD
 10. The handler stores the tracking event details in the `email_tracking_events` table in the **Supabase Database**.
 11. Optionally, the handler might update the status of the original send record in the `email_sends` table based on the tracking event (e.g., update status to "delivered" or "bounced").
 
-This architecture allows for robust email sending capabilities, comprehensive logging, and detailed tracking of email engagement. 
+This architecture allows for robust email sending capabilities, comprehensive logging, and detailed tracking of email engagement.

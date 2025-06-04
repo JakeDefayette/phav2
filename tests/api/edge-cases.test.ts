@@ -277,7 +277,10 @@ describe('API Edge Cases and Error Handling', () => {
 
         const validationErrors = [];
 
-        if (typeof reportId !== 'string' || !/^[0-9a-f\-]{36}$/.test(reportId)) {
+        if (
+          typeof reportId !== 'string' ||
+          !/^[0-9a-f\-]{36}$/.test(reportId)
+        ) {
           validationErrors.push('reportId must be a valid UUID');
         }
 
@@ -799,7 +802,9 @@ describe('API Edge Cases and Error Handling', () => {
       });
 
       // Mock external service failure
-      const { deliveryService } = require('../../src/features/reports/services/delivery');
+      const {
+        deliveryService,
+      } = require('../../src/features/reports/services/delivery');
       deliveryService.deliverReport.mockRejectedValue(
         new Error('External service unavailable')
       );

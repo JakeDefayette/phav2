@@ -87,9 +87,12 @@ export {
 // Service instances for backward compatibility
 import { authService } from '@/shared/services/auth';
 import { brandingService } from '@/shared/services/brandingService';
-import { emailService } from '@/shared/services/email';
+import { EmailService } from '@/shared/services/email';
 
 // Export service instances
+// Create service instance
+const emailService = new EmailService();
+
 export {
   authService as auth,
   brandingService as branding,

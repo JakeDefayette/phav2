@@ -34,7 +34,7 @@ beforeEach(() => {
 
   // Reset mocks
   jest.clearAllMocks();
-  
+
   // Set up default mock behavior
   mockSupabaseClient.from.mockReturnValue(createMockQueryBuilder());
 });
@@ -143,7 +143,9 @@ describe('EmailTrackingService', () => {
 
       expect(result).toBeDefined();
       expect(result?.id).toBe('tracking-123');
-      expect(mockSupabaseClient.from).toHaveBeenCalledWith('email_tracking_events');
+      expect(mockSupabaseClient.from).toHaveBeenCalledWith(
+        'email_tracking_events'
+      );
     });
 
     it('should handle unsupported event types', async () => {
@@ -161,7 +163,9 @@ describe('EmailTrackingService', () => {
     });
 
     it('should handle database insertion errors', async () => {
-      const mockBuilder = createMockQueryBuilder(null, { message: 'Database error' });
+      const mockBuilder = createMockQueryBuilder(null, {
+        message: 'Database error',
+      });
       mockSupabaseClient.from.mockReturnValue(mockBuilder);
 
       try {
@@ -230,7 +234,10 @@ describe('EmailTrackingService', () => {
 
   describe('generateTrackingUrl', () => {
     it('should generate tracking URL successfully', async () => {
-      const mockBuilder = createMockQueryBuilder({ trackingToken: 'track-123' }, null);
+      const mockBuilder = createMockQueryBuilder(
+        { trackingToken: 'track-123' },
+        null
+      );
       mockSupabaseClient.from.mockReturnValue(mockBuilder);
 
       const result = await trackingService.generateTrackingUrl({
@@ -242,11 +249,15 @@ describe('EmailTrackingService', () => {
 
       expect(result).toBeDefined();
       expect(result.trackingToken).toBe('track-123');
-      expect(mockSupabaseClient.from).toHaveBeenCalledWith('email_tracking_urls');
+      expect(mockSupabaseClient.from).toHaveBeenCalledWith(
+        'email_tracking_urls'
+      );
     });
 
     it('should handle tracking URL generation errors', async () => {
-      const mockBuilder = createMockQueryBuilder(null, { message: 'Generation error' });
+      const mockBuilder = createMockQueryBuilder(null, {
+        message: 'Generation error',
+      });
       mockSupabaseClient.from.mockReturnValue(mockBuilder);
 
       try {
@@ -275,7 +286,9 @@ describe('EmailTrackingService', () => {
       const result = await trackingService.getTrackingUrl('track-123');
 
       expect(result).toEqual(mockData);
-      expect(mockSupabaseClient.from).toHaveBeenCalledWith('email_tracking_urls');
+      expect(mockSupabaseClient.from).toHaveBeenCalledWith(
+        'email_tracking_urls'
+      );
     });
 
     it('should return null for non-existent token', async () => {
@@ -288,7 +301,9 @@ describe('EmailTrackingService', () => {
     });
 
     it('should throw error for database errors', async () => {
-      const mockBuilder = createMockQueryBuilder(null, { message: 'Database error' });
+      const mockBuilder = createMockQueryBuilder(null, {
+        message: 'Database error',
+      });
       mockSupabaseClient.from.mockReturnValue(mockBuilder);
 
       try {
@@ -307,11 +322,11 @@ describe('EmailTrackingService', () => {
         practiceId: '550e8400-e29b-41d4-a716-446655440000',
         recipientEmail: 'user@example.com',
       };
-      
+
       // Mock the getTrackingUrl call first
       const mockBuilderGet = createMockQueryBuilder(mockUrlData, null);
       const mockBuilderInsert = createMockQueryBuilder(null, null);
-      
+
       mockSupabaseClient.from
         .mockReturnValueOnce(mockBuilderGet) // For getTrackingUrl
         .mockReturnValueOnce(mockBuilderInsert); // For recordTrackingEvent
@@ -325,7 +340,8 @@ describe('EmailTrackingService', () => {
       const mockBuilder = createMockQueryBuilder(null, { code: 'PGRST116' });
       mockSupabaseClient.from.mockReturnValue(mockBuilder);
 
-      const result = await trackingService.processClickTracking('invalid-token');
+      const result =
+        await trackingService.processClickTracking('invalid-token');
 
       expect(result).toBeNull();
     });
@@ -333,7 +349,10 @@ describe('EmailTrackingService', () => {
 
   describe('generateTrackingPixel', () => {
     it('should generate tracking pixel successfully', async () => {
-      const mockBuilder = createMockQueryBuilder({ trackingToken: 'pixel-123' }, null);
+      const mockBuilder = createMockQueryBuilder(
+        { trackingToken: 'pixel-123' },
+        null
+      );
       mockSupabaseClient.from.mockReturnValue(mockBuilder);
 
       const result = await trackingService.generateTrackingPixel({
@@ -344,11 +363,15 @@ describe('EmailTrackingService', () => {
 
       expect(result).toBeDefined();
       expect(result.trackingToken).toBe('pixel-123');
-      expect(mockSupabaseClient.from).toHaveBeenCalledWith('email_tracking_pixels');
+      expect(mockSupabaseClient.from).toHaveBeenCalledWith(
+        'email_tracking_pixels'
+      );
     });
 
     it('should handle tracking pixel generation errors', async () => {
-      const mockBuilder = createMockQueryBuilder(null, { message: 'Pixel error' });
+      const mockBuilder = createMockQueryBuilder(null, {
+        message: 'Pixel error',
+      });
       mockSupabaseClient.from.mockReturnValue(mockBuilder);
 
       try {
@@ -376,7 +399,9 @@ describe('EmailTrackingService', () => {
       const result = await trackingService.getTrackingPixel('pixel-123');
 
       expect(result).toEqual(mockData);
-      expect(mockSupabaseClient.from).toHaveBeenCalledWith('email_tracking_pixels');
+      expect(mockSupabaseClient.from).toHaveBeenCalledWith(
+        'email_tracking_pixels'
+      );
     });
 
     it('should return null for non-existent token', async () => {
@@ -395,11 +420,11 @@ describe('EmailTrackingService', () => {
         practiceId: '550e8400-e29b-41d4-a716-446655440000',
         recipientEmail: 'user@example.com',
       };
-      
+
       // Mock the getTrackingPixel call first
       const mockBuilderGet = createMockQueryBuilder(mockPixelData, null);
       const mockBuilderInsert = createMockQueryBuilder(null, null);
-      
+
       mockSupabaseClient.from
         .mockReturnValueOnce(mockBuilderGet) // For getTrackingPixel
         .mockReturnValueOnce(mockBuilderInsert); // For recordTrackingEvent
@@ -436,7 +461,12 @@ describe('EmailTrackingService', () => {
   describe('analytics', () => {
     it('should get analytics summary', async () => {
       const mockData = [
-        { practiceId: '550e8400-e29b-41d4-a716-446655440000', sentCount: 100, deliveredCount: 90, openedCount: 50 },
+        {
+          practiceId: '550e8400-e29b-41d4-a716-446655440000',
+          sentCount: 100,
+          deliveredCount: 90,
+          openedCount: 50,
+        },
       ];
       const mockBuilder = createMockQueryBuilder(mockData, null);
       mockSupabaseClient.from.mockReturnValue(mockBuilder);
@@ -447,15 +477,17 @@ describe('EmailTrackingService', () => {
 
       expect(result).toBeDefined();
       expect(Array.isArray(result)).toBe(true);
-      expect(mockSupabaseClient.from).toHaveBeenCalledWith('email_analytics_summary');
+      expect(mockSupabaseClient.from).toHaveBeenCalledWith(
+        'email_analytics_summary'
+      );
     });
 
     it('should get tracking events', async () => {
       const mockData = [
-        { 
-          eventType: 'delivered', 
+        {
+          eventType: 'delivered',
           eventTimestamp: '2024-01-01T12:00:00Z',
-          recipientEmail: 'user@example.com'
+          recipientEmail: 'user@example.com',
         },
       ];
       const mockBuilder = createMockQueryBuilder(mockData, null);
@@ -467,20 +499,22 @@ describe('EmailTrackingService', () => {
 
       expect(result).toBeDefined();
       expect(Array.isArray(result)).toBe(true);
-      expect(mockSupabaseClient.from).toHaveBeenCalledWith('email_tracking_events');
+      expect(mockSupabaseClient.from).toHaveBeenCalledWith(
+        'email_tracking_events'
+      );
     });
 
     it('should get email performance metrics', async () => {
       const mockData = [
-        { 
-          eventType: 'delivered', 
+        {
+          eventType: 'delivered',
           eventTimestamp: '2024-01-01T12:00:00Z',
-          recipientEmail: 'user@example.com'
+          recipientEmail: 'user@example.com',
         },
-        { 
-          eventType: 'opened', 
+        {
+          eventType: 'opened',
           eventTimestamp: '2024-01-01T12:05:00Z',
-          recipientEmail: 'user@example.com'
+          recipientEmail: 'user@example.com',
         },
       ];
       const mockBuilder = createMockQueryBuilder(mockData, null);
@@ -500,14 +534,21 @@ describe('EmailTrackingService', () => {
 
   describe('email content tracking injection', () => {
     it('should add tracking to email content', async () => {
-      const mockPixelBuilder = createMockQueryBuilder({ trackingToken: 'pixel-token' }, null);
-      const mockUrlBuilder = createMockQueryBuilder({ trackingToken: 'url-token' }, null);
-      
+      const mockPixelBuilder = createMockQueryBuilder(
+        { trackingToken: 'pixel-token' },
+        null
+      );
+      const mockUrlBuilder = createMockQueryBuilder(
+        { trackingToken: 'url-token' },
+        null
+      );
+
       mockSupabaseClient.from
         .mockReturnValueOnce(mockUrlBuilder) // For generateTrackingUrl
         .mockReturnValueOnce(mockPixelBuilder); // For generateTrackingPixel
 
-      const htmlContent = '<html><body><a href="https://example.com">Link</a></body></html>';
+      const htmlContent =
+        '<html><body><a href="https://example.com">Link</a></body></html>';
       const result = await trackingService.addTrackingToEmail({
         htmlContent,
         practiceId: '550e8400-e29b-41d4-a716-446655440000',
@@ -523,7 +564,10 @@ describe('EmailTrackingService', () => {
 
   describe('suppression list', () => {
     it('should add email to suppression list', async () => {
-      const mockBuilder = createMockQueryBuilder({ id: 'suppression-123' }, null);
+      const mockBuilder = createMockQueryBuilder(
+        { id: 'suppression-123' },
+        null
+      );
       mockSupabaseClient.from.mockReturnValue(mockBuilder);
 
       await trackingService.addToSuppressionList(
@@ -539,7 +583,10 @@ describe('EmailTrackingService', () => {
       const mockBuilder = createMockQueryBuilder({ status: 'bounced' }, null);
       mockSupabaseClient.from.mockReturnValue(mockBuilder);
 
-      const result = await trackingService.isEmailSuppressed('550e8400-e29b-41d4-a716-446655440000', 'user@example.com');
+      const result = await trackingService.isEmailSuppressed(
+        '550e8400-e29b-41d4-a716-446655440000',
+        'user@example.com'
+      );
 
       expect(result).toBe(true);
     });
@@ -548,16 +595,25 @@ describe('EmailTrackingService', () => {
       const mockBuilder = createMockQueryBuilder(null, null);
       mockSupabaseClient.from.mockReturnValue(mockBuilder);
 
-      const result = await trackingService.isEmailSuppressed('550e8400-e29b-41d4-a716-446655440000', 'clean@example.com');
+      const result = await trackingService.isEmailSuppressed(
+        '550e8400-e29b-41d4-a716-446655440000',
+        'clean@example.com'
+      );
 
       expect(result).toBe(false);
     });
 
     it('should return false for email with active status', async () => {
-      const mockBuilder = createMockQueryBuilder({ status: 'subscribed' }, null);
+      const mockBuilder = createMockQueryBuilder(
+        { status: 'subscribed' },
+        null
+      );
       mockSupabaseClient.from.mockReturnValue(mockBuilder);
 
-      const result = await trackingService.isEmailSuppressed('550e8400-e29b-41d4-a716-446655440000', 'active@example.com');
+      const result = await trackingService.isEmailSuppressed(
+        '550e8400-e29b-41d4-a716-446655440000',
+        'active@example.com'
+      );
 
       expect(result).toBe(false);
     });
@@ -565,7 +621,9 @@ describe('EmailTrackingService', () => {
 
   describe('error handling', () => {
     it('should handle Supabase connection errors', async () => {
-      const mockBuilder = createMockQueryBuilder(null, { message: 'Connection failed' });
+      const mockBuilder = createMockQueryBuilder(null, {
+        message: 'Connection failed',
+      });
       mockSupabaseClient.from.mockReturnValue(mockBuilder);
 
       try {
@@ -592,7 +650,8 @@ describe('EmailTrackingService', () => {
 
   describe('getCampaignTrackingData', () => {
     it('should return default analytics structure', async () => {
-      const result = await trackingService.getCampaignTrackingData('campaign-123');
+      const result =
+        await trackingService.getCampaignTrackingData('campaign-123');
 
       expect(result).toBeDefined();
       expect(result.deviceBreakdown).toBeDefined();

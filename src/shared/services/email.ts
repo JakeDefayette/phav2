@@ -332,7 +332,7 @@ export class EmailService {
    *
    * @async
    * @param {ScheduleEmailOptions} options - Options for scheduling the email, including recipient, subject, content, and scheduled time.
-   * @returns {Promise<{ success: boolean; scheduledEmailId?: string; error?: string }>} A promise resolving to an object indicating success, 
+   * @returns {Promise<{ success: boolean; scheduledEmailId?: string; error?: string }>} A promise resolving to an object indicating success,
    * the ID of the scheduled email if successful, or an error message.
    * @see {@link EmailScheduler.scheduleEmail} for more details on options and behavior.
    */
@@ -947,7 +947,7 @@ export class EmailService {
           <p>This is a test email from the Pediatric Health Assessment platform.</p>
           <p>If you received this email, the email service is working correctly.</p>
           <p>Sent at: ${new Date().toISOString()}</p>
-        `
+        `,
       });
 
       return {

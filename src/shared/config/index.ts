@@ -17,13 +17,15 @@ const configSchema = z.object({
   auth: z.object({
     redirect_url: z.string().url(),
   }),
-  practice: z.object({
-    name: z.string().optional(),
-    logo: z.string().optional(),
-    address: z.string().optional(),
-    phone: z.string().optional(),
-    website: z.string().optional(),
-  }).optional(),
+  practice: z
+    .object({
+      name: z.string().optional(),
+      logo: z.string().optional(),
+      address: z.string().optional(),
+      phone: z.string().optional(),
+      website: z.string().optional(),
+    })
+    .optional(),
 });
 
 export type Config = z.infer<typeof configSchema>;
@@ -61,8 +63,11 @@ function createConfig(): Config {
     },
     app: {
       environment:
-        (process.env.NODE_ENV as 'development' | 'staging' | 'production' | 'test') ||
-        'development',
+        (process.env.NODE_ENV as
+          | 'development'
+          | 'staging'
+          | 'production'
+          | 'test') || 'development',
       base_url: process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000',
     },
     auth: {

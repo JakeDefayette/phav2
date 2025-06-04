@@ -327,7 +327,7 @@ describe('ResendClient', () => {
     it('should create client when configuration is valid', () => {
       // Import directly to test with the valid API key from the top-level mock
       const { createResendClient, ResendClient } = require('../resend');
-      
+
       const client = createResendClient();
 
       expect(client).not.toBeNull();
@@ -339,7 +339,7 @@ describe('ResendClient', () => {
       // Since we can't easily mock the config module dynamically,
       // we'll test the behavior directly
       const { ResendClient } = require('../resend');
-      
+
       // Create a mock config without API key
       const mockConfig = {
         email: {
@@ -363,7 +363,7 @@ describe('ResendClient', () => {
     it('should handle undefined API key gracefully', () => {
       // Test the function directly with undefined API key
       const { ResendClient } = require('../resend');
-      
+
       // Create a mock config with undefined API key
       const mockConfig = {
         email: {},

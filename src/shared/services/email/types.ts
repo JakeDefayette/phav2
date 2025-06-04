@@ -108,7 +108,14 @@ export enum EmailTemplateType {
 export type EmailTemplateTypeValue = keyof typeof EmailTemplateType;
 
 export interface EmailTemplateData {
-  [key: string]: string | number | boolean | Date | undefined | EmailTemplateData | EmailTemplateData[];
+  [key: string]:
+    | string
+    | number
+    | boolean
+    | Date
+    | undefined
+    | EmailTemplateData
+    | EmailTemplateData[];
 }
 
 export interface EmailLogEntry {
@@ -311,7 +318,7 @@ export interface EmailAnalyticsQuery {
   includeDetails?: boolean;
 }
 
-export type { 
+export type {
   EmailPreferenceType,
   EmailConsentStatus,
   ConsentAction,

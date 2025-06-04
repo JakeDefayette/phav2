@@ -222,34 +222,52 @@ interface DatabaseEmailSuppressionEntry {
 }
 
 // Conversion functions
-function convertDatabasePreference(dbPref: DatabaseEmailPreference): EmailPreference {
+function convertDatabasePreference(
+  dbPref: DatabaseEmailPreference
+): EmailPreference {
   return {
     ...dbPref,
-    consent_date: dbPref.consent_date ? new Date(dbPref.consent_date) : undefined,
-    double_opt_in_expires_at: dbPref.double_opt_in_expires_at ? new Date(dbPref.double_opt_in_expires_at) : undefined,
-    double_opt_in_confirmed_at: dbPref.double_opt_in_confirmed_at ? new Date(dbPref.double_opt_in_confirmed_at) : undefined,
-    unsubscribe_date: dbPref.unsubscribe_date ? new Date(dbPref.unsubscribe_date) : undefined,
+    consent_date: dbPref.consent_date
+      ? new Date(dbPref.consent_date)
+      : undefined,
+    double_opt_in_expires_at: dbPref.double_opt_in_expires_at
+      ? new Date(dbPref.double_opt_in_expires_at)
+      : undefined,
+    double_opt_in_confirmed_at: dbPref.double_opt_in_confirmed_at
+      ? new Date(dbPref.double_opt_in_confirmed_at)
+      : undefined,
+    unsubscribe_date: dbPref.unsubscribe_date
+      ? new Date(dbPref.unsubscribe_date)
+      : undefined,
     created_at: new Date(dbPref.created_at),
     updated_at: new Date(dbPref.updated_at),
   };
 }
 
-function convertDatabaseQuota(dbQuota: DatabasePracticeEmailQuota): PracticeEmailQuota {
+function convertDatabaseQuota(
+  dbQuota: DatabasePracticeEmailQuota
+): PracticeEmailQuota {
   return {
     ...dbQuota,
     last_daily_reset: new Date(dbQuota.last_daily_reset),
     last_monthly_reset: new Date(dbQuota.last_monthly_reset),
-    last_quota_exceeded_at: dbQuota.last_quota_exceeded_at ? new Date(dbQuota.last_quota_exceeded_at) : undefined,
+    last_quota_exceeded_at: dbQuota.last_quota_exceeded_at
+      ? new Date(dbQuota.last_quota_exceeded_at)
+      : undefined,
     created_at: new Date(dbQuota.created_at),
     updated_at: new Date(dbQuota.updated_at),
   };
 }
 
-function convertDatabaseSuppression(dbSuppression: DatabaseEmailSuppressionEntry): EmailSuppressionEntry {
+function convertDatabaseSuppression(
+  dbSuppression: DatabaseEmailSuppressionEntry
+): EmailSuppressionEntry {
   return {
     ...dbSuppression,
     suppressed_at: new Date(dbSuppression.suppressed_at),
-    expires_at: dbSuppression.expires_at ? new Date(dbSuppression.expires_at) : undefined,
+    expires_at: dbSuppression.expires_at
+      ? new Date(dbSuppression.expires_at)
+      : undefined,
     created_at: new Date(dbSuppression.created_at),
     updated_at: new Date(dbSuppression.updated_at),
   };
@@ -307,7 +325,7 @@ export class EmailComplianceService {
       const unsubscribeToken = this.generateSecureToken();
 
       // Create preference records
-      const preferencesToCreate = preferenceTypes.map((preferenceType) => ({
+      const preferencesToCreate = preferenceTypes.map(preferenceType => ({
         practice_id: practiceId,
         email,
         preference_type: preferenceType,
@@ -315,11 +333,15 @@ export class EmailComplianceService {
         consent_status: shouldRequireDoubleOptIn
           ? ('double_opt_in_pending' as EmailConsentStatus)
           : ('opted_in' as EmailConsentStatus),
-        consent_date: shouldRequireDoubleOptIn ? undefined : new Date().toISOString(),
+        consent_date: shouldRequireDoubleOptIn
+          ? undefined
+          : new Date().toISOString(),
         consent_source: consentSource,
         consent_ip_address: ipAddress,
         consent_user_agent: userAgent,
-        double_opt_in_token: shouldRequireDoubleOptIn ? doubleOptInToken : undefined,
+        double_opt_in_token: shouldRequireDoubleOptIn
+          ? doubleOptInToken
+          : undefined,
         double_opt_in_expires_at: shouldRequireDoubleOptIn
           ? new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString() // 24 hours
           : undefined,
@@ -341,7 +363,9 @@ export class EmailComplianceService {
       }
 
       // Convert database preferences to typed preferences
-      const typedPreferences = (createdPreferences || []).map(convertDatabasePreference);
+      const typedPreferences = (createdPreferences || []).map(
+        convertDatabasePreference
+      );
 
       // Log consent actions
       for (const preference of typedPreferences) {
@@ -363,13 +387,16 @@ export class EmailComplianceService {
       return {
         success: true,
         preferences: typedPreferences,
-        doubleOptInToken: shouldRequireDoubleOptIn ? doubleOptInToken : undefined,
+        doubleOptInToken: shouldRequireDoubleOptIn
+          ? doubleOptInToken
+          : undefined,
       };
     } catch (error) {
       console.error('Error creating email preferences:', error);
       return {
         success: false,
-        error: error instanceof Error ? error.message : 'Unknown error occurred',
+        error:
+          error instanceof Error ? error.message : 'Unknown error occurred',
       };
     }
   }
@@ -433,7 +460,9 @@ export class EmailComplianceService {
         .eq('double_opt_in_token', token);
 
       if (updateError) {
-        throw new Error(`Failed to confirm subscription: ${updateError.message}`);
+        throw new Error(
+          `Failed to confirm subscription: ${updateError.message}`
+        );
       }
 
       // Log consent actions
@@ -463,7 +492,8 @@ export class EmailComplianceService {
       console.error('Error confirming double opt-in:', error);
       return {
         success: false,
-        error: error instanceof Error ? error.message : 'Unknown error occurred',
+        error:
+          error instanceof Error ? error.message : 'Unknown error occurred',
       };
     }
   }
@@ -544,7 +574,8 @@ export class EmailComplianceService {
       console.error('Error unsubscribing by token:', error);
       return {
         success: false,
-        error: error instanceof Error ? error.message : 'Unknown error occurred',
+        error:
+          error instanceof Error ? error.message : 'Unknown error occurred',
       };
     }
   }
@@ -602,7 +633,9 @@ export class EmailComplianceService {
               email,
               preference_type: preferenceType as EmailPreferenceType,
               is_subscribed: isSubscribed,
-              consent_status: isSubscribed ? ('opted_in' as EmailConsentStatus) : ('opted_out' as EmailConsentStatus),
+              consent_status: isSubscribed
+                ? ('opted_in' as EmailConsentStatus)
+                : ('opted_out' as EmailConsentStatus),
               consent_date: new Date().toISOString(),
               consent_source: 'preference_update',
               consent_ip_address: ipAddress,
@@ -625,27 +658,34 @@ export class EmailComplianceService {
           }
 
           if (newPreferenceData) {
-            updatedPreferences.push(convertDatabasePreference(newPreferenceData));
+            updatedPreferences.push(
+              convertDatabasePreference(newPreferenceData)
+            );
           }
         } else {
-          const currentPreference = convertDatabasePreference(currentPreferenceData);
-          
+          const currentPreference = convertDatabasePreference(
+            currentPreferenceData
+          );
+
           // Update existing preference
-          const { data: updatedPreferenceData, error: updateError } = await supabase
-            .from('email_preferences')
-            .update({
-              is_subscribed: isSubscribed,
-              consent_status: isSubscribed ? ('opted_in' as EmailConsentStatus) : ('opted_out' as EmailConsentStatus),
-              marketing_consent:
-                preferenceType === 'marketing'
-                  ? isSubscribed
-                  : currentPreference.marketing_consent,
-              updated_at: new Date().toISOString(),
-            })
-            .eq('id', currentPreference.id)
-            .select('*')
-            .single()
-            .returns<DatabaseEmailPreference>();
+          const { data: updatedPreferenceData, error: updateError } =
+            await supabase
+              .from('email_preferences')
+              .update({
+                is_subscribed: isSubscribed,
+                consent_status: isSubscribed
+                  ? ('opted_in' as EmailConsentStatus)
+                  : ('opted_out' as EmailConsentStatus),
+                marketing_consent:
+                  preferenceType === 'marketing'
+                    ? isSubscribed
+                    : currentPreference.marketing_consent,
+                updated_at: new Date().toISOString(),
+              })
+              .eq('id', currentPreference.id)
+              .select('*')
+              .single()
+              .returns<DatabaseEmailPreference>();
 
           if (updateError) {
             console.error(
@@ -656,8 +696,10 @@ export class EmailComplianceService {
           }
 
           if (updatedPreferenceData) {
-            updatedPreferences.push(convertDatabasePreference(updatedPreferenceData));
-            
+            updatedPreferences.push(
+              convertDatabasePreference(updatedPreferenceData)
+            );
+
             // Log the preference update
             await this.logConsentAction({
               practiceId,
@@ -687,7 +729,8 @@ export class EmailComplianceService {
       console.error('Error updating preferences:', error);
       return {
         success: false,
-        error: error instanceof Error ? error.message : 'Unknown error occurred',
+        error:
+          error instanceof Error ? error.message : 'Unknown error occurred',
       };
     }
   }
@@ -735,7 +778,8 @@ export class EmailComplianceService {
       return {
         success: false,
         suppressed: false,
-        error: error instanceof Error ? error.message : 'Unknown error occurred',
+        error:
+          error instanceof Error ? error.message : 'Unknown error occurred',
       };
     }
   }
@@ -819,7 +863,8 @@ export class EmailComplianceService {
       console.error('Error adding to suppression list:', error);
       return {
         success: false,
-        error: error instanceof Error ? error.message : 'Unknown error occurred',
+        error:
+          error instanceof Error ? error.message : 'Unknown error occurred',
       };
     }
   }
@@ -847,7 +892,9 @@ export class EmailComplianceService {
         throw new Error(`Failed to get preferences: ${error.message}`);
       }
 
-      const preferences = (preferencesData || []).map(convertDatabasePreference);
+      const preferences = (preferencesData || []).map(
+        convertDatabasePreference
+      );
 
       return {
         success: true,
@@ -857,7 +904,8 @@ export class EmailComplianceService {
       console.error('Error getting email preferences:', error);
       return {
         success: false,
-        error: error instanceof Error ? error.message : 'Unknown error occurred',
+        error:
+          error instanceof Error ? error.message : 'Unknown error occurred',
       };
     }
   }
@@ -930,7 +978,8 @@ export class EmailComplianceService {
       console.error('Error getting practice quota:', error);
       return {
         success: false,
-        error: error instanceof Error ? error.message : 'Unknown error occurred',
+        error:
+          error instanceof Error ? error.message : 'Unknown error occurred',
       };
     }
   }
@@ -1033,7 +1082,8 @@ export class EmailComplianceService {
       console.error('Error incrementing email usage:', error);
       return {
         success: false,
-        error: error instanceof Error ? error.message : 'Unknown error occurred',
+        error:
+          error instanceof Error ? error.message : 'Unknown error occurred',
       };
     }
   }
@@ -1098,7 +1148,7 @@ export class EmailComplianceService {
       // Since we don't have a specific compliance status table, generate report from existing data
       const [preferencesResult, quotaResult] = await Promise.all([
         this.getEmailPreferences(practiceId, ''), // Empty email to get all preferences for practice
-        this.getPracticeQuota(practiceId)
+        this.getPracticeQuota(practiceId),
       ]);
 
       const { data: consentLogs, error: logsError } = await supabase
@@ -1115,8 +1165,12 @@ export class EmailComplianceService {
       const report = {
         practice_id: practiceId,
         total_subscribers: preferencesResult.preferences?.length || 0,
-        active_subscribers: preferencesResult.preferences?.filter(p => p.is_subscribed).length || 0,
-        unsubscribed_count: preferencesResult.preferences?.filter(p => !p.is_subscribed).length || 0,
+        active_subscribers:
+          preferencesResult.preferences?.filter(p => p.is_subscribed).length ||
+          0,
+        unsubscribed_count:
+          preferencesResult.preferences?.filter(p => !p.is_subscribed).length ||
+          0,
         quota_status: quotaResult.quota,
         recent_consent_actions: consentLogs || [],
         gdpr_compliant: true,
@@ -1132,7 +1186,8 @@ export class EmailComplianceService {
       console.error('Error generating compliance report:', error);
       return {
         success: false,
-        error: error instanceof Error ? error.message : 'Unknown error occurred',
+        error:
+          error instanceof Error ? error.message : 'Unknown error occurred',
       };
     }
   }
@@ -1150,7 +1205,10 @@ export class EmailComplianceService {
   }> {
     try {
       // Get email preferences
-      const preferencesResult = await this.getEmailPreferences(practiceId, email);
+      const preferencesResult = await this.getEmailPreferences(
+        practiceId,
+        email
+      );
 
       // Get consent log
       const { data: consentLogs, error: logsError } = await supabase
@@ -1177,7 +1235,7 @@ export class EmailComplianceService {
         data_sources: [
           'email_preferences',
           'email_consent_log',
-          'email_suppressions'
+          'email_suppressions',
         ],
       };
 
@@ -1189,7 +1247,8 @@ export class EmailComplianceService {
       console.error('Error exporting user data:', error);
       return {
         success: false,
-        error: error instanceof Error ? error.message : 'Unknown error occurred',
+        error:
+          error instanceof Error ? error.message : 'Unknown error occurred',
       };
     }
   }
@@ -1214,7 +1273,10 @@ export class EmailComplianceService {
       const { content, subject, templateType } = options;
 
       // Check for unsubscribe link
-      if (!content.includes('unsubscribe') && templateType !== 'transactional') {
+      if (
+        !content.includes('unsubscribe') &&
+        templateType !== 'transactional'
+      ) {
         errors.push('Marketing emails must include an unsubscribe link');
       }
 
@@ -1225,14 +1287,17 @@ export class EmailComplianceService {
 
       // Check subject line length
       if (subject.length > 78) {
-        warnings.push('Subject line is longer than recommended (78 characters)');
+        warnings.push(
+          'Subject line is longer than recommended (78 characters)'
+        );
       }
 
       // Check for spam trigger words
       const spamWords = ['free', 'urgent', 'act now', 'limited time', '$$$'];
-      const hasSpamWords = spamWords.some(word => 
-        content.toLowerCase().includes(word.toLowerCase()) || 
-        subject.toLowerCase().includes(word.toLowerCase())
+      const hasSpamWords = spamWords.some(
+        word =>
+          content.toLowerCase().includes(word.toLowerCase()) ||
+          subject.toLowerCase().includes(word.toLowerCase())
       );
 
       if (hasSpamWords) {
@@ -1284,7 +1349,7 @@ export class EmailComplianceService {
 
       // Check quota limits
       const canSendResult = await this.canSendEmail(practiceId, 1);
-      
+
       return canSendResult;
     } catch (error) {
       console.error('Error validating sending permissions:', error);

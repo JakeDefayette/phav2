@@ -225,7 +225,10 @@ export class EmailBounceHandler {
           email: trackingEvent.recipientEmail,
           suppressionType: 'bounce',
           suppressionReason: analysis.reason,
-          bounceType: analysis.classification === 'unknown' ? undefined : analysis.classification,
+          bounceType:
+            analysis.classification === 'unknown'
+              ? undefined
+              : analysis.classification,
           canBeResubscribed: analysis.classification === 'soft',
           expiresAt:
             analysis.classification === 'soft'
@@ -285,11 +288,9 @@ export class EmailBounceHandler {
    * Analyze complaint to determine severity and action
    */
   private analyzeComplaint(feedbackType: string): ComplaintAnalysis {
-    const severity = (
-      this.complaintSeverity[
-        feedbackType as keyof typeof this.complaintSeverity
-      ] || 'medium'
-    ) as ComplaintAnalysis['severity'];
+    const severity = (this.complaintSeverity[
+      feedbackType as keyof typeof this.complaintSeverity
+    ] || 'medium') as ComplaintAnalysis['severity'];
 
     let action: ComplaintAnalysis['action'] = 'suppress';
     let reputationImpact = 5; // Medium impact by default

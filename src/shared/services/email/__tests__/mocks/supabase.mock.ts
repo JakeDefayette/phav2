@@ -23,7 +23,10 @@ export interface MockSupabaseClient {
 /**
  * Creates a mock Supabase query builder with chainable methods
  */
-export function createMockQueryBuilder(mockData?: any, mockError?: any): MockQueryBuilder {
+export function createMockQueryBuilder(
+  mockData?: any,
+  mockError?: any
+): MockQueryBuilder {
   const mockBuilder: MockQueryBuilder = {
     select: jest.fn(),
     insert: jest.fn(),
@@ -43,26 +46,32 @@ export function createMockQueryBuilder(mockData?: any, mockError?: any): MockQue
   };
 
   // Make all methods chainable and return the builder
-  Object.keys(mockBuilder).forEach((method) => {
-    if (method !== 'single' && method !== 'maybeSingle' && method !== 'returns') {
-      mockBuilder[method as keyof MockQueryBuilder].mockReturnValue(mockBuilder);
+  Object.keys(mockBuilder).forEach(method => {
+    if (
+      method !== 'single' &&
+      method !== 'maybeSingle' &&
+      method !== 'returns'
+    ) {
+      mockBuilder[method as keyof MockQueryBuilder].mockReturnValue(
+        mockBuilder
+      );
     }
   });
 
   // The final method in chain should return the data/error response
   mockBuilder.single.mockResolvedValue({
-    data: mockError ? null : (mockData || null),
+    data: mockError ? null : mockData || null,
     error: mockError || null,
   });
 
   mockBuilder.maybeSingle.mockResolvedValue({
-    data: mockError ? null : (mockData || null),
+    data: mockError ? null : mockData || null,
     error: mockError || null,
   });
 
   // The returns() method should return the same response structure
   mockBuilder.returns.mockResolvedValue({
-    data: mockError ? null : (mockData || null),
+    data: mockError ? null : mockData || null,
     error: mockError || null,
   });
 
@@ -71,11 +80,11 @@ export function createMockQueryBuilder(mockData?: any, mockError?: any): MockQue
     const selectBuilder = {
       ...mockBuilder,
       single: jest.fn().mockResolvedValue({
-        data: mockError ? null : (mockData || null),
+        data: mockError ? null : mockData || null,
         error: mockError || null,
       }),
       returns: jest.fn().mockResolvedValue({
-        data: mockError ? null : (mockData || null),
+        data: mockError ? null : mockData || null,
         error: mockError || null,
       }),
     };
@@ -88,11 +97,11 @@ export function createMockQueryBuilder(mockData?: any, mockError?: any): MockQue
       ...mockBuilder,
       select: jest.fn().mockImplementation(() => ({
         single: jest.fn().mockResolvedValue({
-          data: mockError ? null : (mockData || null),
+          data: mockError ? null : mockData || null,
           error: mockError || null,
         }),
         returns: jest.fn().mockResolvedValue({
-          data: mockError ? null : (mockData || null),
+          data: mockError ? null : mockData || null,
           error: mockError || null,
         }),
       })),
@@ -107,11 +116,11 @@ export function createMockQueryBuilder(mockData?: any, mockError?: any): MockQue
       ...mockBuilder,
       select: jest.fn().mockImplementation(() => ({
         single: jest.fn().mockResolvedValue({
-          data: mockError ? null : (mockData || null),
+          data: mockError ? null : mockData || null,
           error: mockError || null,
         }),
         returns: jest.fn().mockResolvedValue({
-          data: mockError ? null : (mockData || null),
+          data: mockError ? null : mockData || null,
           error: mockError || null,
         }),
       })),
@@ -124,7 +133,10 @@ export function createMockQueryBuilder(mockData?: any, mockError?: any): MockQue
 /**
  * Creates a mock Supabase client
  */
-export function createMockSupabaseClient(defaultMockData?: any, defaultMockError?: any): MockSupabaseClient {
+export function createMockSupabaseClient(
+  defaultMockData?: any,
+  defaultMockError?: any
+): MockSupabaseClient {
   const mockClient: MockSupabaseClient = {
     from: jest.fn(),
   };
@@ -140,9 +152,13 @@ export function createMockSupabaseClient(defaultMockData?: any, defaultMockError
 /**
  * Creates a mock for specific table operations
  */
-export function createTableMock(tableName: string, mockData?: any, mockError?: any) {
+export function createTableMock(
+  tableName: string,
+  mockData?: any,
+  mockError?: any
+) {
   const mockBuilder = createMockQueryBuilder(mockData, mockError);
-  
+
   return {
     [tableName]: mockBuilder,
   };
@@ -151,15 +167,17 @@ export function createTableMock(tableName: string, mockData?: any, mockError?: a
 /**
  * Utility to setup Supabase mock for specific operations
  */
-export function setupSupabaseMock(operations: Record<string, { data?: any; error?: any }>) {
+export function setupSupabaseMock(
+  operations: Record<string, { data?: any; error?: any }>
+) {
   const mockClient = createMockSupabaseClient();
-  
+
   Object.entries(operations).forEach(([tableName, response]) => {
-    when(mockClient.from).calledWith(tableName).mockReturnValue(
-      createMockQueryBuilder(response.data, response.error)
-    );
+    when(mockClient.from)
+      .calledWith(tableName)
+      .mockReturnValue(createMockQueryBuilder(response.data, response.error));
   });
-  
+
   return mockClient;
 }
 
@@ -168,7 +186,7 @@ function when(mockFn: jest.MockedFunction<any>) {
   return {
     calledWith: (arg: any) => ({
       mockReturnValue: (value: any) => {
-        mockFn.mockImplementation((callArg) => {
+        mockFn.mockImplementation(callArg => {
           if (callArg === arg) {
             return value;
           }
@@ -228,8 +246,12 @@ export const createMockSupabase = () => {
 
     // Terminal methods should return a promise
     chainable.single = jest.fn().mockResolvedValue({ data: null, error: null });
-    chainable.maybeSingle = jest.fn().mockResolvedValue({ data: null, error: null });
-    chainable.returns = jest.fn().mockResolvedValue({ data: null, error: null });
+    chainable.maybeSingle = jest
+      .fn()
+      .mockResolvedValue({ data: null, error: null });
+    chainable.returns = jest
+      .fn()
+      .mockResolvedValue({ data: null, error: null });
 
     return chainable;
   };
@@ -240,7 +262,9 @@ export const createMockSupabase = () => {
     rpc: mockRpc.mockResolvedValue({ data: null, error: null }),
     sql: mockSql.mockResolvedValue({ data: null, error: null }),
     auth: {
-      getUser: jest.fn().mockResolvedValue({ data: { user: null }, error: null }),
+      getUser: jest
+        .fn()
+        .mockResolvedValue({ data: { user: null }, error: null }),
       signOut: jest.fn().mockResolvedValue({ error: null }),
     },
   };
@@ -279,4 +303,6 @@ export const createMockSupabase = () => {
 export const mockSupabaseInstance = createMockSupabase();
 
 // Mock for @supabase/supabase-js module
-export const createClientMock = jest.fn(() => mockSupabaseInstance.mockSupabase);
+export const createClientMock = jest.fn(
+  () => mockSupabaseInstance.mockSupabase
+);

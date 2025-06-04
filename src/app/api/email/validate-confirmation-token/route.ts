@@ -21,14 +21,13 @@ export async function POST(request: NextRequest) {
     // Check if the token exists and is valid for double opt-in
     const { data: preference, error } = await supabase
       .from('email_preferences')
-      .select(
-        'email, practice_id, consent_status, double_opt_in_expires_at'
-      )
+      .select('email, practice_id, consent_status, double_opt_in_expires_at')
       .eq('double_opt_in_token', token)
       .eq('consent_status', 'double_opt_in_pending')
       .single();
 
-    const typedPreference = preference as unknown as DoubleOptInPreference | null;
+    const typedPreference =
+      preference as unknown as DoubleOptInPreference | null;
 
     if (error || !typedPreference) {
       return NextResponse.json(

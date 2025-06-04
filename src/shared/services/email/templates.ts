@@ -9,9 +9,9 @@ import {
 import { EmailTemplateType } from './types';
 
 // Extended EmailTemplateData to support specific template props
-export type EmailTemplateData = 
-  | ReportDeliveryTemplateProps 
-  | ReportReadyTemplateProps 
+export type EmailTemplateData =
+  | ReportDeliveryTemplateProps
+  | ReportReadyTemplateProps
   | Record<string, string | number | boolean | Date | undefined>;
 
 // Template registry interface

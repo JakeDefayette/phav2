@@ -120,7 +120,10 @@ export class EmailTrackingService {
       }
 
       // Handle specific event types
-      await this.handleSpecificEventType(event, data as unknown as EmailTrackingEvent);
+      await this.handleSpecificEventType(
+        event,
+        data as unknown as EmailTrackingEvent
+      );
 
       return data as unknown as EmailTrackingEvent;
     } catch (error) {
