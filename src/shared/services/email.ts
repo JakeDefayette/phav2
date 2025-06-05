@@ -966,3 +966,8 @@ export class EmailService {
     }
   }
 }
+
+// Create and export email service instance
+const emailService = new EmailService();
+
+export { emailService };

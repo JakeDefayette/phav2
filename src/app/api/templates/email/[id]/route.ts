@@ -5,7 +5,7 @@ import { cookies } from 'next/headers';
 // GET /api/templates/email/[id] - Get a specific email template
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const supabase = createRouteHandlerClient<any>({ cookies });
@@ -34,10 +34,11 @@ export async function GET(
       );
     }
 
+    const resolvedParams = await params;
     const { data, error } = await supabase
       .from('email_templates')
       .select('*')
-      .eq('id', params.id)
+      .eq('id', resolvedParams.id)
       .eq('practice_id', profile.practice_id)
       .single();
 
@@ -68,7 +69,7 @@ export async function GET(
 // PUT /api/templates/email/[id] - Update a specific email template
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const body = await request.json();
@@ -118,11 +119,12 @@ export async function PUT(
       );
     }
 
+    const resolvedParams = await params;
     // First check if template exists and belongs to practice
     const { data: existingTemplate, error: fetchError } = await supabase
       .from('email_templates')
       .select('id')
-      .eq('id', params.id)
+      .eq('id', resolvedParams.id)
       .eq('practice_id', profile.practice_id)
       .single();
 
@@ -153,7 +155,7 @@ export async function PUT(
         updated_at: new Date().toISOString(),
         updated_by: user.id,
       })
-      .eq('id', params.id)
+      .eq('id', resolvedParams.id)
       .eq('practice_id', profile.practice_id)
       .select()
       .single();
@@ -179,7 +181,7 @@ export async function PUT(
 // DELETE /api/templates/email/[id] - Delete a specific email template
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const supabase = createRouteHandlerClient<any>({ cookies });
@@ -208,11 +210,12 @@ export async function DELETE(
       );
     }
 
+    const resolvedParams = await params;
     // First check if template exists and belongs to practice
     const { data: existingTemplate, error: fetchError } = await supabase
       .from('email_templates')
       .select('id')
-      .eq('id', params.id)
+      .eq('id', resolvedParams.id)
       .eq('practice_id', profile.practice_id)
       .single();
 
@@ -238,7 +241,7 @@ export async function DELETE(
         updated_at: new Date().toISOString(),
         updated_by: user.id,
       })
-      .eq('id', params.id)
+      .eq('id', resolvedParams.id)
       .eq('practice_id', profile.practice_id);
 
     if (error) {

@@ -156,21 +156,25 @@ export class ResendClient {
           continue;
         }
 
-        // Attempt to send email
-        const result = await this.client.emails.send({
+        // Attempt to send email with proper type casting
+        const emailData: any = {
           from: options.from,
           to: options.to,
           subject: options.subject,
-          html: options.html,
-          text: options.text,
-          attachments: options.attachments?.map(att => ({
-            filename: att.filename,
-            content: att.content,
-            content_type: att.contentType,
-          })),
-          headers: options.headers,
-          tags: options.tags,
-        });
+          ...(options.html && { html: options.html }),
+          ...(options.text && { text: options.text }),
+          ...(options.attachments && {
+            attachments: options.attachments.map(att => ({
+              filename: att.filename,
+              content: att.content,
+              content_type: att.contentType,
+            })),
+          }),
+          ...(options.headers && { headers: options.headers }),
+          ...(options.tags && { tags: options.tags }),
+        };
+
+        const result = await this.client.emails.send(emailData);
 
         if (result.error) {
           throw new Error(`Resend API error: ${result.error.message}`);

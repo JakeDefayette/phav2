@@ -70,31 +70,26 @@ export class SurveyResponsesService extends BaseService<
     assessmentId: string
   ): Promise<SurveyResponseWithQuestion[]> {
     try {
-      const { data, error } = await supabase
-        .from(this.tableName)
-        .select(
-          `
-          *,
-          survey_question_definitions (
-            id,
-            question_text,
-            question_type,
-            options,
-            category,
-            order_index,
-            is_required,
-            validation_rules
-          )
-        `
-        )
-        .eq('assessment_id', assessmentId)
-        .order('created_at');
+      // TODO: Survey responses table not yet implemented in schema
+      // Return empty array for now
+      console.log(
+        'Survey responses would be fetched for assessment:',
+        assessmentId
+      );
+      return [];
 
-      if (error) {
-        this.handleError(error, 'Find by assessment ID');
-      }
-
-      return data as SurveyResponseWithQuestion[];
+      // In the future, when survey_responses table is added:
+      // const { data, error } = await supabase
+      //   .from(this.tableName)
+      //   .select('*')
+      //   .eq('assessment_id', assessmentId)
+      //   .order('created_at');
+      //
+      // if (error) {
+      //   this.handleError(error, 'Find by assessment ID');
+      // }
+      //
+      // return (data || []) as unknown as SurveyResponseWithQuestion[];
     } catch (error) {
       if (error instanceof ServiceError) {
         throw error;
@@ -155,19 +150,25 @@ export class SurveyResponsesService extends BaseService<
     responses: SurveyResponseInsert[]
   ): Promise<SurveyResponse[]> {
     try {
-      const { data, error } = await supabase
-        .from(this.tableName)
-        .upsert(responses, {
-          onConflict: 'assessment_id,question_id',
-          ignoreDuplicates: false,
-        })
-        .select();
+      // TODO: Survey responses table not yet implemented in schema
+      // Return empty array for now
+      console.log('Multiple survey responses would be saved:', responses);
+      return [];
 
-      if (error) {
-        this.handleError(error, 'Save multiple responses');
-      }
-
-      return data as SurveyResponse[];
+      // In the future, when survey_responses table is added:
+      // const { data, error } = await supabase
+      //   .from(this.tableName)
+      //   .upsert(responses, {
+      //     onConflict: 'assessment_id,question_id',
+      //     ignoreDuplicates: false,
+      //   })
+      //   .select();
+      //
+      // if (error) {
+      //   this.handleError(error, 'Save multiple responses');
+      // }
+      //
+      // return (data || []) as unknown as SurveyResponse[];
     } catch (error) {
       if (error instanceof ServiceError) {
         throw error;
@@ -186,89 +187,16 @@ export class SurveyResponsesService extends BaseService<
     dateTo?: string
   ): Promise<ResponseSummary | null> {
     try {
-      let query = supabase
-        .from(this.tableName)
-        .select(
-          `
-          response_value,
-          response_text,
-          survey_question_definitions (
-            id,
-            question_text,
-            question_type,
-            category
-          ),
-          assessments (
-            practice_id,
-            started_at
-          )
-        `
-        )
-        .eq('question_id', questionId);
-
-      if (practiceId) {
-        query = query.eq('assessments.practice_id', practiceId);
-      }
-
-      if (dateFrom) {
-        query = query.gte('assessments.started_at', dateFrom);
-      }
-
-      if (dateTo) {
-        query = query.lte('assessments.started_at', dateTo);
-      }
-
-      const { data, error } = await query;
-
-      if (error) {
-        this.handleError(error, 'Get response summary');
-      }
-
-      if (!data || data.length === 0) {
-        return null;
-      }
-
-      const firstResponse = data[0];
-      const questionData = (firstResponse as any).survey_question_definitions;
-
-      if (!questionData) {
-        throw new ServiceError('Question data not found', 'QUESTION_NOT_FOUND');
-      }
-
-      // Count responses by value
-      const responseCounts = new Map<
-        string,
-        { count: number; text?: string }
-      >();
-
-      data.forEach(response => {
-        const key = JSON.stringify(response.response_value);
-        const existing = responseCounts.get(key) || { count: 0 };
-        existing.count++;
-        if (response.response_text) {
-          existing.text = response.response_text;
-        }
-        responseCounts.set(key, existing);
-      });
-
-      const totalResponses = data.length;
-      const responses = Array.from(responseCounts.entries()).map(
-        ([valueStr, { count, text }]) => ({
-          value: JSON.parse(valueStr),
-          text,
-          count,
-          percentage: (count / totalResponses) * 100,
-        })
+      // TODO: Survey responses table not yet implemented in schema
+      // Return null for now
+      console.log(
+        'Survey response summary would be fetched for question:',
+        questionId
       );
+      return null;
 
-      return {
-        question_id: questionId,
-        question_text: questionData.question_text,
-        question_type: questionData.question_type,
-        category: questionData.category,
-        responses,
-        total_responses: totalResponses,
-      };
+      // In the future, when survey_responses and survey_question_definitions tables are added:
+      // Implement the actual database query and processing logic
     } catch (error) {
       if (error instanceof ServiceError) {
         throw error;

@@ -210,7 +210,7 @@ export function ScheduledEmailsWidget({
                   <Button
                     onClick={() => handleCancelEmail(email.id)}
                     variant='outline'
-                    size='xs'
+                    size='sm'
                     className='text-red-600 hover:text-red-700'
                   >
                     Cancel

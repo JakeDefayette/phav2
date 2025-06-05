@@ -49,16 +49,16 @@ export class BrandingService {
       }
 
       const brandingConfig: BrandingConfig = {
-        primaryColor: practice.primary_color || '#2B5797',
-        secondaryColor: practice.secondary_color || '#FF8C00',
-        accentColor: practice.accent_color || '#F7F7F7',
-        logoUrl: practice.logo_url,
-        practiceName: practice.name,
-        address: practice.address || '',
-        phone: practice.phone || '',
-        hours: practice.hours || 'Mon-Fri 9AM-5PM',
-        website: practice.website,
-        email: practice.email,
+        primaryColor: (practice.primary_color as string) || '#2B5797',
+        secondaryColor: (practice.secondary_color as string) || '#FF8C00',
+        accentColor: (practice.accent_color as string) || '#F7F7F7',
+        logoUrl: practice.logo_url as string,
+        practiceName: practice.name as string,
+        address: (practice.address as string) || '',
+        phone: (practice.phone as string) || '',
+        hours: (practice.hours as string) || 'Mon-Fri 9AM-5PM',
+        website: practice.website as string,
+        email: practice.email as string,
       };
 
       // Cache the result
@@ -168,19 +168,21 @@ export class BrandingService {
         }
 
         return {
-          id: practice.id,
-          practice_id: practice.id,
-          primary_color: practice.primary_color || '#2B5797',
-          secondary_color: practice.secondary_color || '#FF8C00',
+          id: practice.id as string,
+          practice_id: practice.id as string,
+          primary_color: (practice.primary_color as string) || '#2B5797',
+          secondary_color: (practice.secondary_color as string) || '#FF8C00',
           accent_color: '#F7F7F7', // Default accent color
-          logo_url: practice.logo_url,
-          practice_name: practice.name,
-          address: practice.address,
-          phone: practice.phone,
-          email: practice.email,
-          website: practice.website,
-          created_at: practice.created_at || new Date().toISOString(),
-          updated_at: practice.updated_at || new Date().toISOString(),
+          logo_url: practice.logo_url as string,
+          practice_name: practice.name as string,
+          address: practice.address as string,
+          phone: practice.phone as string,
+          email: practice.email as string,
+          website: practice.website as string,
+          created_at:
+            (practice.created_at as string) || new Date().toISOString(),
+          updated_at:
+            (practice.updated_at as string) || new Date().toISOString(),
         };
       } else {
         // Return default branding if no practice ID provided

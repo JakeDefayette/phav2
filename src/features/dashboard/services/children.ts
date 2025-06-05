@@ -68,7 +68,7 @@ export class ChildrenService extends BaseService<
         this.handleError(error, 'Find by ID with assessments');
       }
 
-      return data as ChildWithAssessments;
+      return data as unknown as ChildWithAssessments;
     } catch (error) {
       if (error instanceof ServiceError) {
         throw error;
@@ -181,7 +181,7 @@ export class ChildrenService extends BaseService<
         this.handleError(error, 'Find with recent assessments');
       }
 
-      return data as ChildWithAssessments[];
+      return data as unknown as ChildWithAssessments[];
     } catch (error) {
       if (error instanceof ServiceError) {
         throw error;
@@ -259,7 +259,7 @@ export class ChildrenService extends BaseService<
         this.handleError(error, 'Find by practice ID');
       }
 
-      return data as Child[];
+      return data as unknown as Child[];
     } catch (error) {
       if (error instanceof ServiceError) {
         throw error;

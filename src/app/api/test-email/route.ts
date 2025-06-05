@@ -96,7 +96,10 @@ export async function GET() {
     const isConfigured = emailService.isConfigured();
     const rateLimitStatus = emailService.getRateLimitStatus();
 
-    let connectionTest = { success: false, error: 'Not tested' };
+    let connectionTest: { success: boolean; error?: string } = {
+      success: false,
+      error: 'Not tested',
+    };
     if (isConfigured) {
       connectionTest = await emailService.testConnection();
     }

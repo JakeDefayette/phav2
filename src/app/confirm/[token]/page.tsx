@@ -6,9 +6,9 @@ import { Button } from '@/shared/components/atoms/Button';
 import { Alert } from '@/shared/components/molecules/Alert';
 
 interface ConfirmPageProps {
-  params: {
+  params: Promise<{
     token: string;
-  };
+  }>;
 }
 
 interface ConfirmState {
@@ -18,6 +18,7 @@ interface ConfirmState {
   email?: string;
   practiceId?: string;
   confirming: boolean;
+  token?: string;
 }
 
 export default function ConfirmPage({ params }: ConfirmPageProps) {
@@ -29,6 +30,8 @@ export default function ConfirmPage({ params }: ConfirmPageProps) {
   });
 
   const handleConfirm = async () => {
+    if (!state.token) return;
+
     setState(prev => ({ ...prev, confirming: true, error: null }));
 
     try {
@@ -39,7 +42,7 @@ export default function ConfirmPage({ params }: ConfirmPageProps) {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          token: params.token,
+          token: state.token,
           userAgent: navigator.userAgent,
         }),
       });
@@ -73,13 +76,18 @@ export default function ConfirmPage({ params }: ConfirmPageProps) {
   useEffect(() => {
     const autoConfirm = async () => {
       try {
+        const resolvedParams = await params;
+        const token = resolvedParams.token;
+
+        setState(prev => ({ ...prev, token }));
+
         // First validate the token exists
         const response = await fetch('/api/email/validate-confirmation-token', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
           },
-          body: JSON.stringify({ token: params.token }),
+          body: JSON.stringify({ token }),
         });
 
         const data = await response.json();
@@ -109,7 +117,7 @@ export default function ConfirmPage({ params }: ConfirmPageProps) {
     };
 
     autoConfirm();
-  }, [params.token]);
+  }, [params]);
 
   if (state.loading) {
     return (
@@ -252,7 +260,7 @@ export default function ConfirmPage({ params }: ConfirmPageProps) {
               onClick={handleConfirm}
               className='w-full'
               variant='primary'
-              isLoading={state.confirming}
+              loading={state.confirming}
               disabled={state.confirming}
             >
               {state.confirming ? 'Confirming...' : 'Confirm Subscription'}

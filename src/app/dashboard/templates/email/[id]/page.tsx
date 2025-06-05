@@ -8,12 +8,13 @@ import {
   EmailTemplateEditor,
   EmailTemplateDefinition,
 } from '@/features/dashboard/components/EmailTemplateEditor';
+import { EmailTemplateType } from '@/shared/services/email/types';
 import { Loading } from '@/shared/components/atoms/Loading';
 
 interface EditEmailTemplatePageProps {
-  params: {
+  params: Promise<{
     id: string;
-  };
+  }>;
 }
 
 export default function EditEmailTemplatePage({
@@ -25,23 +26,27 @@ export default function EditEmailTemplatePage({
   );
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [templateId, setTemplateId] = useState<string | null>(null);
 
   useEffect(() => {
     const loadTemplate = async () => {
       try {
+        const resolvedParams = await params;
+        const id = resolvedParams.id;
+        setTemplateId(id);
+
         // TODO: Replace with actual API call
-        console.log('Loading template with ID:', params.id);
+        console.log('Loading template with ID:', id);
 
         // Simulate API call
         await new Promise(resolve => setTimeout(resolve, 1000));
 
         // Mock template data
         const mockTemplate: EmailTemplateDefinition = {
-          id: params.id,
+          id: id,
           name: 'Welcome Email Template',
           subject: 'Welcome to Our Practice',
-          description: 'A warm welcome message for new patients',
-          type: 'welcome',
+          type: EmailTemplateType.WELCOME,
           elements: [
             {
               id: '1',
@@ -69,7 +74,6 @@ export default function EditEmailTemplatePage({
               },
               styles: {
                 fontSize: '16px',
-                lineHeight: '1.6',
                 color: '#374151',
                 padding: '20px',
               },
@@ -79,21 +83,31 @@ export default function EditEmailTemplatePage({
           variables: [
             {
               name: 'patient_name',
+              label: 'Patient Name',
+              type: 'text' as const,
               description: "Patient's full name",
               defaultValue: '[Patient Name]',
+              required: false,
             },
             {
               name: 'practice_name',
+              label: 'Practice Name',
+              type: 'text' as const,
               description: 'Practice name',
               defaultValue: '[Practice Name]',
+              required: false,
             },
           ],
           metadata: {
-            version: 1,
-            createdAt: new Date('2024-01-01'),
-            updatedAt: new Date(),
-            createdBy: 'user123',
+            description: 'A warm welcome message for new patients',
+            tags: ['welcome', 'onboarding'],
+            category: 'patient-communications',
+            isActive: true,
           },
+          version: 1,
+          createdAt: new Date('2024-01-01'),
+          updatedAt: new Date(),
+          createdBy: 'user123',
         };
 
         setTemplate(mockTemplate);
@@ -106,7 +120,7 @@ export default function EditEmailTemplatePage({
     };
 
     loadTemplate();
-  }, [params.id]);
+  }, [params]);
 
   const handleSave = async (updatedTemplate: EmailTemplateDefinition) => {
     try {
@@ -180,7 +194,7 @@ export default function EditEmailTemplatePage({
     <DashboardLayout>
       <RoleGuard requiredPermission='canManagePractice'>
         <EmailTemplateEditor
-          initialTemplate={template}
+          templateId={templateId || undefined}
           onSave={handleSave}
           onCancel={handleCancel}
         />

@@ -114,7 +114,7 @@ export default function MonitoringDashboardPage() {
             />
 
             {/* Alert Management Widget */}
-            <AlertManagementWidget className='w-full' compactMode={false} />
+            <AlertManagementWidget />
           </div>
 
           {/* Advanced Monitoring Tools Section */}

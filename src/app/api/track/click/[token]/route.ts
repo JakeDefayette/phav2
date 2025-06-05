@@ -2,9 +2,9 @@ import { NextRequest, NextResponse } from 'next/server';
 import { emailTrackingService } from '@/shared/services/email/tracking';
 
 interface RouteParams {
-  params: {
+  params: Promise<{
     token: string;
-  };
+  }>;
 }
 
 /**
@@ -14,7 +14,8 @@ interface RouteParams {
  * Records click event in analytics and redirects user to intended destination.
  */
 export async function GET(request: NextRequest, { params }: RouteParams) {
-  const { token } = params;
+  const resolvedParams = await params;
+  const { token } = resolvedParams;
 
   try {
     // Extract tracking information from request
@@ -113,7 +114,8 @@ function isValidRedirectUrl(url: string): boolean {
  * HEAD request for preflight checks
  */
 export async function HEAD(request: NextRequest, { params }: RouteParams) {
-  const { token } = params;
+  const resolvedParams = await params;
+  const { token } = resolvedParams;
 
   try {
     // Check if tracking token exists without processing the click

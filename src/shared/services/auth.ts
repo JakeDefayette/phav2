@@ -141,8 +141,8 @@ export async function registerUser(
       firstName: (profileData.first_name as string) || credentials.firstName,
       lastName: (profileData.last_name as string) || credentials.lastName,
       practiceId: credentials.practiceId,
-      createdAt: profileData.created_at as string,
-      updatedAt: profileData.updated_at as string,
+      createdAt: profileData.createdAt as string,
+      updatedAt: profileData.updatedAt as string,
     };
 
     return userProfile;
@@ -206,8 +206,8 @@ export async function loginUser(
       firstName: userMetadata?.firstName || profileData.first_name || '',
       lastName: userMetadata?.lastName || profileData.last_name || '',
       practiceId: userMetadata?.practiceId,
-      createdAt: profileData.created_at as string,
-      updatedAt: profileData.updated_at as string,
+      createdAt: profileData.createdAt as string,
+      updatedAt: profileData.updatedAt as string,
     };
 
     return userProfile;
@@ -317,8 +317,8 @@ export async function getCurrentUser(): Promise<UserProfile | null> {
       firstName: userMetadata?.firstName || profileData.first_name || '',
       lastName: userMetadata?.lastName || profileData.last_name || '',
       practiceId: userMetadata?.practiceId,
-      createdAt: profileData.created_at as string,
-      updatedAt: profileData.updated_at as string,
+      createdAt: profileData.createdAt as string,
+      updatedAt: profileData.updatedAt as string,
     };
 
     return userProfile;

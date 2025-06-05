@@ -3,7 +3,6 @@
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/shared/components/atoms/Button';
 import { Alert } from '@/shared/components/molecules/Alert';
-import { RadioGroup } from '@/shared/components/molecules/RadioGroup';
 import { Input } from '@/shared/components/atoms/Input';
 import { Label } from '@/shared/components/atoms/Label';
 
@@ -208,13 +207,26 @@ export function UnsubscribeForm({
           >
             Help us improve: Why are you unsubscribing? (Optional)
           </Label>
-          <div className='mt-2'>
-            <RadioGroup
-              name='reason'
-              value={reason}
-              onChange={setReason}
-              options={UNSUBSCRIBE_REASONS}
-            />
+          <div className='mt-2 space-y-3'>
+            {UNSUBSCRIBE_REASONS.map(option => (
+              <div key={option.value} className='flex items-center'>
+                <input
+                  id={`reason-${option.value}`}
+                  name='reason'
+                  type='radio'
+                  value={option.value}
+                  checked={reason === option.value}
+                  onChange={e => setReason(e.target.value)}
+                  className='h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300'
+                />
+                <label
+                  htmlFor={`reason-${option.value}`}
+                  className='ml-3 block text-sm font-medium text-gray-700'
+                >
+                  {option.label}
+                </label>
+              </div>
+            ))}
           </div>
         </div>
 
@@ -245,7 +257,7 @@ export function UnsubscribeForm({
           type='submit'
           className='w-full'
           variant='primary'
-          isLoading={state.loading}
+          loading={state.loading}
           disabled={
             state.loading || (reason === 'other' && !customReason.trim())
           }

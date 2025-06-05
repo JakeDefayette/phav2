@@ -4,10 +4,10 @@ import { cookies } from 'next/headers';
 import type { Database } from '@/shared/types/database';
 
 interface RouteParams {
-  params: {
+  params: Promise<{
     id: string;
     versionId: string;
-  };
+  }>;
 }
 
 // GET /api/templates/email/[id]/versions/[versionId] - Get a specific version
@@ -39,11 +39,12 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
       );
     }
 
+    const resolvedParams = await params;
     // First verify the template belongs to the user's practice
     const { data: template, error: templateError } = await supabase
       .from('email_templates')
       .select('id')
-      .eq('id', params.id)
+      .eq('id', resolvedParams.id)
       .eq('practice_id', profile.practice_id)
       .single();
 
@@ -66,8 +67,8 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
         )
       `
       )
-      .eq('id', params.versionId)
-      .eq('template_id', params.id)
+      .eq('id', resolvedParams.versionId)
+      .eq('template_id', resolvedParams.id)
       .single();
 
     if (versionError || !version) {
@@ -113,11 +114,12 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
       );
     }
 
+    const resolvedParams = await params;
     // First verify the template belongs to the user's practice
     const { data: template, error: templateError } = await supabase
       .from('email_templates')
       .select('id')
-      .eq('id', params.id)
+      .eq('id', resolvedParams.id)
       .eq('practice_id', profile.practice_id)
       .single();
 
@@ -132,8 +134,8 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
     const { data: version, error: versionError } = await supabase
       .from('email_template_versions')
       .select('*')
-      .eq('id', params.versionId)
-      .eq('template_id', params.id)
+      .eq('id', resolvedParams.versionId)
+      .eq('template_id', resolvedParams.id)
       .single();
 
     if (versionError || !version) {
@@ -145,7 +147,8 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
       .from('email_templates')
       .update({
         name: version.name,
-        template_type: version.template_type,
+        template_type:
+          version.template_type as Database['public']['Enums']['email_template_type_enum'],
         subject: version.subject,
         html_content: version.html_content,
         text_content: version.text_content,
@@ -154,7 +157,7 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
         updated_at: new Date().toISOString(),
         updated_by: user.id,
       })
-      .eq('id', params.id);
+      .eq('id', resolvedParams.id);
 
     if (updateError) {
       console.error('Failed to update main template:', updateError);
@@ -168,12 +171,12 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
     await supabase
       .from('email_template_versions')
       .update({ is_published: false })
-      .eq('template_id', params.id);
+      .eq('template_id', resolvedParams.id);
 
     const { error: publishError } = await supabase
       .from('email_template_versions')
       .update({ is_published: true })
-      .eq('id', params.versionId);
+      .eq('id', resolvedParams.versionId);
 
     if (publishError) {
       console.error('Failed to mark version as published:', publishError);
@@ -225,11 +228,12 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
       );
     }
 
+    const resolvedParams = await params;
     // First verify the template belongs to the user's practice
     const { data: template, error: templateError } = await supabase
       .from('email_templates')
       .select('id')
-      .eq('id', params.id)
+      .eq('id', resolvedParams.id)
       .eq('practice_id', profile.practice_id)
       .single();
 
@@ -244,8 +248,8 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
     const { data: version, error: versionError } = await supabase
       .from('email_template_versions')
       .select('is_published, version_number')
-      .eq('id', params.versionId)
-      .eq('template_id', params.id)
+      .eq('id', resolvedParams.versionId)
+      .eq('template_id', resolvedParams.id)
       .single();
 
     if (versionError || !version) {
@@ -267,7 +271,7 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
     const { error: deleteError } = await supabase
       .from('email_template_versions')
       .delete()
-      .eq('id', params.versionId);
+      .eq('id', resolvedParams.versionId);
 
     if (deleteError) {
       console.error('Failed to delete version:', deleteError);

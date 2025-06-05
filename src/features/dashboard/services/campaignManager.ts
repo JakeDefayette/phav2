@@ -376,13 +376,12 @@ export class CampaignManager {
 
       const batchPromises = batch.map(async subscriber => {
         try {
-          await this.emailService.send({
+          await this.emailService.sendReportDeliveryEmail({
             to: subscriber.email,
-            subject: campaign.subject,
-            html: campaign.content,
-            campaignId,
+            childName: 'Campaign Recipient',
+            assessmentDate: new Date().toISOString(),
+            downloadUrl: '',
             practiceId: campaign.practice_id,
-            trackingEnabled: true,
           });
 
           // Record the send
@@ -629,7 +628,7 @@ export class CampaignManager {
   async getCampaignPerformanceMetrics(
     campaignId: string,
     period: 'hour' | 'day' | 'week' | 'month' = 'day',
-    dateRange?: { start: string; end: string }
+    _dateRange?: { start: string; end: string }
   ): Promise<CampaignPerformanceMetrics> {
     // This would typically aggregate data from analytics_events or similar table
     // For now, return a basic structure
@@ -668,22 +667,22 @@ export class CampaignManager {
       campaigns.length;
     if (avgOpenRate < 20) {
       recommendations.push({
-        type: 'subject_line',
+        type: 'subject_line' as const,
         title: 'Improve Subject Lines',
         description:
           'Your average open rate is below industry standards. Consider A/B testing different subject line approaches.',
-        impact: 'high',
+        impact: 'high' as const,
         data: { currentOpenRate: avgOpenRate, targetOpenRate: 25 },
       });
     }
 
     // Send time recommendations
     recommendations.push({
-      type: 'send_time',
+      type: 'send_time' as const,
       title: 'Optimize Send Times',
       description:
         'Test sending emails at different times to find when your audience is most engaged.',
-      impact: 'medium',
+      impact: 'medium' as const,
       data: { suggestedTimes: ['10:00 AM', '2:00 PM', '7:00 PM'] },
     });
 
@@ -707,7 +706,7 @@ export class CampaignManager {
   /**
    * Retrieve campaign metadata
    */
-  private async getCampaignMetadata(campaignId: string): Promise<any> {
+  private async getCampaignMetadata(_campaignId: string): Promise<any> {
     // Retrieve stored metadata
     // For now, return empty object
     return {};

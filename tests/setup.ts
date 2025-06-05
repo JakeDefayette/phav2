@@ -3,8 +3,8 @@ import '@testing-library/jest-dom';
 import { TextDecoder, TextEncoder } from 'util';
 
 // Global polyfills for React Email
-global.TextDecoder = TextDecoder;
-global.TextEncoder = TextEncoder;
+global.TextDecoder = TextDecoder as any;
+global.TextEncoder = TextEncoder as any;
 
 // Load environment variables from .env.local, .env.test, or .env
 config({ path: '.env.local' });
@@ -13,7 +13,7 @@ config({ path: '.env' });
 
 // Mock environment variables for testing if not present
 if (!process.env.NODE_ENV) {
-  process.env.NODE_ENV = 'test';
+  (process.env as any).NODE_ENV = 'test';
 }
 if (!process.env.ENVIRONMENT) {
   process.env.ENVIRONMENT = 'test';

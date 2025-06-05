@@ -3,18 +3,20 @@ import { UnsubscribeForm } from '@/features/email/components/UnsubscribeForm';
 import { Loading } from '@/shared/components/atoms/Loading';
 
 interface UnsubscribePageProps {
-  params: {
+  params: Promise<{
     token: string;
-  };
-  searchParams: {
+  }>;
+  searchParams: Promise<{
     reason?: string;
-  };
+  }>;
 }
 
-export default function UnsubscribePage({
+export default async function UnsubscribePage({
   params,
   searchParams,
 }: UnsubscribePageProps) {
+  const resolvedParams = await params;
+  const resolvedSearchParams = await searchParams;
   return (
     <div className='min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8'>
       <div className='sm:mx-auto sm:w-full sm:max-w-md'>
@@ -30,8 +32,8 @@ export default function UnsubscribePage({
         <div className='bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10'>
           <Suspense fallback={<Loading />}>
             <UnsubscribeForm
-              token={params.token}
-              defaultReason={searchParams.reason}
+              token={resolvedParams.token}
+              defaultReason={resolvedSearchParams.reason}
             />
           </Suspense>
         </div>
@@ -50,7 +52,7 @@ export default function UnsubscribePage({
 export async function generateMetadata({
   params,
 }: {
-  params: { token: string };
+  params: Promise<{ token: string }>;
 }) {
   return {
     title: 'Unsubscribe from Email Lists',

@@ -179,10 +179,10 @@ async function convertToGeneratedReport(
           gender: child.gender,
         },
         assessment: {
-          id: assessmentData.id,
-          brain_o_meter_score: assessmentData.brain_o_meter_score,
-          completed_at: assessmentData.completed_at,
-          status: assessmentData.status,
+          id: assessmentData.id as string,
+          brain_o_meter_score: assessmentData.brain_o_meter_score as number,
+          completed_at: assessmentData.completed_at as string,
+          status: assessmentData.status as string,
         },
         // Content is generated dynamically, not stored in database
       },

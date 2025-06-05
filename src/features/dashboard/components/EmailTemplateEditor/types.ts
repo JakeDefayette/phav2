@@ -216,22 +216,4 @@ export interface TemplateRenderResult {
   errors?: string[];
 }
 
-// Export all types for easier importing
-export type {
-  TemplateElement,
-  TemplateElementType,
-  TemplateElementStyles,
-  EmailTemplateDefinition,
-  TemplateVariable,
-  TemplateMetadata,
-  TemplateVersion,
-  EditorState,
-  EditorError,
-  TemplateLibraryFilter,
-  TemplateLibraryItem,
-  DragItem,
-  DropResult,
-  EditorAction,
-  TemplateRenderOptions,
-  TemplateRenderResult,
-};
+// All types are already exported when defined above

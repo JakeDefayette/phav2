@@ -246,7 +246,7 @@ export abstract class BaseService<T = any, TInsert = any, TUpdate = any> {
     try {
       const { data: result, error } = await supabase
         .from(this.tableName)
-        .insert(data)
+        .insert(data as any)
         .select(select || '*')
         .single();
 
@@ -270,7 +270,7 @@ export abstract class BaseService<T = any, TInsert = any, TUpdate = any> {
     try {
       const { data: result, error } = await supabase
         .from(this.tableName)
-        .update(data)
+        .update(data as any)
         .eq('id', id)
         .select(select || '*')
         .single();

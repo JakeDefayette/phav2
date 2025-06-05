@@ -131,7 +131,7 @@ export const ABTestManager: React.FC<ABTestManagerProps> = ({
 
   const handleUpdateVariant = (
     index: number,
-    field: keyof ABTestVariant,
+    field: 'name' | 'subject' | 'content' | 'percentage',
     value: string | number
   ) => {
     const updatedVariants = [...testConfig.variants];
@@ -151,7 +151,7 @@ export const ABTestManager: React.FC<ABTestManagerProps> = ({
       return;
     }
 
-    const newVariant: Omit<ABTestVariant, 'id'> = {
+    const newVariant = {
       name: `Variant ${String.fromCharCode(65 + testConfig.variants.length)}`,
       subject: '',
       content: '',
@@ -243,7 +243,8 @@ export const ABTestManager: React.FC<ABTestManagerProps> = ({
         {error && (
           <Alert
             variant='error'
-            onClose={() => setError(null)}
+            dismissible
+            onDismiss={() => setError(null)}
             className='mb-4'
           >
             {error}
@@ -253,7 +254,8 @@ export const ABTestManager: React.FC<ABTestManagerProps> = ({
         {success && (
           <Alert
             variant='success'
-            onClose={() => setSuccess(null)}
+            dismissible
+            onDismiss={() => setSuccess(null)}
             className='mb-4'
           >
             {success}
@@ -394,7 +396,12 @@ export const ABTestManager: React.FC<ABTestManagerProps> = ({
       </div>
 
       {error && (
-        <Alert variant='error' onClose={() => setError(null)} className='mb-4'>
+        <Alert
+          variant='error'
+          dismissible
+          onDismiss={() => setError(null)}
+          className='mb-4'
+        >
           {error}
         </Alert>
       )}
@@ -402,7 +409,8 @@ export const ABTestManager: React.FC<ABTestManagerProps> = ({
       {success && (
         <Alert
           variant='success'
-          onClose={() => setSuccess(null)}
+          dismissible
+          onDismiss={() => setSuccess(null)}
           className='mb-4'
         >
           {success}
@@ -412,7 +420,8 @@ export const ABTestManager: React.FC<ABTestManagerProps> = ({
       <div className='space-y-6'>
         {/* Test Settings */}
         <div className='grid grid-cols-1 md:grid-cols-2 gap-6'>
-          <FormField label='Winning Criteria' htmlFor='winning-criteria'>
+          <div>
+            <Label htmlFor='winning-criteria'>Winning Criteria</Label>
             <select
               id='winning-criteria'
               value={testConfig.winningCriteria}
@@ -429,23 +438,22 @@ export const ABTestManager: React.FC<ABTestManagerProps> = ({
               <option value='click_rate'>Click Rate</option>
               <option value='conversion_rate'>Conversion Rate</option>
             </select>
-          </FormField>
+          </div>
 
-          <FormField label='Test Duration (hours)' htmlFor='test-duration'>
-            <Input
-              id='test-duration'
-              type='number'
-              min='1'
-              max='168'
-              value={testConfig.testDuration}
-              onChange={e =>
-                setTestConfig({
-                  ...testConfig,
-                  testDuration: parseInt(e.target.value) || 24,
-                })
-              }
-            />
-          </FormField>
+          <FormField
+            label='Test Duration (hours)'
+            id='test-duration'
+            type='number'
+            min={1}
+            max={168}
+            value={testConfig.testDuration}
+            onChange={e =>
+              setTestConfig({
+                ...testConfig,
+                testDuration: parseInt(e.target.value) || 24,
+              })
+            }
+          />
         </div>
 
         <div className='flex items-center space-x-2'>
@@ -502,22 +510,18 @@ export const ABTestManager: React.FC<ABTestManagerProps> = ({
                 <div className='grid grid-cols-1 md:grid-cols-3 gap-4'>
                   <FormField
                     label='Variant Name'
-                    htmlFor={`variant-name-${index}`}
-                  >
-                    <Input
-                      id={`variant-name-${index}`}
-                      value={variant.name}
-                      onChange={e =>
-                        handleUpdateVariant(index, 'name', e.target.value)
-                      }
-                      placeholder='e.g., Control, Treatment'
-                    />
-                  </FormField>
+                    id={`variant-name-${index}`}
+                    value={variant.name}
+                    onChange={e =>
+                      handleUpdateVariant(index, 'name', e.target.value)
+                    }
+                    placeholder='e.g., Control, Treatment'
+                  />
 
-                  <FormField
-                    label='Traffic Percentage'
-                    htmlFor={`variant-percentage-${index}`}
-                  >
+                  <div>
+                    <Label htmlFor={`variant-percentage-${index}`}>
+                      Traffic Percentage
+                    </Label>
                     <div className='flex items-center space-x-2'>
                       <Input
                         id={`variant-percentage-${index}`}
@@ -535,7 +539,7 @@ export const ABTestManager: React.FC<ABTestManagerProps> = ({
                       />
                       <span className='text-gray-500'>%</span>
                     </div>
-                  </FormField>
+                  </div>
 
                   <div className='flex items-end'>
                     <div className='w-full bg-gray-200 rounded-full h-3'>
@@ -550,22 +554,18 @@ export const ABTestManager: React.FC<ABTestManagerProps> = ({
                 <div className='grid grid-cols-1 gap-4 mt-4'>
                   <FormField
                     label='Subject Line'
-                    htmlFor={`variant-subject-${index}`}
-                  >
-                    <Input
-                      id={`variant-subject-${index}`}
-                      value={variant.subject || ''}
-                      onChange={e =>
-                        handleUpdateVariant(index, 'subject', e.target.value)
-                      }
-                      placeholder='Subject line for this variant'
-                    />
-                  </FormField>
+                    id={`variant-subject-${index}`}
+                    value={variant.subject || ''}
+                    onChange={e =>
+                      handleUpdateVariant(index, 'subject', e.target.value)
+                    }
+                    placeholder='Subject line for this variant'
+                  />
 
-                  <FormField
-                    label='Email Content Preview'
-                    htmlFor={`variant-content-${index}`}
-                  >
+                  <div>
+                    <Label htmlFor={`variant-content-${index}`}>
+                      Email Content Preview
+                    </Label>
                     <textarea
                       id={`variant-content-${index}`}
                       value={variant.content || ''}
@@ -576,7 +576,7 @@ export const ABTestManager: React.FC<ABTestManagerProps> = ({
                       rows={3}
                       className='w-full border border-gray-300 rounded-md px-3 py-2'
                     />
-                  </FormField>
+                  </div>
                 </div>
               </Card>
             ))}

@@ -10,8 +10,11 @@ export * from './services';
 // Export shared hooks
 export * from './hooks';
 
-// Export shared types
-export * from './types';
+// Export shared types (with selective exports to avoid conflicts)
+export * from './types/auth';
+export * from './types/branding';
+export * from './types/common';
+export * from './types/errors';
 
 // Export shared utilities
 export * from './utils';

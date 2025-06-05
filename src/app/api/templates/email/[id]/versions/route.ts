@@ -4,9 +4,9 @@ import { cookies } from 'next/headers';
 import type { Database } from '@/shared/types/database';
 
 interface RouteParams {
-  params: {
+  params: Promise<{
     id: string;
-  };
+  }>;
 }
 
 // GET /api/templates/email/[id]/versions - Get all versions of a template
@@ -38,11 +38,12 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
       );
     }
 
+    const resolvedParams = await params;
     // First verify the template belongs to the user's practice
     const { data: template, error: templateError } = await supabase
       .from('email_templates')
       .select('id')
-      .eq('id', params.id)
+      .eq('id', resolvedParams.id)
       .eq('practice_id', profile.practice_id)
       .single();
 
@@ -73,7 +74,7 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
         )
       `
       )
-      .eq('template_id', params.id)
+      .eq('template_id', resolvedParams.id)
       .order('version_number', { ascending: false });
 
     if (versionsError) {
@@ -145,11 +146,12 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
       );
     }
 
+    const resolvedParams = await params;
     // First verify the template belongs to the user's practice
     const { data: template, error: templateError } = await supabase
       .from('email_templates')
       .select('id')
-      .eq('id', params.id)
+      .eq('id', resolvedParams.id)
       .eq('practice_id', profile.practice_id)
       .single();
 
@@ -164,7 +166,7 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
     const { data: maxVersion } = await supabase
       .from('email_template_versions')
       .select('version_number')
-      .eq('template_id', params.id)
+      .eq('template_id', resolvedParams.id)
       .order('version_number', { ascending: false })
       .limit(1)
       .single();
@@ -175,7 +177,7 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
     const { data: version, error: versionError } = await supabase
       .from('email_template_versions')
       .insert({
-        template_id: params.id,
+        template_id: resolvedParams.id,
         version_number: nextVersion,
         name,
         template_type,

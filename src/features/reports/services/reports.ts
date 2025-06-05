@@ -613,7 +613,7 @@ export class ReportsService extends BaseService<
         this.handleError(error, 'Find reports by child ID');
       }
 
-      return data || [];
+      return (data as any) || [];
     } catch (error) {
       if (error instanceof ServiceError) {
         throw error;
@@ -664,7 +664,7 @@ export class ReportsService extends BaseService<
           this.handleError(error, 'Find reports by user ID (parent)');
         }
 
-        return data || [];
+        return (data as any) || [];
       }
 
       // If no children found, check if user is a chiropractor with a practice
@@ -747,7 +747,7 @@ export class ReportsService extends BaseService<
         this.handleError(error, 'Find by ID with shares');
       }
 
-      return data as ReportWithShares;
+      return data as unknown as ReportWithShares;
     } catch (error) {
       if (error instanceof ServiceError) {
         throw error;
@@ -774,7 +774,7 @@ export class ReportsService extends BaseService<
         this.handleError(error, 'Create share');
       }
 
-      return data as ReportShare;
+      return data as unknown as ReportShare;
     } catch (error) {
       if (error instanceof ServiceError) {
         throw error;
@@ -832,7 +832,10 @@ export class ReportsService extends BaseService<
       }
 
       // Check if share has expired
-      if (data?.expires_at && new Date(data.expires_at) < new Date()) {
+      if (
+        data?.expires_at &&
+        new Date(data.expires_at as string) < new Date()
+      ) {
         return null;
       }
 
@@ -942,9 +945,9 @@ export class ReportsService extends BaseService<
 
       // Count shares by method
       const sharesByMethod: Record<string, number> = {};
-      shares.forEach(share => {
-        sharesByMethod[share.share_method] =
-          (sharesByMethod[share.share_method] || 0) + 1;
+      shares.forEach((share: any) => {
+        sharesByMethod[share.share_method as string] =
+          (sharesByMethod[share.share_method as string] || 0) + 1;
       });
 
       // Get most shared reports
@@ -952,8 +955,8 @@ export class ReportsService extends BaseService<
         string,
         { count: number; views: number; childName: string }
       >();
-      shares.forEach(share => {
-        const reportId = share.report_id;
+      shares.forEach((share: any) => {
+        const reportId = share.report_id as string;
         const existing = reportShareCounts.get(reportId) || {
           count: 0,
           views: 0,

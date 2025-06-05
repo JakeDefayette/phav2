@@ -193,8 +193,9 @@ async function handleCriticalEvents(
 
       // Example notification structure:
       const notification = {
-        type:
-          event.type === 'email.bounced' ? 'EMAIL_BOUNCE' : 'EMAIL_COMPLAINT',
+        type: (event.type === 'email.bounced'
+          ? 'EMAIL_BOUNCE'
+          : 'EMAIL_COMPLAINT') as 'EMAIL_BOUNCE' | 'EMAIL_COMPLAINT',
         practiceId: trackingEvent.practiceId,
         recipientEmail: trackingEvent.recipientEmail,
         emailId: trackingEvent.emailId,

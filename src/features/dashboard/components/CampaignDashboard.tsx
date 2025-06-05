@@ -67,6 +67,20 @@ export const CampaignDashboard: React.FC<CampaignDashboardProps> = ({
     loadCampaigns();
   }, [practiceId, filters]);
 
+  // Helper function to derive status from database fields
+  const deriveStatus = (campaign: any): Campaign['status'] => {
+    if (campaign.sent_at) {
+      return 'sent';
+    }
+    if (campaign.scheduled_at && new Date(campaign.scheduled_at) > new Date()) {
+      return 'scheduled';
+    }
+    if (campaign.is_active === false) {
+      return 'cancelled';
+    }
+    return 'draft';
+  };
+
   const loadCampaigns = async () => {
     try {
       setIsLoading(true);
@@ -79,26 +93,38 @@ export const CampaignDashboard: React.FC<CampaignDashboardProps> = ({
         sortOrder: 'desc',
       });
 
-      setCampaigns(result.campaigns as Campaign[]);
+      // Transform campaigns to add missing status field
+      const transformedCampaigns: Campaign[] = result.campaigns.map(
+        campaign => ({
+          ...campaign,
+          status: deriveStatus(campaign),
+        })
+      ) as Campaign[];
+
+      setCampaigns(transformedCampaigns);
 
       // Calculate stats
       const totalCampaigns = result.total;
-      const activeCampaigns = result.campaigns.filter(
+      const activeCampaigns = transformedCampaigns.filter(
         c => c.status === 'scheduled' || c.status === 'sending'
       ).length;
-      const totalSent = result.campaigns.reduce(
+      const totalSent = transformedCampaigns.reduce(
         (sum, c) => sum + (c.send_count || 0),
         0
       );
       const avgOpenRate =
-        result.campaigns.length > 0
-          ? result.campaigns.reduce((sum, c) => sum + (c.open_rate || 0), 0) /
-            result.campaigns.length
+        transformedCampaigns.length > 0
+          ? transformedCampaigns.reduce(
+              (sum, c) => sum + (c.open_rate || 0),
+              0
+            ) / transformedCampaigns.length
           : 0;
       const avgClickRate =
-        result.campaigns.length > 0
-          ? result.campaigns.reduce((sum, c) => sum + (c.click_rate || 0), 0) /
-            result.campaigns.length
+        transformedCampaigns.length > 0
+          ? transformedCampaigns.reduce(
+              (sum, c) => sum + (c.click_rate || 0),
+              0
+            ) / transformedCampaigns.length
           : 0;
 
       setStats({
@@ -110,7 +136,7 @@ export const CampaignDashboard: React.FC<CampaignDashboardProps> = ({
       });
 
       // Load analytics for recent campaigns
-      const recentCampaigns = result.campaigns.slice(0, 10);
+      const recentCampaigns = transformedCampaigns.slice(0, 10);
       const analyticsPromises = recentCampaigns.map(async campaign => {
         try {
           const analytics = await campaignManager.getCampaignAnalytics(
@@ -194,23 +220,50 @@ export const CampaignDashboard: React.FC<CampaignDashboardProps> = ({
     const clickRates = campaigns.slice(0, 10).map(c => c.click_rate || 0);
 
     return {
-      labels: campaignNames,
-      datasets: [
-        {
-          label: 'Open Rate (%)',
-          data: openRates,
-          backgroundColor: 'rgba(59, 130, 246, 0.5)',
-          borderColor: 'rgb(59, 130, 246)',
-          borderWidth: 1,
+      chartType: 'bar' as const,
+      title: 'Campaign Performance',
+      chartData: {
+        labels: campaignNames,
+        datasets: [
+          {
+            label: 'Open Rate (%)',
+            data: openRates,
+            backgroundColor: 'rgba(59, 130, 246, 0.5)',
+            borderColor: 'rgb(59, 130, 246)',
+            borderWidth: 1,
+          },
+          {
+            label: 'Click Rate (%)',
+            data: clickRates,
+            backgroundColor: 'rgba(16, 185, 129, 0.5)',
+            borderColor: 'rgb(16, 185, 129)',
+            borderWidth: 1,
+          },
+        ],
+      },
+      chartOptions: {
+        responsive: true,
+        maintainAspectRatio: false,
+        scales: {
+          y: {
+            beginAtZero: true,
+            max: 100,
+            ticks: {
+              // callback: function (value) {
+              //   return value + '%';
+              // },
+            },
+          },
         },
-        {
-          label: 'Click Rate (%)',
-          data: clickRates,
-          backgroundColor: 'rgba(16, 185, 129, 0.5)',
-          borderColor: 'rgb(16, 185, 129)',
-          borderWidth: 1,
+        plugins: {
+          legend: {
+            position: 'top' as const,
+          },
+          title: {
+            display: false,
+          },
         },
-      ],
+      },
     };
   };
 
@@ -242,7 +295,7 @@ export const CampaignDashboard: React.FC<CampaignDashboardProps> = ({
       </div>
 
       {error && (
-        <Alert variant='error' onClose={() => setError(null)}>
+        <Alert variant='error' dismissible onDismiss={() => setError(null)}>
           {error}
         </Alert>
       )}
@@ -331,33 +384,7 @@ export const CampaignDashboard: React.FC<CampaignDashboardProps> = ({
             Campaign Performance
           </h3>
           <div className='h-64'>
-            <ChartDisplay
-              type='bar'
-              data={getPerformanceChartData()}
-              options={{
-                responsive: true,
-                maintainAspectRatio: false,
-                scales: {
-                  y: {
-                    beginAtZero: true,
-                    max: 100,
-                    ticks: {
-                      callback: function (value) {
-                        return value + '%';
-                      },
-                    },
-                  },
-                },
-                plugins: {
-                  legend: {
-                    position: 'top' as const,
-                  },
-                  title: {
-                    display: false,
-                  },
-                },
-              }}
-            />
+            <ChartDisplay chartData={getPerformanceChartData()} height={256} />
           </div>
         </Card>
       )}

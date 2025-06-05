@@ -285,11 +285,12 @@ export class DatabaseTransactionService {
 
       const result: AssessmentSubmissionResult = {
         assessmentId,
-        reportId: report.id,
-        status: updatedAssessment.status,
-        brainOMeterScore: updatedAssessment.brain_o_meter_score,
-        completedAt: updatedAssessment.completed_at,
-        reportGeneratedAt: report.generated_at || new Date().toISOString(),
+        reportId: report.id as string,
+        status: updatedAssessment.status as string,
+        brainOMeterScore: updatedAssessment.brain_o_meter_score as number,
+        completedAt: updatedAssessment.completed_at as string,
+        reportGeneratedAt:
+          (report.generated_at as string) || new Date().toISOString(),
         responsesCount: insertedResponses?.length || 0,
       };
 

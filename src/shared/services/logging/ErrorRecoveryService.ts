@@ -397,8 +397,9 @@ export class ErrorRecoveryService {
       attempt: 1,
       timestamp: new Date(),
       strategy: action.type,
-      result: 'failure' as const,
+      result: 'failure' as 'success' | 'failure' | 'timeout',
       duration: 0,
+      error: undefined as string | undefined,
     };
 
     const startTime = Date.now();
@@ -468,8 +469,9 @@ export class ErrorRecoveryService {
         attempt,
         timestamp: new Date(),
         strategy: strategy.type,
-        result: 'failure' as const,
+        result: 'failure' as 'success' | 'failure' | 'timeout',
         duration: 0,
+        error: undefined as string | undefined,
       };
 
       // Calculate delay

@@ -368,12 +368,13 @@ export type CompositeTypes<
     : never;
 
 // Convenience types for common tables
-export type UserProfile = Tables<'user_profiles'>;
-export type Practice = Tables<'practices'>;
-export type Child = Tables<'children'>;
+// TODO: Uncomment these as tables are added to the schema
+// export type UserProfile = Tables<'user_profiles'>;
+// export type Practice = Tables<'practices'>;
+// export type Child = Tables<'children'>;
 export type Assessment = Tables<'assessments'>;
-export type Report = Tables<'reports'>;
-export type EmailCampaign = Tables<'email_campaigns'>;
+// export type Report = Tables<'reports'>;
+// export type EmailCampaign = Tables<'email_campaigns'>;
 
 // Enum types
 export type UserRole = Enums<'user_role_enum'>;

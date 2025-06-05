@@ -112,14 +112,30 @@ const ErrorMonitoringWidget: React.FC<WidgetProps> = ({
       // Fetch data from all monitoring services
       const [errorMetrics, alertMetrics, activeAlerts, recentErrors] =
         await Promise.all([
-          errorLogger.getErrorMetrics(startTime, endTime),
-          alertingService.getAlertMetrics(startTime, endTime),
-          alertingService.getActiveAlerts(),
-          errorLogger.getRecentErrors({
-            startTime,
-            endTime,
+          errorLogger?.getErrorMetrics() ||
+            ({
+              timeWindow: { start: startTime, end: endTime },
+              errorRate: 0,
+              errorCount: 0,
+              errorsByLevel: {},
+              errorsByCategory: {},
+              errorsBySource: {},
+              meanTimeToResolution: 0,
+              topErrorMessages: [],
+              trends: { increasing: false, changePercent: 0 },
+            } as any),
+          alertingService?.getAlertMetrics(startTime, endTime) ||
+            ({
+              totalAlerts: 0,
+              alertRate: 0,
+              categories: {},
+            } as any),
+          alertingService?.getActiveAlerts() || [],
+          errorLogger?.getErrors({
+            startTime: startTime,
+            endTime: endTime,
             limit: compactMode ? 5 : 10,
-          }),
+          }) || [],
         ]);
 
       // Generate system health status
@@ -228,7 +244,7 @@ const ErrorMonitoringWidget: React.FC<WidgetProps> = ({
 
   const handleAlertAcknowledge = async (alertId: string) => {
     try {
-      await alertingService.acknowledgeAlert(alertId, 'dashboard-user');
+      await alertingService?.acknowledgeAlert(alertId, 'dashboard-user');
       fetchMonitoringData(); // Refresh data
     } catch (err) {
       console.error('Failed to acknowledge alert:', err);

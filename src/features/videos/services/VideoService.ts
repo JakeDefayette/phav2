@@ -88,7 +88,7 @@ export class VideoService {
       const totalPages = Math.ceil((count || 0) / limit);
 
       return {
-        videos: data as Video[],
+        videos: data as unknown as Video[],
         total: count || 0,
         page,
         totalPages,
@@ -120,7 +120,7 @@ export class VideoService {
         throw new Error('Video not found');
       }
 
-      return { video: data as Video };
+      return { video: data as unknown as Video };
     } catch (error) {
       console.error('Error fetching video:', error);
       throw error;
@@ -203,7 +203,7 @@ export class VideoService {
       const { data: finalVideo, error: updateError } = await supabase
         .from('videos')
         .update({ upload_status: 'ready' })
-        .eq('id', dbData.id)
+        .eq('id', (dbData as any).id)
         .select()
         .single();
 
@@ -211,7 +211,7 @@ export class VideoService {
         console.warn('Failed to update video status:', updateError);
       }
 
-      return { video: finalVideo || (dbData as Video) };
+      return { video: (finalVideo || dbData) as unknown as Video };
     } catch (error) {
       console.error('Error uploading video:', error);
       throw error;
@@ -241,7 +241,7 @@ export class VideoService {
         throw new Error(`Failed to update video: ${error.message}`);
       }
 
-      return { video: data as Video };
+      return { video: data as unknown as Video };
     } catch (error) {
       console.error('Error updating video:', error);
       throw error;
@@ -286,7 +286,7 @@ export class VideoService {
       if (video?.filename) {
         const { error: storageError } = await supabase.storage
           .from(this.STORAGE_BUCKET)
-          .remove([video.filename]);
+          .remove([(video as any).filename]);
 
         if (storageError) {
           console.warn(
@@ -344,7 +344,7 @@ export class VideoService {
           (stats.byStatus[video.upload_status as VideoUploadStatus] || 0) + 1;
 
         // Sum file sizes
-        stats.totalSize += video.file_size || 0;
+        stats.totalSize += (video.file_size as number) || 0;
       });
 
       return stats;

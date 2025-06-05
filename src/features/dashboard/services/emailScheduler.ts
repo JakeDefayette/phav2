@@ -136,7 +136,7 @@ export class EmailScheduler {
         return { success: false, error: error.message };
       }
 
-      return { success: true, scheduledEmailId: data.id };
+      return { success: true, scheduledEmailId: data?.id as string };
     } catch (error) {
       const errorMessage =
         error instanceof Error ? error.message : 'Unknown scheduling error';
@@ -180,7 +180,7 @@ export class EmailScheduler {
         return { success: false, error: error.message };
       }
 
-      return { success: true, scheduledEmailId: data.id };
+      return { success: true, scheduledEmailId: data?.id as string };
     } catch (error) {
       const errorMessage =
         error instanceof Error
@@ -259,35 +259,37 @@ export class EmailScheduler {
         return { data: [], error: error.message };
       }
 
-      const scheduledEmails: ScheduledEmailRecord[] = data.map(record => ({
-        id: record.id,
-        practiceId: record.practice_id,
-        templateType: record.template_type,
-        recipientEmail: record.recipient_email,
-        subject: record.subject,
-        templateData: record.template_data,
-        scheduledAt: new Date(record.scheduled_at),
-        retryCount: record.retry_count,
-        maxRetries: record.max_retries,
-        nextRetryAt: record.next_retry_at
-          ? new Date(record.next_retry_at)
-          : undefined,
-        status: record.status,
-        priority: record.priority,
-        campaignId: record.campaign_id,
-        processingAttempts: record.processing_attempts,
-        lastAttemptedAt: record.last_attempted_at
-          ? new Date(record.last_attempted_at)
-          : undefined,
-        sentAt: record.sent_at ? new Date(record.sent_at) : undefined,
-        failedAt: record.failed_at ? new Date(record.failed_at) : undefined,
-        errorMessage: record.error_message,
-        isRecurring: record.is_recurring,
-        recurrenceRule: record.recurrence_rule,
-        parentScheduledEmailId: record.parent_scheduled_email_id,
-        createdAt: new Date(record.created_at),
-        updatedAt: new Date(record.updated_at),
-      }));
+      const scheduledEmails: ScheduledEmailRecord[] = data.map(
+        (record: any) => ({
+          id: record.id,
+          practiceId: record.practice_id,
+          templateType: record.template_type,
+          recipientEmail: record.recipient_email,
+          subject: record.subject,
+          templateData: record.template_data,
+          scheduledAt: new Date(record.scheduled_at),
+          retryCount: record.retry_count,
+          maxRetries: record.max_retries,
+          nextRetryAt: record.next_retry_at
+            ? new Date(record.next_retry_at)
+            : undefined,
+          status: record.status,
+          priority: record.priority,
+          campaignId: record.campaign_id,
+          processingAttempts: record.processing_attempts,
+          lastAttemptedAt: record.last_attempted_at
+            ? new Date(record.last_attempted_at)
+            : undefined,
+          sentAt: record.sent_at ? new Date(record.sent_at) : undefined,
+          failedAt: record.failed_at ? new Date(record.failed_at) : undefined,
+          errorMessage: record.error_message,
+          isRecurring: record.is_recurring,
+          recurrenceRule: record.recurrence_rule,
+          parentScheduledEmailId: record.parent_scheduled_email_id,
+          createdAt: new Date(record.created_at),
+          updatedAt: new Date(record.updated_at),
+        })
+      );
 
       return { data: scheduledEmails };
     } catch (error) {

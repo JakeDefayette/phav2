@@ -2,9 +2,9 @@ import { NextRequest, NextResponse } from 'next/server';
 import { emailTrackingService } from '@/shared/services/email/tracking';
 
 interface RouteParams {
-  params: {
+  params: Promise<{
     token: string;
-  };
+  }>;
 }
 
 // 1x1 transparent pixel image in base64
@@ -20,7 +20,8 @@ const TRACKING_PIXEL = Buffer.from(
  * Returns a 1x1 transparent PNG and records the open event.
  */
 export async function GET(request: NextRequest, { params }: RouteParams) {
-  const { token } = params;
+  const resolvedParams = await params;
+  const { token } = resolvedParams;
 
   try {
     // Extract tracking information from request
@@ -80,7 +81,8 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
  * HEAD request for checking pixel availability
  */
 export async function HEAD(request: NextRequest, { params }: RouteParams) {
-  const { token } = params;
+  const resolvedParams = await params;
+  const { token } = resolvedParams;
 
   try {
     // Check if tracking token exists

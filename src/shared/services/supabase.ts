@@ -47,7 +47,7 @@ function getSupabaseClient() {
           },
         },
         db: {
-          schema: 'public',
+          schema: undefined,
         },
         realtime: {
           params: {

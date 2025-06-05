@@ -82,7 +82,7 @@ const AlertManagementWidget: React.FC<WidgetProps> = ({
   const loadAlertRules = useCallback(async () => {
     try {
       setIsLoading(true);
-      const rules = alertingService.getAllAlertRules();
+      const rules = alertingService?.getAllAlertRules() || [];
       setAlertRules(rules);
       setError(null);
     } catch (err) {
@@ -138,7 +138,7 @@ const AlertManagementWidget: React.FC<WidgetProps> = ({
     }
 
     try {
-      await alertingService.deleteAlertRule(ruleId);
+      await alertingService?.deleteAlertRule(ruleId);
       await loadAlertRules();
     } catch (err) {
       console.error('Failed to delete alert rule:', err);
@@ -147,7 +147,7 @@ const AlertManagementWidget: React.FC<WidgetProps> = ({
 
   const handleToggleRule = async (ruleId: string, enabled: boolean) => {
     try {
-      await alertingService.updateAlertRule(ruleId, { enabled });
+      await alertingService?.updateAlertRule(ruleId, { enabled });
       await loadAlertRules();
     } catch (err) {
       console.error('Failed to toggle alert rule:', err);
@@ -157,12 +157,12 @@ const AlertManagementWidget: React.FC<WidgetProps> = ({
   const handleTestRule = async (ruleId: string) => {
     try {
       setTestingRuleId(ruleId);
-      const result = await alertingService.testAlertRule(ruleId);
+      const result = await alertingService?.testAlertRule(ruleId);
 
-      if (result.success) {
+      if (result?.success) {
         alert(`Test successful: ${result.message}`);
       } else {
-        alert(`Test failed: ${result.message}`);
+        alert(`Test failed: ${result?.message || 'Unknown error'}`);
       }
     } catch (err) {
       alert(
@@ -177,10 +177,10 @@ const AlertManagementWidget: React.FC<WidgetProps> = ({
     try {
       if (editingRule) {
         // Update existing rule
-        await alertingService.updateAlertRule(editingRule.id, formData);
+        await alertingService?.updateAlertRule(editingRule.id, formData);
       } else {
         // Create new rule
-        await alertingService.createAlertRule(formData);
+        await alertingService?.createAlertRule(formData);
       }
 
       setShowCreateForm(false);
@@ -230,7 +230,7 @@ const AlertManagementWidget: React.FC<WidgetProps> = ({
       enabled: true,
       config: {
         email: {
-          recipients: [''],
+          recipients: [],
           subject: 'Alert Notification',
         },
       },
@@ -725,6 +725,8 @@ const AlertManagementWidget: React.FC<WidgetProps> = ({
                               config: {
                                 ...action.config,
                                 email: {
+                                  recipients:
+                                    action.config.email?.recipients || [],
                                   ...action.config.email,
                                   subject: e.target.value,
                                 },
@@ -743,11 +745,11 @@ const AlertManagementWidget: React.FC<WidgetProps> = ({
                               config: {
                                 ...action.config,
                                 email: {
-                                  ...action.config.email,
                                   recipients: e.target.value
                                     .split(',')
                                     .map(s => s.trim())
                                     .filter(Boolean),
+                                  ...action.config.email,
                                 },
                               },
                             })

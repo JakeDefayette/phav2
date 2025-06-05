@@ -58,7 +58,7 @@ export function EmailTemplateEditor({
         const sampleTemplate: EmailTemplateDefinition = {
           id: templateId,
           name: 'Sample Template',
-          type: 'welcome',
+          type: EmailTemplateType.WELCOME,
           subject: 'Welcome to our platform!',
           elements: [],
           variables: [],
@@ -80,7 +80,7 @@ export function EmailTemplateEditor({
       // Create new template
       const newTemplate: EmailTemplateDefinition = {
         name: 'New Template',
-        type: 'welcome',
+        type: EmailTemplateType.WELCOME,
         subject: 'Email Subject',
         elements: [],
         variables: [],
@@ -162,11 +162,14 @@ export function EmailTemplateEditor({
     if (!element) return null;
 
     const updateElementField = (field: string, value: any) => {
+      const currentFieldValue = element[field as keyof TemplateElement];
+      const newFieldValue =
+        typeof currentFieldValue === 'object' && currentFieldValue !== null
+          ? { ...currentFieldValue, ...value }
+          : value;
+
       updateElement(element.id, {
-        [field]: {
-          ...element[field as keyof TemplateElement],
-          ...value,
-        },
+        [field]: newFieldValue,
       });
     };
 

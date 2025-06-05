@@ -43,30 +43,36 @@ export type {
 // Service instances for convenience (server-side only)
 // Note: These instances should only be used in API routes or server-side code
 // Client components should call API endpoints instead
+import { EmailErrorLogger as EmailErrorLoggerClass } from './EmailErrorLogger';
+
 export const errorLogger = (() => {
   if (typeof window === 'undefined') {
-    return EmailErrorLogger.getInstance();
+    return EmailErrorLoggerClass.getInstance();
   }
   return null;
 })();
 
+import { ErrorRecoveryService as ErrorRecoveryServiceClass } from './ErrorRecoveryService';
+import { FallbackService as FallbackServiceClass } from './FallbackService';
+import { AlertingService as AlertingServiceClass } from './AlertingService';
+
 export const recoveryService = (() => {
   if (typeof window === 'undefined') {
-    return ErrorRecoveryService.getInstance();
+    return ErrorRecoveryServiceClass.getInstance();
   }
   return null;
 })();
 
 export const fallbackService = (() => {
   if (typeof window === 'undefined') {
-    return FallbackService.getInstance();
+    return FallbackServiceClass.getInstance();
   }
   return null;
 })();
 
 export const alertingService = (() => {
   if (typeof window === 'undefined') {
-    return AlertingService.getInstance();
+    return AlertingServiceClass.getInstance();
   }
   return null;
 })();

@@ -101,9 +101,9 @@ export class FallbackService {
     const id = generateUUID();
     const fallbackProvider: FallbackProvider = {
       id,
-      isHealthy: true,
-      failureCount: 0,
       ...provider,
+      isHealthy: provider.isHealthy ?? true,
+      failureCount: provider.failureCount ?? 0,
     };
 
     this.providers.set(id, fallbackProvider);
@@ -621,10 +621,15 @@ export class FallbackService {
     }
 
     try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 5000);
+
       const response = await fetch(provider.healthCheckUrl, {
         method: 'GET',
-        timeout: 5000,
+        signal: controller.signal,
       });
+
+      clearTimeout(timeoutId);
       return response.ok;
     } catch (error) {
       return false;
