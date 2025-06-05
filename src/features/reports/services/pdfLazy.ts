@@ -44,8 +44,8 @@ export interface LazyPDFService {
     chartImages?: ChartImageData[]
   ): React.ReactElement;
 
-  validateReportData(report: GeneratedReport): boolean;
-  estimatePDFSize(report: GeneratedReport): number;
+  validateReportData(report: GeneratedReport): Promise<boolean>;
+  estimatePDFSize(report: GeneratedReport): Promise<number>;
   testPDFGeneration(): Promise<boolean>;
 }
 
