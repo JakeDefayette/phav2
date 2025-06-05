@@ -359,3 +359,5 @@ export function EmailDeliverabilityWidget({
     </Card>
   );
 }
+
+export default EmailDeliverabilityWidget;

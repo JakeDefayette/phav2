@@ -237,3 +237,5 @@ export function ScheduledEmailsWidget({
     </Card>
   );
 }
+
+export default ScheduledEmailsWidget;
