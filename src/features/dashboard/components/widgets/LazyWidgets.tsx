@@ -16,7 +16,9 @@ const ErrorMonitoringWidget = React.lazy(
 const PatientSummaryWidget = React.lazy(() => import('./PatientSummaryWidget'));
 const QuickActionsWidget = React.lazy(() => import('./QuickActionsWidget'));
 const RecentActivityWidget = React.lazy(() => import('./RecentActivityWidget'));
-const ScheduledEmailsWidget = React.lazy(() => import('./ScheduledEmailsWidget'));
+const ScheduledEmailsWidget = React.lazy(
+  () => import('./ScheduledEmailsWidget')
+);
 const AppointmentWidget = React.lazy(() => import('./AppointmentWidget'));
 
 // Widget loading skeleton
