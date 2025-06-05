@@ -25,7 +25,7 @@ export * from './templates/PageLayout';
 // DATA DISPLAY - Information presentation
 // ==========================================
 export * from './molecules/Card';
-export * from './molecules/Charts';
+export { ChartContainer, LazyCharts, useChartLoader } from './molecules/Charts';
 
 // ==========================================
 // FORMS & INPUT GROUPS - Form-related components
@@ -55,7 +55,6 @@ export * from './molecules/StepTransition';
 // ==========================================
 export * from './atoms/RoleGuard';
 export * from './ErrorBoundary';
-export * from './LazyComponents';
 export * from './QueryProvider';
 export * from './BrandingProvider';
 export * from './organisms/AuthErrorBoundary';

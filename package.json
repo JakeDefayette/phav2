@@ -23,6 +23,10 @@
     "analyze": "ANALYZE=true npm run build",
     "analyze:server": "BUNDLE_ANALYZE=server npm run build",
     "analyze:browser": "BUNDLE_ANALYZE=browser npm run build",
+    "bundle-size": "node scripts/bundle-size-check.js",
+    "bundle-size:check": "npm run build && npm run bundle-size",
+    "bundle-size:analyze": "npm run build && npm run bundle-size -- --analyze",
+    "bundle-size:ci": "npm run build && npm run bundle-size -- --fail",
     "deploy": "vercel --prod",
     "deploy:preview": "vercel"
   },
@@ -53,7 +57,6 @@
     "react": "^19.0.0",
     "react-chartjs-2": "^5.3.0",
     "react-dom": "^19.0.0",
-    "recharts": "^2.15.3",
     "resend": "^4.5.1",
     "tailwind-merge": "^3.3.0",
     "uuid": "^11.1.0",

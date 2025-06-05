@@ -1,9 +1,9 @@
 {
   "meta": {
-    "generatedAt": "2025-06-02T14:07:40.201Z",
+    "generatedAt": "2025-06-05T10:49:48.906Z",
     "tasksAnalyzed": 1,
     "totalTasks": 17,
-    "analysisCount": 2,
+    "analysisCount": 3,
     "thresholdScore": 5,
     "projectName": "Taskmaster",
     "usedResearch": true
@@ -24,6 +24,14 @@
       "recommendedSubtasks": 8,
       "expansionPrompt": "Break down the Resend email integration into detailed implementation tasks covering API setup, template system, scheduling mechanism, tracking implementation, error handling, testing framework, documentation, and deployment strategy",
       "reasoning": "This task involves multiple interconnected components (API integration, templating, scheduling, tracking) with dependencies on other tasks. The cyclomatic complexity is high due to various decision paths in email delivery, scheduling logic, and template rendering. The task requires implementation across multiple files and features, suggesting significant cognitive complexity. The existing 5 subtasks cover core functionality but miss error handling, documentation, and deployment considerations."
+    },
+    {
+      "taskId": 14,
+      "taskTitle": "Optimize for Performance and Bundle Size",
+      "complexityScore": 9,
+      "recommendedSubtasks": 7,
+      "expansionPrompt": "Break down the optimization process into distinct subtasks such as: (1) Analyze current bundle size and performance metrics, (2) Implement code splitting across feature modules, (3) Apply tree-shaking and remove unused code, (4) Set up and enforce file size limits for components and utilities, (5) Integrate dynamic imports where appropriate, (6) Configure and run Lighthouse CI and bundle analyzer tools, (7) Optimize imports to align with the new directory structure and verify improvements.",
+      "reasoning": "This task is highly complex due to its broad scope, technical depth, and strict performance targets. It requires architectural understanding, tool integration, and coordinated changes across multiple modules. The need to enforce granular file size limits, implement advanced bundling techniques, and validate results with automated tools further increases complexity. Breaking it into at least seven subtasks will help manage dependencies, parallelize work, and ensure thorough coverage of all requirements."
     }
   ]
 }

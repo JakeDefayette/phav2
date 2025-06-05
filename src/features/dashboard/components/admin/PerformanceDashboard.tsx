@@ -29,21 +29,9 @@ import {
 import { Card } from '@/shared/components/molecules/Card';
 import { Button } from '@/shared/components/atoms/Button';
 import { Loading } from '@/shared/components/atoms/Loading';
-import {
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  Legend,
-  ResponsiveContainer,
-  LineChart,
-  Line,
-  PieChart,
-  Pie,
-  Cell,
-} from 'recharts';
+import { BarChart } from '@/shared/components/molecules/Charts/BarChart';
+import { LineChart } from '@/shared/components/molecules/Charts/LineChart';
+import { PieChart } from '@/shared/components/molecules/Charts/PieChart';
 
 // Temporary placeholder components until shadcn/ui is installed
 const CardHeader = ({
