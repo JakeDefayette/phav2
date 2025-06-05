@@ -864,7 +864,83 @@
       "priority": "high",
       "details": "Implement code splitting, tree-shaking, and dynamic imports across all feature modules. Enforce file size limits (React components <200 lines, utility functions <100 lines, etc.). Use Lighthouse CI and bundle analyzer. Target initial load <50KB, route chunks <25KB, total app <200KB gzipped. Optimize imports to leverage the new directory structure.",
       "testStrategy": "Run Lighthouse audits, bundle analysis, and performance tests in src/shared/__tests__/performance/.",
-      "subtasks": []
+      "subtasks": [
+        {
+          "id": 1,
+          "title": "Analyze current bundle size and performance metrics",
+          "description": "Establish baseline performance by measuring current bundle sizes and identifying performance bottlenecks",
+          "dependencies": [],
+          "details": "Use Webpack Bundle Analyzer to generate visualizations of bundle composition and size. Identify large modules, redundant code, and potential splitting points. Document current load times and performance metrics for later comparison.\n<info added on 2025-06-05T10:57:27.337Z>\n✅ Baseline Analysis Complete - Key Findings:\n\n**Critical Issues Identified:**\n- Shared JS bundles: 102KB total (46.4KB + 53.2KB + 2.34KB) - exceeds 50KB target by 104%\n- Dashboard routes consistently ~1MB each - far exceeding targets\n- No effective code splitting - heavy shared dependencies loaded for all routes\n\n**Major Bundle Bloat Sources:**\n1. Multiple chart libraries (Chart.js + Recharts) causing duplication\n2. @react-pdf/renderer loaded for all routes (only needed occasionally)\n3. Complete Supabase client with potentially unused features\n4. Form libraries (Formik + Yup) loaded globally\n\n**Optimization Priorities Established:**\n1. Split the 46.4KB vendor chunk (likely React/Next.js + chart libraries)\n2. Split the 53.2KB app chunk (probably dashboard + feature code)\n3. Implement feature-based code splitting for dashboard (~970KB avg), reports (~1.04MB), videos (~990KB)\n4. Dynamic import PDF renderer and chart libraries\n\n**Performance Tests Created:**\n- Baseline analysis documented in `src/shared/__tests__/performance/baseline-analysis.md`\n- Automated bundle metrics test in `src/shared/__tests__/performance/bundle-metrics.test.js`\n- Bundle analyzer reports generated in `.next/analyze/`\n\n**Ready for 14.2:** Code splitting targets identified and prioritized. Next step is configuring SplitChunksPlugin with feature-based caching groups.\n</info added on 2025-06-05T10:57:27.337Z>",
+          "status": "done"
+        },
+        {
+          "id": 2,
+          "title": "Implement code splitting across feature modules",
+          "description": "Split code into separate bundles based on feature modules to enable on-demand loading",
+          "dependencies": [
+            1
+          ],
+          "details": "Use Webpack's SplitChunksPlugin to dedupe and split chunks. Configure entry points for major feature modules. Create independent domains that can be loaded separately. Focus on isolating modules to maximize the effectiveness of code splitting.",
+          "status": "pending"
+        },
+        {
+          "id": 3,
+          "title": "Apply tree-shaking and remove unused code",
+          "description": "Eliminate dead code and unused dependencies to reduce overall bundle size",
+          "dependencies": [
+            1
+          ],
+          "details": "Configure Webpack for production mode to enable tree-shaking. Audit and remove unused imports, functions, and components. Update import statements to use named exports instead of default exports where possible to improve tree-shaking effectiveness.",
+          "status": "pending"
+        },
+        {
+          "id": 4,
+          "title": "Set up and enforce file size limits for components and utilities",
+          "description": "Establish maximum size thresholds for individual components and utility modules",
+          "dependencies": [
+            1,
+            3
+          ],
+          "details": "Configure bundle size limits in the build process. Create automated checks that fail builds when components exceed size limits. Document size guidelines for developers and implement a review process for exceptions.",
+          "status": "pending"
+        },
+        {
+          "id": 5,
+          "title": "Integrate dynamic imports where appropriate",
+          "description": "Implement on-demand loading for non-critical components and features",
+          "dependencies": [
+            2
+          ],
+          "details": "Replace static imports with dynamic import() syntax for components that aren't needed at initial page load. Focus on components that are conditionally rendered or only appear after user interaction. Implement loading states for dynamically imported components.",
+          "status": "pending"
+        },
+        {
+          "id": 6,
+          "title": "Configure and run Lighthouse CI and bundle analyzer tools",
+          "description": "Set up automated performance monitoring and bundle analysis in the CI pipeline",
+          "dependencies": [
+            2,
+            3,
+            5
+          ],
+          "details": "Integrate Webpack Bundle Analyzer into the CI process. Configure Lighthouse CI to run performance audits on each build. Set up alerts for performance regressions and bundle size increases. Create dashboards to visualize performance trends over time.",
+          "status": "pending"
+        },
+        {
+          "id": 7,
+          "title": "Optimize imports to align with new directory structure and verify improvements",
+          "description": "Refactor import statements to match the optimized structure and validate performance gains",
+          "dependencies": [
+            2,
+            3,
+            4,
+            5,
+            6
+          ],
+          "details": "Update import paths to reflect the new modular structure. Compare before/after performance metrics to quantify improvements. Document the optimization process and results. Create guidelines for maintaining optimized bundle sizes in future development.",
+          "status": "pending"
+        }
+      ]
     },
     {
       "id": 16,
